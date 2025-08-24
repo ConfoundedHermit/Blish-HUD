@@ -50,7 +50,9 @@ namespace Blish_HUD.Content {
                                        ? _activeTexture2D.Bounds
                                        : throw new InvalidOperationException($"{nameof(AsyncTexture2D)} object must have a Texture.");
 
-        /// <inheritdoc cref="Texture2D.IsDisposed"/>
+        /// <summary>
+        /// Gets a value that indicates whether the object is disposed.
+        /// </summary>
         public bool IsDisposed => this.HasTexture
                                        ? _activeTexture2D.IsDisposed
                                        : throw new InvalidOperationException($"{nameof(AsyncTexture2D)} object must have a Texture.");
@@ -68,14 +70,15 @@ namespace Blish_HUD.Content {
         }
 
         /// <summary>
-        /// Create an <see cref="AsyncTexture2D"/> where the current <see cref="Texture"/> is the <see cref="Texture2D"/> passed as <param name="defaultTexture"/>.
+        /// Create an <see cref="AsyncTexture2D"/> where the current <see cref="Texture"/> is the <see cref="Texture2D"/> passed as <paramref name="defaultTexture"/>.
         /// </summary>
+        /// <param name="defaultTexture">The default texture to use.</param>
         public AsyncTexture2D(Texture2D defaultTexture) {
             _activeTexture2D = defaultTexture;
         }
 
         /// <summary>
-        /// Replaces the <see cref="Texture"/> of the <see cref="AsyncTexture2D"/> with the texture provided in <param name="newTexture"/> on the main thread.
+        /// Replaces the <see cref="Texture"/> of the <see cref="AsyncTexture2D"/> with the texture provided in <paramref name="newTexture"/> on the main thread.
         /// </summary>
         /// <param name="newTexture">The new texture to assign.</param>
         public void SwapTexture(Texture2D newTexture) {

@@ -227,7 +227,7 @@ namespace Blish_HUD {
         /// <summary>
         /// Allows you to enqueue a call that will occur during the next time the update loop executes.
         /// </summary>
-        /// <param name="call">A method accepting <see="GameTime" /> as a parameter.</param>
+        /// <param name="call">A method accepting <see cref="GameTime" /> as a parameter.</param>
         public void QueueMainThreadRender(Action<GraphicsDevice> call) {
             _queuedRenders.Enqueue(call);
         }

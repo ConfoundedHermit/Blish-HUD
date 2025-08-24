@@ -5,7 +5,7 @@ namespace Blish_HUD.ArcDps {
     /// ArcDps Enums and helpful extension methods.
     /// </summary>
     /// <remarks>
-    /// Source: <see cref="https://github.com/baaron4/GW2-Elite-Insights-Parser/blob/master/GW2EIEvtcParser/ParserHelpers/ArcDPSEnums.cs"/>
+    /// Source: <see href="https://github.com/baaron4/GW2-Elite-Insights-Parser/blob/master/GW2EIEvtcParser/ParserHelpers/ArcDPSEnums.cs"/>
     /// (MIT License)
     /// </remarks>
     public static class ArcDpsEnums {

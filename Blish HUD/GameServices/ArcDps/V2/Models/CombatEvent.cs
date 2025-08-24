@@ -3,7 +3,7 @@
     /// Infos and data about the combat event.
     /// </summary>
     /// <remarks>
-    /// For more information see the <see cref="https://deltaconnected.com/arcdps/api/">arcdps plugin documentation</see>.
+    /// For more information see the <see href="https://deltaconnected.com/arcdps/api/">arcdps plugin documentation</see>.
     /// </remarks>
     public struct CombatEvent {
 
@@ -35,7 +35,7 @@
         /// An event-specific value.
         /// </summary>
         /// <remarks>
-        /// Meaning differs per event-type. Eg. estimated physical hit damage. See <see cref="https://www.deltaconnected.com/arcdps/evtc/">evtc notes</see> for details.
+        /// Meaning differs per event-type. Eg. estimated physical hit damage. See <see href="https://www.deltaconnected.com/arcdps/evtc/">evtc notes</see> for details.
         /// </remarks>
         public int Value { get; set; }
 
@@ -73,7 +73,7 @@
         public ushort SourceMasterInstanceId { get; set; }
 
         /// <summary>
-        /// If <seealso cref="DstAgent">DstAgent</seealso> has a master (eg. minion, pet), this field will be equal to the <seealso cref="Agent.Id">agent id</seealso> of the master. Otherwise zero.
+        /// If <seealso cref="DestinationAgent">DestinationAgent</seealso> has a master (eg. minion, pet), this field will be equal to the <seealso cref="Agent.Id">agent id</seealso> of the master. Otherwise zero.
         /// </summary>
         public ushort DestinationMasterInstanceId { get; set; }
 
@@ -94,7 +94,7 @@
         /// <seealso cref="PhysicalResult"/> or <see cref="ConditionResult"/>.
         /// </summary>
         /// <remarks>
-        /// See <see cref="https://www.deltaconnected.com/arcdps/evtc/">evtc notes</see> for details.
+        /// See <see href="https://www.deltaconnected.com/arcdps/evtc/">evtc notes</see> for details.
         /// </remarks>
         public byte Result { get; set; }
 

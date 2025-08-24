@@ -240,7 +240,7 @@ namespace Blish_HUD {
         /// <param name="signature">The SHA1 signature of the requested texture.</param>
         /// <param name="fileId">The file id of the requested texture.</param>
         /// <returns>A transparent texture that is later overwritten by the texture downloaded from the Render Service.</returns>
-        /// <seealso cref="https://wiki.guildwars2.com/wiki/API:Render_service"/>
+        /// <seealso href="https://wiki.guildwars2.com/wiki/API:Render_service"/>
         public AsyncTexture2D GetRenderServiceTexture(string signature, string fileId) {
             return this.DatAssetCache.GetTextureFromAssetId(int.Parse(fileId));
         }
@@ -250,7 +250,7 @@ namespace Blish_HUD {
         /// </summary>
         /// <param name="uriOrSignatureFileIdPair">Either the full Render Service URL or the signature and file id URI (e.g. "7554DCAF5A1EA1BDF5297352A203AF2357BE2B5B/498983").</param>
         /// <returns>A transparent texture that is later overwritten by the texture downloaded from the Render Service.</returns>
-        /// <seealso cref="https://wiki.guildwars2.com/wiki/API:Render_service"/>
+        /// <seealso href="https://wiki.guildwars2.com/wiki/API:Render_service"/>
         public AsyncTexture2D GetRenderServiceTexture(string uriOrSignatureFileIdPair) {
             var splitUri = _regexRenderServiceSignatureFileIdPair.Match(uriOrSignatureFileIdPair);
 

@@ -40,7 +40,7 @@ namespace Blish_HUD.Overlay {
         private SelfUpdateWindow _activeUpdateWindow;
 
         /// <summary>
-        /// The highest version release.  Will include prereleases only if <see cref="PrereleasesVisible"/> is <c>true</c>.
+        /// The highest version release.  Will include prereleases only if <see cref="OverlayService.ShowPreviews"/> is <c>true</c>.
         /// </summary>
         public CoreVersionManifest LatestRelease => _availableUpdates.Where(manifest => manifest.IsPrerelease == GameService.Overlay.ShowPreviews.Value)
                                                                      .OrderByDescending(manifest => manifest.Version)

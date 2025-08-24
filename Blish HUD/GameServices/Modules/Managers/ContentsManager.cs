@@ -33,7 +33,7 @@ namespace Blish_HUD.Modules.Managers {
         }
 
         /// <summary>
-        /// Loads a <see cref="Texture2D"/> from a file such as a PNG. If the requested texture is inaccessible, the <see cref="fallbackTexture"/> will be returned.
+        /// Loads a <see cref="Texture2D"/> from a file such as a PNG. If the requested texture is inaccessible, the <paramref name="fallbackTexture"/> will be returned.
         /// </summary>
         /// <param name="texturePath">The path to the texture.</param>
         /// <param name="fallbackTexture">An alternative <see cref="Texture2D"/> to return if the requested texture is not found or is invalid.</param>
@@ -50,7 +50,7 @@ namespace Blish_HUD.Modules.Managers {
         }
 
         /// <summary>
-        /// Loads a compiled shader in from a file as a <see cref="TEffect"/> that inherits from <see cref="Effect"/>.
+        /// Loads a compiled shader in from a file as a <typeparamref name="TEffect"/> that inherits from <see cref="Effect"/>.
         /// </summary>
         /// <typeparam name="TEffect">A custom effect wrapper (similar to the function of <see cref="BasicEffect"/>).</typeparam>
         /// <param name="effectPath">The path to the compiled shader.</param>

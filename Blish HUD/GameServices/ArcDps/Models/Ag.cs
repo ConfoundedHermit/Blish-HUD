@@ -23,14 +23,14 @@
         /// Profession id at time of event.
         /// </summary>
         /// <remarks>
-        /// Meaning differs per event type. Eg. "Species ID" for non-gadgets. See <see cref="https://www.deltaconnected.com/arcdps/evtc/">evtc notes</see> for details.
+        /// Meaning differs per event type. Eg. "Species ID" for non-gadgets. See <see href="https://www.deltaconnected.com/arcdps/evtc/">evtc notes</see> for details.
         /// </remarks>
         public uint   Profession { get; }
         /// <summary>
         /// Elite specialization id at time of event. 
         /// </summary>
         /// <remarks>
-        /// Meaning differs per event type. See <see cref="https://www.deltaconnected.com/arcdps/evtc/">evtc notes</see> for details.
+        /// Meaning differs per event type. See <see href="https://www.deltaconnected.com/arcdps/evtc/">evtc notes</see> for details.
         /// </remarks>
         public uint   Elite      { get; }
         /// <summary>

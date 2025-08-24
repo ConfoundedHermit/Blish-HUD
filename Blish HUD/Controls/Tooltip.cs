@@ -168,14 +168,14 @@ namespace Blish_HUD.Controls {
         }
 
         /// <summary>
-        /// Shows the tooltip at the provided <see cref="x"/> and <see cref="y"/> coordinates.
+        /// Shows the tooltip at the provided <paramref name="x"/> and <paramref name="y"/> coordinates.
         /// </summary>
         public void Show(int x, int y) {
             this.Show(new Point(x, y));
         }
 
         /// <summary>
-        /// Shows the tooltip at the provided <see cref="location"/>.
+        /// Shows the tooltip at the provided <paramref name="location"/>.
         /// </summary>
         public void Show(Point location) {
             this.Location = location;

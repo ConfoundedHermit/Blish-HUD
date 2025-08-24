@@ -15,7 +15,7 @@ namespace Blish_HUD.Content {
         string PhysicalPath { get; }
 
         /// <summary>
-        /// Gets a new <see cref="IDataReader"/> with the root path set to the provided <see cref="subPath"/>.
+        /// Gets a new <see cref="IDataReader"/> with the root path set to the provided <paramref name="subPath"/>.
         /// </summary>
         /// <param name="subPath">A sub path within the context of the <see cref="IDataReader"/>.</param>
         IDataReader GetSubPath(string subPath);
@@ -27,11 +27,12 @@ namespace Blish_HUD.Content {
         string GetPathRepresentation(string relativeFilePath = null);
 
         /// <summary>
-        /// Enumerates all available files. Files that have the extension <see cref="fileExtension"/>
-        /// will be passed to the provided <see cref="loadFileFunc"/>.
+        /// Enumerates all available files. Files that have the extension <paramref name="fileExtension"/>
+        /// will be passed to the provided <paramref name="loadFileFunc"/>.
         /// </summary>
         /// <param name="loadFileFunc">The method to call on all files within the context of the <see cref="IDataReader"/> that have the required file extension.</param>
         /// <param name="fileExtension">The file extension criteria. Should contain the '.' before the extension. If no fileExtension is provided, all files will meet the criteria.</param>
+        /// <param name="progress">Progress reporting for the operation.</param>
         void LoadOnFileType(Action<Stream, IDataReader> loadFileFunc, string fileExtension = "", IProgress<string> progress = null);
 
         /// <summary>
@@ -61,12 +62,12 @@ namespace Blish_HUD.Content {
         byte[] GetFileBytes(string filePath);
 
         /// <summary>
-        /// Opens a file, writes the raw data to the provided <see cref="fileBuffer"/> and returns the length of the data read.
+        /// Opens a file, writes the raw data to the provided <paramref name="fileBuffer"/> and returns the length of the data read.
         /// </summary>
         /// <param name="filePath">A path to a file within the context of the <see cref="IDataReader"/>.</param>
         /// <param name="fileBuffer">The buffer to write the file's data into.</param>
         /// <returns>
-        /// The total number of bytes successfully read into the <see cref="fileBuffer"/>.
+        /// The total number of bytes successfully read into the <paramref name="fileBuffer"/>.
         /// If the file does not exist or cannot be read, the buffer will be empty and the return value will be 0.
         /// </returns>
         int GetFileBytes(string filePath, out byte[] fileBuffer);
