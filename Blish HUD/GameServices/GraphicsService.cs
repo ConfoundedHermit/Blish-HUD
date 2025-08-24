@@ -165,7 +165,7 @@ namespace Blish_HUD {
 
         public GraphicsDeviceManager GraphicsDeviceManager => BlishHud.Instance.ActiveGraphicsDeviceManager;
 
-        [Obsolete("To ensure exclusive use of the graphics device use GameService.Graphics.LendGraphicsDevice().", true)]
+        [Obsolete("To ensure exclusive use of the graphics device use LendGraphicsDevice or LendGraphicsDeviceContext.", true)]
         public GraphicsDevice GraphicsDevice => BlishHud.Instance.ActiveGraphicsDeviceManager.GraphicsDevice;
 
         public int WindowWidth  => BlishHud.Instance.ActiveGraphicsDeviceManager.GraphicsDevice.Viewport.Width;
@@ -399,7 +399,7 @@ namespace Blish_HUD {
         }
 
         /// <summary>
-        /// Unlocks access to the <see cref="GraphicsDevice"/>.  You must call this after <see cref="LendGraphicsDevice"/>.
+        /// Unlocks access to the <see cref="GraphicsDevice"/>.  You must call this after <see cref="LendGraphicsDevice(bool)"/>.
         /// </summary>
         internal void ReturnGraphicsDevice(bool highPriority) {
             Monitor.Exit(_lendLockDevice);

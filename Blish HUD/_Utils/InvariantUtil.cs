@@ -20,7 +20,7 @@ namespace Blish_HUD {
         /// </summary>
         /// <param name="value">A string containing a number to convert.</param>
         /// <exception cref="ArgumentException"></exception>
-        /// <returns><see langword="true" /> if <param name="value"/> was converted successfully; otherwise, <see langword="false"/>.</returns>
+        /// <returns><see langword="true" /> if <paramref name="value"/> was converted successfully; otherwise, <see langword="false"/>.</returns>
         public static bool TryParseFloat(string value, out float result) => float.TryParse(value, NumberStyles.Any, _invariantCulture, out result);
 
         /// <summary>
@@ -29,7 +29,7 @@ namespace Blish_HUD {
         /// </summary>
         /// <param name="value">A string containing a number to convert.</param>
         /// <exception cref="ArgumentException"></exception>
-        /// <returns><see langword="true" /> if <param name="value"/> was converted successfully; otherwise, <see langword="false"/>.</returns>
+        /// <returns><see langword="true" /> if <paramref name="value"/> was converted successfully; otherwise, <see langword="false"/>.</returns>
         public static bool TryParseInt(string value, out int result) => int.TryParse(value, NumberStyles.Any, _invariantCulture, out result);
 
     }

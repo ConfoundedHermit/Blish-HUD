@@ -13,7 +13,7 @@ namespace Blish_HUD {
         #endregion
 
         /// <summary>
-        /// Draws an animated loading spinner at the provided <param name="bounds">bounds</param>.
+        /// Draws an animated loading spinner at the provided <paramref name="bounds"/>.
         /// </summary>
         /// <param name="control">The control the loading spinner will be drawn on.</param>
         /// <param name="spriteBatch">The active spritebatch.</param>
