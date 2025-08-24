@@ -217,6 +217,7 @@ namespace Blish_HUD {
                         ScreenSizeUpdated(value);
                     } catch (SharpDXException sdxe) {
                         // If device lost, we should hopefully handle in device lost event below
+                        Logger.Debug($"SharpDX exception caught during resolution change: {sdxe.Message}");
                     }
                 }
             }

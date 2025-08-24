@@ -161,7 +161,7 @@ namespace Blish_HUD.Controls {
         }
 
         private static void OnFocusedControlChanged(ControlActivatedEventArgs e) {
-            ActiveControlChanged?.Invoke(null, e);
+            FocusedControlChanged?.Invoke(null, e);
         }
 
         #endregion
