@@ -213,9 +213,11 @@ namespace Blish_HUD.Contexts {
 
         /// <summary>
         /// If <see cref="ContextAvailability.Available"/>, returns
-        /// a <c>bool</c> indicating if the provided<param name="festival">festival</param>
+        /// a <c>bool</c> indicating if the provided festival
         /// is currently active or not.
         /// </summary>
+        /// <param name="festival">The festival to check if it is currently active.</param>
+        /// <param name="contextResult">When this method returns, contains the result indicating whether the festival is active, if the operation succeeded, or the default value if the operation failed.</param>
         public ContextAvailability TryCheckIfFestivalIsActive(Festival festival, out ContextResult<bool> contextResult) {
             if (!string.IsNullOrEmpty(_fault)) {
                 contextResult = new ContextResult<bool>(false, _fault ?? string.Empty);

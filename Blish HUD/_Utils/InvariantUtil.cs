@@ -19,6 +19,7 @@ namespace Blish_HUD {
         /// A return value indicates whether the conversion succeeded.
         /// </summary>
         /// <param name="value">A string containing a number to convert.</param>
+        /// <param name="result">When this method returns, contains the <see langword="float" /> equivalent of the numeric value contained in <paramref name="value"/>, if the conversion succeeded, or zero if the conversion failed.</param>
         /// <exception cref="ArgumentException"></exception>
         /// <returns><see langword="true" /> if <paramref name="value"/> was converted successfully; otherwise, <see langword="false"/>.</returns>
         public static bool TryParseFloat(string value, out float result) => float.TryParse(value, NumberStyles.Any, _invariantCulture, out result);
@@ -28,6 +29,7 @@ namespace Blish_HUD {
         /// A return value indicates whether the conversion succeeded.
         /// </summary>
         /// <param name="value">A string containing a number to convert.</param>
+        /// <param name="result">When this method returns, contains the <see langword="int" /> equivalent of the numeric value contained in <paramref name="value"/>, if the conversion succeeded, or zero if the conversion failed.</param>
         /// <exception cref="ArgumentException"></exception>
         /// <returns><see langword="true" /> if <paramref name="value"/> was converted successfully; otherwise, <see langword="false"/>.</returns>
         public static bool TryParseInt(string value, out int result) => int.TryParse(value, NumberStyles.Any, _invariantCulture, out result);

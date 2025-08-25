@@ -894,6 +894,7 @@ namespace Blish_HUD.Controls {
         /// <summary>
         /// Draw the control.
         /// </summary>
+        /// <param name="spriteBatch">The <see cref="SpriteBatch"/> to use for drawing.</param>
         /// <param name="bounds">The draw region of the control.  Anything outside of this region will be clipped.  If this control is the child of a container, it could potentially be clipped even further by <see cref="GraphicsDevice.ScissorRectangle" />.</param>
         protected abstract void Paint(SpriteBatch spriteBatch, Rectangle bounds);
 

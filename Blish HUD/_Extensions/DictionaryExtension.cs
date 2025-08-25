@@ -29,6 +29,7 @@ namespace Blish_HUD {
         /// <summary>
         /// Merges dictionaries into another dictionary and returns a new dictionary from the result.
         /// </summary>
+        /// <typeparam name="T">The type of the dictionary that implements IDictionary.</typeparam>
         /// <typeparam name="TKey">The type of the keys.</typeparam>
         /// <typeparam name="TValue">The type of the values.</typeparam>
         /// <param name="main">The dictionary to merge into.</param>
