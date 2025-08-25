@@ -5,7 +5,7 @@ using Microsoft.Xna.Framework.Graphics;
 namespace Blish_HUD.Modules.UI.Controls {
     public class StatusMenuItem : MenuItem {
 
-        private string _statusText;
+        private string _statusText = string.Empty;
         private Color _statusTextColor = Color.White;
 
         public string StatusText {

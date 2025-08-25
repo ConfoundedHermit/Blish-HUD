@@ -79,7 +79,7 @@ namespace Blish_HUD {
                                                                          Environment.SpecialFolderOption.DoNotVerify), MUSIC_DIR));
         }
 
-        private static string CreateDir(string dirPath) {
+        private static string? CreateDir(string dirPath) {
             try {
                 return Directory.CreateDirectory(dirPath).FullName;
             } catch (UnauthorizedAccessException) {
@@ -89,11 +89,11 @@ namespace Blish_HUD {
             return null;
         }
 
-        public static string RegisterDirectory(string directory) {
+        public static string? RegisterDirectory(string directory) {
             return CreateDir(Path.Combine(BasePath, directory));
         }
 
-        public static string RegisterDirectory(string basePath, string directory) {
+        public static string? RegisterDirectory(string basePath, string directory) {
             return CreateDir(Path.Combine(basePath, directory));
         }
 

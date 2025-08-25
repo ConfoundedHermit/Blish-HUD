@@ -14,7 +14,7 @@ namespace Blish_HUD.Controls {
         private const int DEFAULT_COLOR_SIZE = 24;
         private const int COLOR_PADDING = 3;
 
-        public event EventHandler<EventArgs> SelectedColorChanged;
+        public event EventHandler<EventArgs> SelectedColorChanged = delegate { };
 
         public ObservableCollection<Gw2Sharp.WebApi.V2.Models.Color> Colors { get; protected set; }
 
@@ -22,8 +22,8 @@ namespace Blish_HUD.Controls {
 
         private int colorsPerRow;
 
-        private Gw2Sharp.WebApi.V2.Models.Color selectedColor;
-        public Gw2Sharp.WebApi.V2.Models.Color SelectedColor {
+        private Gw2Sharp.WebApi.V2.Models.Color? selectedColor;
+        public Gw2Sharp.WebApi.V2.Models.Color? SelectedColor {
             get => selectedColor;
             protected set {
                 if (SetProperty(ref selectedColor, value)) {
@@ -36,15 +36,15 @@ namespace Blish_HUD.Controls {
             }
         }
 
-        private ColorBox associatedColorBox;
-        public ColorBox AssociatedColorBox {
+        private ColorBox? associatedColorBox;
+        public ColorBox? AssociatedColorBox {
             get => associatedColorBox;
             set {
                 if (SetProperty(ref associatedColorBox, value)) {
-                    if (colorBoxes.ContainsKey(associatedColorBox.Color)) { 
+                    if (associatedColorBox?.Color != null && colorBoxes.ContainsKey(associatedColorBox.Color)) { 
                         colorBoxes[associatedColorBox.Color].IsSelected = true;
                     }
-                    this.SelectedColor            = this.AssociatedColorBox.Color;
+                    this.SelectedColor = associatedColorBox?.Color;
                 }
             }
         }

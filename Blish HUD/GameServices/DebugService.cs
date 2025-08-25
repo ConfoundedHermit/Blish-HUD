@@ -25,17 +25,17 @@ namespace Blish_HUD {
 
         private const string DEBUG_SETTINGS = "DebugConfiguration";
 
-        internal SettingCollection _debugSettings;
+        internal SettingCollection _debugSettings = null!;
         public SettingCollection DebugSettings => _debugSettings;
-        public SettingEntry<bool> EnableDebugLogging { get; private set; }
-        public SettingEntry<bool> EnableFPSDisplay { get; private set; }
-        public SettingEntry<bool> EnableAdditionalDebugDisplay { get; private set; }
+        public SettingEntry<bool> EnableDebugLogging { get; private set; } = null!;
+        public SettingEntry<bool> EnableFPSDisplay { get; private set; } = null!;
+        public SettingEntry<bool> EnableAdditionalDebugDisplay { get; private set; } = null!;
 
         #region Logging
 
-        private static Logger Logger;
+        private static NLog.Logger Logger = null!;
 
-        private static LoggingConfiguration _logConfiguration;
+        private static LoggingConfiguration? _logConfiguration = null;
 
         private const string STRUCLOG_TIME      = "${date:universalTime=false:format=HH\\:mm\\:ss.ffff K}"; // Default culture is invariant
         private const string STRUCLOG_LEVEL     = "${level:uppercase=true:padding=-5}";
@@ -51,7 +51,7 @@ namespace Blish_HUD {
             Application.SetUnhandledExceptionMode(UnhandledExceptionMode.CatchException);
 
             // Make sure crash dir is available for logs as early as possible
-            string logPath = DirectoryUtil.RegisterDirectory("logs");
+            string? logPath = DirectoryUtil.RegisterDirectory("logs");
 
             // Init the Logger
             _logConfiguration = new LoggingConfiguration();
@@ -92,7 +92,7 @@ namespace Blish_HUD {
 
             LogManager.Configuration = _logConfiguration;
 
-            Logger = Logger.GetLogger<DebugService>();
+            Logger = LogManager.GetLogger(typeof(DebugService).FullName);
         }
 
         private static readonly object _debugLock = new object();
@@ -170,7 +170,7 @@ namespace Blish_HUD {
 
         private const int FRAME_DURATION_SAMPLES = 100;
 
-        public DynamicallySmoothedValue<float> FrameCounter { get; private set; }
+        public DynamicallySmoothedValue<float> FrameCounter { get; private set; } = null!;
 
         #endregion
 
@@ -178,7 +178,7 @@ namespace Blish_HUD {
 
         private const int DEFAULT_DEBUGCOUNTER_SAMPLES = 60;
 
-        private ConcurrentDictionary<string, DebugCounter> _funcTimes;
+        private ConcurrentDictionary<string, DebugCounter> _funcTimes = null!;
 
         /// <summary>
         /// </summary>
@@ -205,14 +205,14 @@ namespace Blish_HUD {
         [Conditional("DEBUG")]
         public void StopTimeFuncAndOutput(string func) {
             _funcTimes[func].EndInterval();
-            Logger.Debug("{funcName} ran for {$funcTime}.", func, _funcTimes[func]?.GetTotal().Seconds().Humanize());
+            Logger.Debug("{funcName} ran for {$funcTime}.", func, _funcTimes[func]?.GetTotal().Seconds().Humanize() ?? "N/A");
         }
 
         #endregion
 
         #region Debug Overlay
 
-        public OverlayStrings OverlayTexts { get; private set; }
+        public OverlayStrings OverlayTexts { get; private set; } = null!;
 
         public void DrawDebugOverlay(SpriteBatch spriteBatch, GameTime gameTime) {
             int debugLeft = Graphics.WindowWidth - 600;

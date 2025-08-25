@@ -57,11 +57,11 @@ namespace Blish_HUD.Settings.UI.Presenters {
 
         private void UpdateViewDetails() {
             this.View.DisplayName = !string.IsNullOrEmpty(this.Model.DisplayName)
-                                        ? this.Model.DisplayName
+                                        ? this.Model.DisplayName!
                                         : this.Model.EntryKey;
 
-            this.View.Description = this.Model.Description;
-            this.View.Value       = this.Model.Value;
+            this.View.Description = this.Model.Description ?? string.Empty;
+            this.View.Value       = this.Model.Value!;
         }
 
         protected override void Unload() {

@@ -26,7 +26,7 @@ namespace Blish_HUD.Debug {
         /// </summary>
         /// <param name="bufferMax">The maximum length of the buffer.</param>
         /// <param name="getBufferLengthFunc">The function used to decide how much of the buffer should be used to calculate the average.</param>
-        public DynamicallySmoothedValue(int bufferMax, Func<int> getBufferLengthFunc = null) : base(bufferMax) {
+        public DynamicallySmoothedValue(int bufferMax, Func<int>? getBufferLengthFunc = null) : base(bufferMax) {
             _getBufferLengthFunc = getBufferLengthFunc ?? (() => bufferMax);
 
             _addExpression    = PrepareAddExpression<T>();

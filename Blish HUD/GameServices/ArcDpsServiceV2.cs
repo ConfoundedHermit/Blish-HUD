@@ -28,9 +28,9 @@ namespace Blish_HUD {
         private readonly TimeSpan _leeway = TimeSpan.FromMilliseconds(1000);
         private readonly CancellationTokenSource _arcDpsClientCancellationTokenSource = new CancellationTokenSource();
         private readonly List<Action> _registerListeners = new List<Action>();
-        private IArcDpsClient _arcDpsClient;
+        private IArcDpsClient _arcDpsClient = null!;
         private bool _hudIsActive;
-        private Stopwatch _stopwatch;
+        private Stopwatch _stopwatch = null!;
         private bool _subscribed;
 
 #if DEBUG
@@ -40,12 +40,12 @@ namespace Blish_HUD {
         /// <summary>
         ///     Triggered upon error of the underlaying socket listener.
         /// </summary>
-        public event EventHandler<SocketError> Error;
+        public event EventHandler<SocketError> Error = null!;
 
         /// <summary>
         ///     Provides common fields that multiple modules might want to track
         /// </summary>
-        public CommonFields Common { get; private set; }
+        public CommonFields Common { get; private set; } = null!;
 
         /// <summary>
         ///     Indicates if arcdps updated <see cref="HudIsActive" /> in the last second (it should every in-game frame)
@@ -121,7 +121,7 @@ namespace Blish_HUD {
                 if (_arcDpsClient != null) {
                     _arcDpsClientCancellationTokenSource.Cancel();
                     _arcDpsClient.Dispose();
-                    _arcDpsClient = null;
+                    _arcDpsClient = null!;
                 }
 
                 _arcDpsClient = new ArcDpsClient(version);

@@ -17,7 +17,7 @@ namespace Blish_HUD.Controls {
         private readonly bool _autoSizeHeight;
         private readonly HorizontalAlignment _horizontalAlignment;
         private readonly VerticalAlignment _verticalAlignment;
-        private FormattedLabelPart _hoveredTextPart;
+        private FormattedLabelPart? _hoveredTextPart;
         private bool finishedInitialization = false;
 
         internal FormattedLabel(IEnumerable<FormattedLabelPart> parts, bool wrapText, bool autoSizeWidth, bool autoSizeHeight, HorizontalAlignment horizontalAlignment, VerticalAlignment verticalAlignment) {

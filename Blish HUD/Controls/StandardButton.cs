@@ -36,12 +36,12 @@ namespace Blish_HUD.Controls {
             set => SetProperty(ref _text, value, true);
         }
 
-        private AsyncTexture2D _icon;
+        private AsyncTexture2D? _icon;
 
         /// <summary>
         /// An icon to show on the <see cref="StandardButton"/>.  For best results, the <see cref="Icon"/> should be 16x16.
         /// </summary>
-        public AsyncTexture2D Icon {
+        public AsyncTexture2D? Icon {
             get => _icon;
             set => SetProperty(ref _icon, value, true);
         }
@@ -62,8 +62,8 @@ namespace Blish_HUD.Controls {
         [EditorBrowsable(EditorBrowsableState.Never)]
         public int AnimationState { get; set; } = 0;
 
-        private Tween _animIn;
-        private Tween _animOut;
+        private Tween? _animIn;
+        private Tween? _animOut;
 
         public StandardButton() {
             _textColor           = Color.Black;

@@ -5,13 +5,13 @@ using Blish_HUD.Controls;
 namespace Blish_HUD.Graphics.UI {
     public abstract class View<TPresenter> : IView where TPresenter : IPresenter {
 
-        public event EventHandler<EventArgs> Loaded;
+        public event EventHandler<EventArgs>? Loaded;
 
-        public event EventHandler<EventArgs> Built;
+        public event EventHandler<EventArgs>? Built;
 
-        public event EventHandler<EventArgs> Unloaded;
+        public event EventHandler<EventArgs>? Unloaded;
 
-        private TPresenter _presenter;
+        private TPresenter _presenter = default!;
         public TPresenter Presenter {
             get => _presenter;
             protected set {
@@ -20,7 +20,7 @@ namespace Blish_HUD.Graphics.UI {
             }
         }
 
-        protected Container ViewTarget { get; private set; }
+        protected Container ViewTarget { get; private set; } = null!;
 
         protected View() { /* NOOP */ }
 

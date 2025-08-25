@@ -15,16 +15,16 @@ namespace Blish_HUD.Modules {
 
         private static readonly List<string> _dirtyNamespaces = new List<string>();
 
-        public event EventHandler<EventArgs> ModuleEnabled;
-        public event EventHandler<EventArgs> ModuleDisabled;
+        public event EventHandler<EventArgs>? ModuleEnabled;
+        public event EventHandler<EventArgs>? ModuleDisabled;
 
-        public event EventHandler<EventArgs> ModuleLoaded;
+        public event EventHandler<EventArgs>? ModuleLoaded;
 
         public void OnModuleLoaded(object _, EventArgs e) {
             this.ModuleLoaded?.Invoke(this, e);
         }
 
-        private Assembly _moduleAssembly;
+        private Assembly? _moduleAssembly;
         
         private bool _forceAllowDependency = false;
 
@@ -55,7 +55,7 @@ namespace Blish_HUD.Modules {
         public IDataReader DataReader { get; }
 
         [Import]
-        public Module ModuleInstance { get; private set; }
+        public Module? ModuleInstance { get; private set; }
 
         internal ModuleManager(Manifest manifest, ModuleState state, IDataReader dataReader) {
             this.Manifest   = manifest;
@@ -95,12 +95,12 @@ namespace Blish_HUD.Modules {
                         this.Enabled = true;
 
                         try {
-                            this.ModuleInstance.DoInitialize();
-                            this.ModuleInstance.DoLoad();
+                        this.ModuleInstance.DoInitialize();
+                        this.ModuleInstance.DoLoad();
 
-                            this.ModuleEnabled?.Invoke(this, EventArgs.Empty);
-                        } catch (TypeLoadException ex) {
-                            this.ModuleInstance = null;
+                        this.ModuleEnabled?.Invoke(this, EventArgs.Empty);
+                    } catch (TypeLoadException ex) {
+                        this.ModuleInstance = null;
                             this.Enabled        = false;
                             Logger.Error(ex, "Module {module} failed to load because it depended on a type which is not available in this version.  Ensure you are using the correct module and Blish HUD versions.", this.Manifest.GetDetailedName());
                         }
@@ -153,13 +153,17 @@ namespace Blish_HUD.Modules {
         private Assembly LoadPackagedAssembly(string assemblyPath) {
             string symbolsPath = assemblyPath.Replace(".dll", ".pdb");
 
-            byte[] assemblyData = this.DataReader.GetFileBytes(assemblyPath);
-            byte[] symbolData   = this.DataReader.GetFileBytes(symbolsPath) ?? new byte[0];
+            byte[]? assemblyData = this.DataReader.GetFileBytes(assemblyPath);
+            byte[]? symbolData   = this.DataReader.GetFileBytes(symbolsPath);
 
-            return Assembly.Load(assemblyData, symbolData);
+            if (assemblyData == null) {
+                throw new FileNotFoundException($"Assembly data could not be loaded from {assemblyPath}");
+            }
+
+            return Assembly.Load(assemblyData, symbolData ?? new byte[0]);
         }
 
-        private Assembly GetResourceAssembly(Assembly requestingAssembly, AssemblyName resourceDetails, string assemblyPath) {
+        private Assembly? GetResourceAssembly(Assembly requestingAssembly, AssemblyName resourceDetails, string assemblyPath) {
             // Avoid loading resource assembly from wrong module
             if (_moduleAssembly != requestingAssembly) return null;
 
@@ -182,7 +186,7 @@ namespace Blish_HUD.Modules {
             return null;
         }
 
-        private Assembly CurrentDomainOnAssemblyResolve(object sender, ResolveEventArgs args) {
+        private Assembly? CurrentDomainOnAssemblyResolve(object sender, ResolveEventArgs args) {
             if (this.Enabled || _forceAllowDependency) {
                 var assemblyDetails = new AssemblyName(args.Name);
 

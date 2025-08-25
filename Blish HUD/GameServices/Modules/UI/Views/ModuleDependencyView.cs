@@ -16,19 +16,21 @@ namespace Blish_HUD.Modules.UI.Views {
             { ModuleDependencyCheckResult.FoundInRepo, Color.Blue },
         };
 
-        public event EventHandler<ValueEventArgs<bool>> IgnoreModuleDependenciesChanged;
+        public event EventHandler<ValueEventArgs<bool>>? IgnoreModuleDependenciesChanged;
 
         public bool IgnoreModuleDependencies {
-            get => _ignoreModuleDependenciesToggle.Checked;
+            get => _ignoreModuleDependenciesToggle?.Checked ?? false;
             set {
-                _ignoreModuleDependenciesToggle.Checked = value;
-                IgnoreModuleDependenciesChanged?.Invoke(this, new ValueEventArgs<bool>(value));
+                if (_ignoreModuleDependenciesToggle != null) {
+                    _ignoreModuleDependenciesToggle.Checked = value;
+                    IgnoreModuleDependenciesChanged?.Invoke(this, new ValueEventArgs<bool>(value));
+                }
             }
         }
 
-        private Menu                 _dependencyMenuList;
-        private Label                _messageLabel;
-        private ContextMenuStripItem _ignoreModuleDependenciesToggle;
+        private Menu?                 _dependencyMenuList;
+        private Label?                _messageLabel;
+        private ContextMenuStripItem? _ignoreModuleDependenciesToggle;
 
         public ModuleDependencyView() { /* NOOP */ }
 
@@ -62,8 +64,8 @@ namespace Blish_HUD.Modules.UI.Views {
         }
 
         public void SetDependencies(IEnumerable<(string Name, string Status, ModuleDependencyCheckResult Result)> dependencies) {
-            _dependencyMenuList.ClearChildren();
-            _dependencyMenuList.Hide();
+            _dependencyMenuList?.ClearChildren();
+            _dependencyMenuList?.Hide();
 
             foreach ((string name, string status, var result) in dependencies) {
                 _ = new StatusMenuItem() {
@@ -76,7 +78,9 @@ namespace Blish_HUD.Modules.UI.Views {
             }
 
             // Show "No dependencies" if there are none
-            _messageLabel.Visible = !(_dependencyMenuList.Visible = _dependencyMenuList.Children.Count > 0);
+            if (_messageLabel != null && _dependencyMenuList != null) {
+                _messageLabel.Visible = !(_dependencyMenuList.Visible = _dependencyMenuList.Children.Count > 0);
+            }
         }
 
     }

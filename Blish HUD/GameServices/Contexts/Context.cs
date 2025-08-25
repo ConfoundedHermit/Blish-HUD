@@ -11,7 +11,7 @@ namespace Blish_HUD.Contexts {
         /// <summary>
         /// Occurs when <see cref="State"/> changes.
         /// </summary>
-        public event EventHandler<EventArgs> StateChanged;
+        public event EventHandler<EventArgs>? StateChanged;
 
         protected void OnStateChanged(EventArgs e) {
             this.StateChanged?.Invoke(this, e);
@@ -61,7 +61,7 @@ namespace Blish_HUD.Contexts {
         /// with the status set to "not ready".
         /// </summary>
         protected ContextAvailability NotReady<T>(out ContextResult<T> contextResult) {
-            contextResult = new ContextResult<T>(default, Strings.GameServices.ContextsService.State_NotReady);
+            contextResult = new ContextResult<T>(default(T)!, Strings.GameServices.ContextsService.State_NotReady);
 
             return ContextAvailability.NotReady;
         }

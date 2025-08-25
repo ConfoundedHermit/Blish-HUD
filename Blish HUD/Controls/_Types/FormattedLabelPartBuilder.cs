@@ -10,9 +10,9 @@ namespace Blish_HUD.Controls {
         private bool _isItalic;
         private bool _isStrikeThrough;
         private bool _isUnderlined;
-        private Action _link;
-        private AsyncTexture2D _prefixImage;
-        private AsyncTexture2D _suffixImage;
+        private Action? _link;
+        private AsyncTexture2D? _prefixImage;
+        private AsyncTexture2D? _suffixImage;
         private Point _prefixImageSize = new Point(32, 32);
         private Point _suffixImageSize = new Point(32, 32);
         private Color _textColor;
@@ -97,9 +97,9 @@ namespace Blish_HUD.Controls {
                 _isStrikeThrough,
                 _isUnderlined,
                 _text,
-                _link,
-                _prefixImage,
-                _suffixImage,
+                _link ?? (() => { }),
+                _prefixImage ?? new AsyncTexture2D(),
+                _suffixImage ?? new AsyncTexture2D(),
                 _prefixImageSize,
                 _suffixImageSize,
                 _textColor,

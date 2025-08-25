@@ -12,7 +12,7 @@
         /// <summary>
         /// The actively selected tab.
         /// </summary>
-        Tab SelectedTab { get; set; }
+        Tab? SelectedTab { get; set; }
         
     }
 }

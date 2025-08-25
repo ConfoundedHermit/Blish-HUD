@@ -24,7 +24,7 @@ namespace Blish_HUD.Content {
         /// Returns a string representation of the current path the DataReader is reading from. This won't necessarily be a valid file path.
         /// </summary>
         /// <param name="relativeFilePath">If provided, the path to a file within the <see cref="IDataReader"/> will be returned.</param>
-        string GetPathRepresentation(string relativeFilePath = null);
+        string GetPathRepresentation(string? relativeFilePath = null);
 
         /// <summary>
         /// Enumerates all available files. Files that have the extension <paramref name="fileExtension"/>
@@ -33,7 +33,7 @@ namespace Blish_HUD.Content {
         /// <param name="loadFileFunc">The method to call on all files within the context of the <see cref="IDataReader"/> that have the required file extension.</param>
         /// <param name="fileExtension">The file extension criteria. Should contain the '.' before the extension. If no fileExtension is provided, all files will meet the criteria.</param>
         /// <param name="progress">Progress reporting for the operation.</param>
-        void LoadOnFileType(Action<Stream, IDataReader> loadFileFunc, string fileExtension = "", IProgress<string> progress = null);
+        void LoadOnFileType(Action<Stream, IDataReader> loadFileFunc, string fileExtension = "", IProgress<string>? progress = null);
 
         /// <summary>
         /// Determines whether the specified file exists.
@@ -49,7 +49,7 @@ namespace Blish_HUD.Content {
         /// A task that represents the file's opened stream.
         /// If the file does not exist or cannot be read, <see cref="T:null"/> will be returned instead of a <see cref="Stream"/>.
         /// </returns>
-        Stream GetFileStream(string filePath);
+        Stream? GetFileStream(string filePath);
 
         /// <summary>
         /// Opens a file and returns the raw data in a byte array.
@@ -59,7 +59,7 @@ namespace Blish_HUD.Content {
         /// A byte array of the file's data.
         /// If the file does not exist or cannot be read, <see cref="T:null"/> will be returned instead of <see cref="T:byte[]"/>.
         /// </returns>
-        byte[] GetFileBytes(string filePath);
+        byte[]? GetFileBytes(string filePath);
 
         /// <summary>
         /// Opens a file, writes the raw data to the provided <paramref name="fileBuffer"/> and returns the length of the data read.
@@ -80,7 +80,7 @@ namespace Blish_HUD.Content {
         /// A task that represents the file's opened stream.
         /// If the file does not exist or cannot be read, the <see cref="Task"/> will result in <see cref="T:null"/> instead of a <see cref="Stream"/>.
         /// </returns>
-        Task<Stream> GetFileStreamAsync(string filePath);
+        Task<Stream?> GetFileStreamAsync(string filePath);
 
         /// <summary>
         /// Asynchronously opens a file and returns the raw data in a byte array.
@@ -90,7 +90,7 @@ namespace Blish_HUD.Content {
         /// A task that represents a byte array of the file's data.
         /// If the file does not exist or cannot be read, the <see cref="Task"/> will result in <see cref="T:null"/> instead of a <see cref="T:byte[]"/>.
         /// </returns>
-        Task<byte[]> GetFileBytesAsync(string filePath);
+        Task<byte[]?> GetFileBytesAsync(string filePath);
 
         /// <summary>
         /// Deletes the root of what this <see cref="IDataReader"/> is representing.

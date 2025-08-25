@@ -59,7 +59,7 @@ namespace Blish_HUD.Controls {
             }
         }
 
-        private AsyncTexture2D _icon;
+        private AsyncTexture2D _icon = null!;
         /// <summary>
         /// The icon shown when the <see cref="CornerIcon"/> is not currently being hovered over.
         /// </summary>
@@ -68,16 +68,16 @@ namespace Blish_HUD.Controls {
             set => SetProperty(ref _icon, value);
         }
 
-        private AsyncTexture2D _hoverIcon;
+        private AsyncTexture2D? _hoverIcon;
         /// <summary>
         /// The icon shown when the <see cref="CornerIcon"/> is hovered over.
         /// </summary>
-        public AsyncTexture2D HoverIcon {
+        public AsyncTexture2D? HoverIcon {
             get => _hoverIcon;
             set => SetProperty(ref _hoverIcon, value);
         }
 
-        private string _iconName;
+        private string _iconName = null!;
         /// <summary>
         /// The name of the <see cref="CornerIcon"/> that is shown when moused over.
         /// </summary>
@@ -99,7 +99,7 @@ namespace Blish_HUD.Controls {
             }
         }
 
-        private string _loadingMessage;
+        private string _loadingMessage = null!;
         /// <summary>
         /// If defined, a loading spinner is shown below the <see cref="CornerIcon"/> and this text will be
         /// shown in a tooltip when the loading spinner is moused over.
@@ -121,7 +121,7 @@ namespace Blish_HUD.Controls {
             CornerIcons.CollectionChanged += delegate { UpdateCornerIconPositions(); };
             
             GameService.Input.Mouse.MouseMoved += (sender, e) => {
-                CornerIcon[] cornerIcons = null;
+                CornerIcon[] cornerIcons;
 
                 lock (CornerIcons) {
                     cornerIcons = CornerIcons.ToArray();
@@ -190,11 +190,11 @@ namespace Blish_HUD.Controls {
         }
 
         public CornerIcon(AsyncTexture2D icon, string iconName) : this() {
-            _icon     = icon;
-            _iconName = iconName;
+            _icon     = icon ?? throw new System.ArgumentNullException(nameof(icon));
+            _iconName = iconName ?? throw new System.ArgumentNullException(nameof(iconName));
         }
 
-        public CornerIcon(AsyncTexture2D icon, AsyncTexture2D hoverIcon, string iconName) : this(icon, iconName) {
+        public CornerIcon(AsyncTexture2D icon, AsyncTexture2D? hoverIcon, string iconName) : this(icon, iconName) {
             _hoverIcon = hoverIcon;
         }
 

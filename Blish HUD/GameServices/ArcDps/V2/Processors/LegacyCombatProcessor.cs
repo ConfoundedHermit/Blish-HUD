@@ -20,7 +20,7 @@ namespace Blish_HUD.GameServices.ArcDps.V2.Processors {
             CombatEvent ev = default;
             Agent src = default;
             Agent dst = default;
-            string skillName = null;
+            string? skillName = null;
             int offset = 1;
 
             if ((byte)(data[0] & (byte)CombatMessageFlags.Ev) == (byte)CombatMessageFlags.Ev) (ev, offset) = ParseEv(data, offset);
@@ -38,7 +38,7 @@ namespace Blish_HUD.GameServices.ArcDps.V2.Processors {
                 Event = ev,
                 Source = src,
                 Destination = dst,
-                SkillName = skillName,
+                SkillName = skillName!,
                 Id = id,
                 Revision = revision,
             };
@@ -148,7 +148,7 @@ namespace Blish_HUD.GameServices.ArcDps.V2.Processors {
             (team, offset) = U16(data, offset);
 
             var ag = new Agent() {
-                Name = name,
+                Name = name!,
                 Id = id,
                 Profession = profession,
                 Elite = elite,

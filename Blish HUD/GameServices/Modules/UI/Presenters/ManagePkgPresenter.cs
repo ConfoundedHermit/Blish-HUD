@@ -9,11 +9,11 @@ using Version = SemVer.Version;
 namespace Blish_HUD.Modules.UI.Presenters {
     public class ManagePkgPresenter : Presenter<ManagePkgView, IOrderedEnumerable<PkgManifest>> {
 
-        private ModuleManager _existingModule;
+        private ModuleManager? _existingModule;
 
-        private Func<PkgManifest, ModuleManager, IProgress<string>, Task<(ModuleManager NewModule, bool Success, string Error)>> _packageAction;
+        private Func<PkgManifest, ModuleManager?, IProgress<string>, Task<(ModuleManager? NewModule, bool Success, string Error)>>? _packageAction;
 
-        private PkgManifest _selectedVersion;
+        private PkgManifest _selectedVersion = null!;
 
         public ManagePkgPresenter(ManagePkgView view, IOrderedEnumerable<PkgManifest> model) : base(view, model) { /* NOOP */ }
 
@@ -50,7 +50,7 @@ namespace Blish_HUD.Modules.UI.Presenters {
             this.View.PackageActionEnabled                = _packageAction != null;
         }
 
-        private (Func<PkgManifest, ModuleManager, IProgress<string>, Task<(ModuleManager NewModule, bool Success, string Error)>> Action, string ActionText) GetPackageAction() {
+        private (Func<PkgManifest, ModuleManager?, IProgress<string>, Task<(ModuleManager? NewModule, bool Success, string Error)>>? Action, string ActionText) GetPackageAction() {
             if (_existingModule != null) {
                 if (_existingModule.Manifest.Version < _selectedVersion.Version) {
                     // A newer version of the module is selected

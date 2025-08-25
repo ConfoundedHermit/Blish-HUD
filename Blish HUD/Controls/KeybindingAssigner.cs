@@ -12,7 +12,7 @@ namespace Blish_HUD.Controls {
         /// Fires when the keybinding on the assigned <see cref="KeyBinding"/> is updated
         /// through this control.
         /// </summary>
-        public event EventHandler<EventArgs> BindingChanged;
+        public event EventHandler<EventArgs>? BindingChanged;
 
         protected void OnBindingChanged(EventArgs e) {
             this.BindingChanged?.Invoke(this, e);
@@ -29,7 +29,7 @@ namespace Blish_HUD.Controls {
             set => SetProperty(ref _nameWidth, value, true);
         }
 
-        private KeyBinding _keyBinding;
+        private KeyBinding _keyBinding = null!;
 
         /// <summary>
         /// The name shown as the key binding name.
@@ -64,7 +64,7 @@ namespace Blish_HUD.Controls {
             this.Size = new Point(340, 16);
         }
 
-        public KeybindingAssigner() : this(null) { /* NOOP */ }
+        public KeybindingAssigner() : this(new KeyBinding()) { /* NOOP */ }
 
         protected override void OnClick(MouseEventArgs e) {
             if (_overHotkey && e.IsDoubleClick) {

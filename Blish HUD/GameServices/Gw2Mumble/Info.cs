@@ -12,17 +12,17 @@ namespace Blish_HUD.Gw2Mumble {
         /// <summary>
         /// Fires when the build ID reported by the Mumble API changes.
         /// </summary>
-        public event EventHandler<ValueEventArgs<int>> BuildIdChanged;
+        public event EventHandler<ValueEventArgs<int>>? BuildIdChanged;
 
         /// <summary>
         /// Fires when the Guild Wars 2 application receives or loses focus.
         /// </summary>
-        public event EventHandler<ValueEventArgs<bool>> IsGameFocusedChanged;
+        public event EventHandler<ValueEventArgs<bool>>? IsGameFocusedChanged;
 
         /// <summary>
         /// Fires when the process ID of the active Guild Wars 2 window changes.
         /// </summary>
-        public event EventHandler<ValueEventArgs<uint>> ProcessIdChanged;
+        public event EventHandler<ValueEventArgs<uint>>? ProcessIdChanged;
 
         private void OnBuildIdChanged(ValueEventArgs<int>        e) => BuildIdChanged?.Invoke(this, e);
         private void OnIsGameFocusedChanged(ValueEventArgs<bool> e) => IsGameFocusedChanged?.Invoke(this, e);

@@ -23,14 +23,17 @@ namespace Blish_HUD.Content {
             return new DirectoryReader(Path.Combine(_directoryPath, subPath));
         }
         
-        public string GetPathRepresentation(string relativeFilePath = null) {
+        public string GetPathRepresentation(string? relativeFilePath = null) {
             return Path.Combine(_directoryPath, relativeFilePath ?? "");
         }
         
-        public void LoadOnFileType(Action<Stream, IDataReader> loadFileFunc, string fileExtension = "", IProgress<string> progress = null) {    
+        public void LoadOnFileType(Action<Stream, IDataReader> loadFileFunc, string fileExtension = "", IProgress<string>? progress = null) {
             foreach (string filePath in Directory.EnumerateFiles(_directoryPath, $"*{fileExtension}", SearchOption.AllDirectories)) {
                 progress?.Report($"Loading {Path.GetFileName(filePath)}");
-                loadFileFunc.Invoke(this.GetFileStream(filePath), this);
+                var stream = this.GetFileStream(filePath);
+                if (stream != null) {
+                    loadFileFunc.Invoke(stream, this);
+                }
             }
         }
         
@@ -38,29 +41,29 @@ namespace Blish_HUD.Content {
             return File.Exists(Path.Combine(_directoryPath, filePath));
         }
         
-        public Stream GetFileStream(string filePath) {
+        public Stream? GetFileStream(string filePath) {
             if (!this.FileExists(filePath)) return null;
 
             return File.Open(Path.Combine(_directoryPath, filePath), FileMode.Open);
         }
         
-        public byte[] GetFileBytes(string filePath) {
+        public byte[]? GetFileBytes(string filePath) {
             if (!this.FileExists(filePath)) return null;
 
             return File.ReadAllBytes(Path.Combine(_directoryPath, filePath));
         }
         
         public int GetFileBytes(string filePath, out byte[] fileBuffer) {
-            fileBuffer = GetFileBytes(filePath);
+            fileBuffer = GetFileBytes(filePath) ?? Array.Empty<byte>();
 
-            return fileBuffer?.Length ?? 0;
+            return fileBuffer.Length;
         }
         
-        public async Task<Stream> GetFileStreamAsync(string filePath) {
+        public async Task<Stream?> GetFileStreamAsync(string filePath) {
             return await Task.FromResult(this.GetFileStream(filePath));
         }
         
-        public async Task<byte[]> GetFileBytesAsync(string filePath) {
+        public async Task<byte[]?> GetFileBytesAsync(string filePath) {
             if (!FileExists(filePath)) return null;
 
             byte[] fileData;

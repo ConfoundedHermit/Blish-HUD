@@ -55,6 +55,9 @@ namespace Blish_HUD.Modules.Managers {
             _subtokenHandler   = new JwtSecurityTokenHandler();
 
             _connection = moduleConnection;
+            
+            // Initialize event to avoid CS8618 warning
+            SubtokenUpdated = delegate { };
         }
 
         internal static Gw2ApiManager GetModuleInstance(ModuleManager module) {

@@ -5,13 +5,13 @@ namespace Blish_HUD.Modules {
     public class ModuleContributor {
 
         [JsonProperty("name")]
-        public string Name { get; private set; }
+        public string Name { get; private set; } = null!;
 
         [JsonProperty("username")]
-        public string Username { get; private set; }
+        public string Username { get; private set; } = null!;
 
         [JsonProperty("url")]
-        public string Url { get; private set; }
+        public string Url { get; private set; } = null!;
 
     }
 

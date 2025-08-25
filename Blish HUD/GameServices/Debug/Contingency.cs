@@ -20,9 +20,9 @@ namespace Blish_HUD.Debug {
 
             Logger.Warn($"Contingency '{key}' was triggered!");
 
-            if (BlishHud.Instance != null) {
+            if (BlishHud.Instance?.Form != null) {
                 if (BlishHud.Instance.Form.InvokeRequired) {
-                    BlishHud.Instance.Form.Invoke(new Action(() => BlishHud.Instance.Form.Hide()));
+                    BlishHud.Instance.Form.Invoke(new Action(() => BlishHud.Instance.Form?.Hide()));
                 } else {
                     BlishHud.Instance.Form.Hide();
                 }

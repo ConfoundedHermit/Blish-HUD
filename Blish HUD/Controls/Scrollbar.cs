@@ -48,7 +48,7 @@ namespace Blish_HUD.Controls {
             }
         }
 
-        private Tween _targetScrollDistanceAnim = null;
+        private Tween? _targetScrollDistanceAnim = null;
 
         private float _targetScrollDistance;
         private float TargetScrollDistance {

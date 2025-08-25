@@ -17,17 +17,17 @@ namespace Blish_HUD.Input {
         /// <summary>
         /// Occurs when a key is pressed down.
         /// </summary>
-        public event EventHandler<KeyboardEventArgs> KeyPressed;
+        public event EventHandler<KeyboardEventArgs> KeyPressed = null!;
 
         /// <summary>
         /// Occurs when a key is released.
         /// </summary>
-        public event EventHandler<KeyboardEventArgs> KeyReleased;
+        public event EventHandler<KeyboardEventArgs> KeyReleased = null!;
 
         /// <summary>
         /// Occurs when the state of any key changes.
         /// </summary>
-        public event EventHandler<KeyboardEventArgs> KeyStateChanged;
+        public event EventHandler<KeyboardEventArgs> KeyStateChanged = null!;
 
         private void OnKeyStateChanged(KeyboardEventArgs e) {
             if (e.EventType == KeyboardEventType.KeyDown)
@@ -63,7 +63,7 @@ namespace Blish_HUD.Input {
             }
         }
 
-        private Control _focusedControl;
+        private Control _focusedControl = null!;
 
         private readonly ConcurrentQueue<KeyboardEventArgs> _inputBuffer = new ConcurrentQueue<KeyboardEventArgs>();
 
@@ -90,7 +90,7 @@ namespace Blish_HUD.Input {
         /// </summary>
         public IReadOnlyList<Keys> KeysDown => _keysDown.AsReadOnly();
         
-        private Action<string> _textInputDelegate;
+        private Action<string> _textInputDelegate = null!;
 
         private readonly ReaderWriterLockSlim _stagedKeyBindingLock = new ReaderWriterLockSlim();
         private readonly HashSet<KeyBinding>  _stagedKeyBindings    = new HashSet<KeyBinding>();
@@ -164,7 +164,7 @@ namespace Blish_HUD.Input {
         public void SetTextInputListner(Action<string> input) { _textInputDelegate = input; }
 
         public void UnsetTextInputListner(Action<string> input) {
-            if (input == _textInputDelegate) _textInputDelegate = null;
+            if (input == _textInputDelegate) _textInputDelegate = null!;
         }
 
         private void UpdateStates() {

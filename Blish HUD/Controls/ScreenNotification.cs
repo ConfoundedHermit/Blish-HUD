@@ -49,27 +49,27 @@ namespace Blish_HUD.Controls {
             set => SetProperty(ref _duration, value);
         }
 
-        private Texture2D _icon;
+        private Texture2D? _icon;
 
-        public Texture2D Icon {
+        public Texture2D? Icon {
             get => _icon;
             set => SetProperty(ref _icon, value);
         }
 
-        private string _message;
+        private string _message = string.Empty;
         public string Message {
             get => _message;
             set => SetProperty(ref _message, value);
         }
         
-        private Glide.Tween _animFadeLifecycle;
+        private Glide.Tween? _animFadeLifecycle;
         private int _targetTop = 0;
-        private Tween _slideDownTween;
+        private Tween? _slideDownTween;
 
         private Rectangle _layoutMessageBounds;
         private Rectangle _layoutIconBounds;
 
-        private ScreenNotification(string message, NotificationType type = NotificationType.Info, Texture2D icon = null, int duration = DURATION_DEFAULT) {
+        private ScreenNotification(string message, NotificationType type = NotificationType.Info, Texture2D? icon = null, int duration = DURATION_DEFAULT) {
             _message  = message;
             _type     = type;
             _icon     = icon;
@@ -122,8 +122,8 @@ namespace Blish_HUD.Controls {
         protected override void Paint(SpriteBatch spriteBatch, Rectangle bounds) {
             if (string.IsNullOrEmpty(_message)) return;
 
-            Color     messageColor           = Color.White;
-            Texture2D notificationBackground = null;
+            Color      messageColor           = Color.White;
+            Texture2D? notificationBackground = null;
 
             switch (_type) {
                 case NotificationType.Info:
@@ -212,7 +212,7 @@ namespace Blish_HUD.Controls {
             base.DisposeControl();
         }
 
-        public static void ShowNotification(string message, NotificationType type = NotificationType.Info, Texture2D icon = null, int duration = DURATION_DEFAULT) {
+        public static void ShowNotification(string message, NotificationType type = NotificationType.Info, Texture2D? icon = null, int duration = DURATION_DEFAULT) {
             var nNot = new ScreenNotification(message, type, icon, duration) {
                 Parent = Graphics.SpriteScreen
             };

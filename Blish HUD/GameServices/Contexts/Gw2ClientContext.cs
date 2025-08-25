@@ -32,7 +32,13 @@
         #region Specific Checks
 
         private (bool IsMatch, ContextAvailability CdnAvailability) IsStandardClientType(int currentBuildId, out ContextAvailability contextAvailability) {
-            contextAvailability = GameService.Contexts.GetContext<CdnInfoContext>().TryGetStandardCdnInfo(out var standardCdnContextResult);
+            var cdnContext = GameService.Contexts.GetContext<CdnInfoContext>();
+            if (cdnContext == null) {
+                contextAvailability = ContextAvailability.Unavailable;
+                return (false, contextAvailability);
+            }
+
+            contextAvailability = cdnContext.TryGetStandardCdnInfo(out var standardCdnContextResult);
 
             Logger.Debug("{contextName} ({contextAvailability}) reported the Standard client build ID to be {standardBuildId}.", nameof(CdnInfoContext), contextAvailability, standardCdnContextResult.Value.BuildId);
 
@@ -42,7 +48,13 @@
         }
 
         private (bool IsMatch, ContextAvailability CdnAvailability) IsChineseClientType(int currentBuildId, out ContextAvailability contextAvailability) {
-            contextAvailability = GameService.Contexts.GetContext<CdnInfoContext>().TryGetChineseCdnInfo(out var chineseCdnContextResult);
+            var cdnContext = GameService.Contexts.GetContext<CdnInfoContext>();
+            if (cdnContext == null) {
+                contextAvailability = ContextAvailability.Unavailable;
+                return (false, contextAvailability);
+            }
+
+            contextAvailability = cdnContext.TryGetChineseCdnInfo(out var chineseCdnContextResult);
 
             Logger.Debug("{contextName} ({contextAvailability}) reported the Chinese client build ID to be {chineseBuildId}.", nameof(CdnInfoContext), contextAvailability, chineseCdnContextResult.Value.BuildId);
 

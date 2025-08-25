@@ -24,9 +24,10 @@ namespace Blish_HUD.Debug {
 
         public ContingencyPopup() {
             InitializeComponent();
+            TroubleshootingUrl = string.Empty;
         }
 
-        public ContingencyPopup(string title, string description, string troubleshootingUrl, IEnumerable<PopupButton> buttons = null) {
+        public ContingencyPopup(string title, string description, string troubleshootingUrl, IEnumerable<PopupButton>? buttons = null) {
             InitializeComponent();
 
             this.Text                = title;

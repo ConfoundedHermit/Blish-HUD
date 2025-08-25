@@ -20,7 +20,7 @@ namespace Blish_HUD.Contexts {
         /// </summary>
         public readonly struct Festival {
 
-            private static FestivalContext _context;
+            private static FestivalContext? _context;
 
             private static readonly Dictionary<string, Festival> _festivalLookup = new Dictionary<string, Festival>(StringComparer.InvariantCultureIgnoreCase);
 
@@ -127,7 +127,7 @@ namespace Blish_HUD.Contexts {
 
         private List<Festival> _activeFestivals = new List<Festival>();
 
-        private string _fault;
+        private string? _fault;
 
         public FestivalContext() {
             GameService.Gw2WebApi.FinishedLoading += Gw2WebApiOnFinishedLoading;
@@ -201,7 +201,7 @@ namespace Blish_HUD.Contexts {
         /// </summary>
         public ContextAvailability TryGetActiveFestivals(out ContextResult<ReadOnlyCollection<Festival>> contextResult) {
             if (!string.IsNullOrEmpty(_fault)) {
-                contextResult = new ContextResult<ReadOnlyCollection<Festival>>(default, _fault);
+                contextResult = new ContextResult<ReadOnlyCollection<Festival>>(new ReadOnlyCollection<Festival>(new List<Festival>()), _fault ?? string.Empty);
                 return ContextAvailability.Failed;
             }
 
@@ -218,7 +218,7 @@ namespace Blish_HUD.Contexts {
         /// </summary>
         public ContextAvailability TryCheckIfFestivalIsActive(Festival festival, out ContextResult<bool> contextResult) {
             if (!string.IsNullOrEmpty(_fault)) {
-                contextResult = new ContextResult<bool>(false, _fault);
+                contextResult = new ContextResult<bool>(false, _fault ?? string.Empty);
                 return ContextAvailability.Failed;
             }
 

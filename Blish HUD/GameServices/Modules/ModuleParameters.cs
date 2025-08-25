@@ -8,23 +8,23 @@ namespace Blish_HUD.Modules {
 
         private static readonly Logger Logger = Logger.GetLogger<ModuleParameters>();
 
-        private Manifest           _manifest;
-        private SettingsManager    _settingsManager;
-        private ContentsManager    _contentsManager;
-        private DirectoriesManager _directoriesManager;
-        private Gw2ApiManager      _gw2ApiManager;
+        private Manifest?           _manifest;
+        private SettingsManager?    _settingsManager;
+        private ContentsManager?    _contentsManager;
+        private DirectoriesManager? _directoriesManager;
+        private Gw2ApiManager?      _gw2ApiManager;
 
-        public Manifest Manifest => _manifest;
+        public Manifest Manifest => _manifest!;
 
-        public SettingsManager SettingsManager => _settingsManager;
+        public SettingsManager SettingsManager => _settingsManager!;
 
-        public ContentsManager ContentsManager => _contentsManager;
+        public ContentsManager ContentsManager => _contentsManager!;
 
-        public DirectoriesManager DirectoriesManager => _directoriesManager;
+        public DirectoriesManager DirectoriesManager => _directoriesManager!;
 
-        public Gw2ApiManager Gw2ApiManager => _gw2ApiManager;
+        public Gw2ApiManager Gw2ApiManager => _gw2ApiManager!;
 
-        internal static ModuleParameters BuildFromManifest(Manifest manifest, ModuleManager module) {
+        internal static ModuleParameters? BuildFromManifest(Manifest manifest, ModuleManager module) {
             switch (manifest.ManifestVersion) {
                 case SupportedModuleManifestVersion.V1:
                     return BuildFromManifest(manifest as ManifestV1, module);
@@ -37,7 +37,7 @@ namespace Blish_HUD.Modules {
             return null;
         }
 
-        private static ModuleParameters BuildFromManifest(ManifestV1 manifest, ModuleManager module) {
+        private static ModuleParameters? BuildFromManifest(ManifestV1? manifest, ModuleManager module) {
             var builtModuleParameters = new ModuleParameters {
                 _manifest = manifest,
 
@@ -63,7 +63,7 @@ namespace Blish_HUD.Modules {
         }
 
         internal async Task LoadAsync() {
-            await _gw2ApiManager.RenewSubtoken();
+            await _gw2ApiManager!.RenewSubtoken();
         }
 
         public void Dispose() {

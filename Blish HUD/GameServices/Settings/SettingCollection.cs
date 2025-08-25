@@ -16,7 +16,11 @@ namespace Blish_HUD.Settings {
             private const string ATTR_RENDERINUI = "Ui";
             private const string ATTR_ENTRIES    = "Entries";
 
-            public override void WriteJson(JsonWriter writer, SettingCollection value, JsonSerializer serializer) {
+            public override void WriteJson(JsonWriter writer, SettingCollection? value, JsonSerializer serializer) {
+                if (value == null) {
+                    writer.WriteNull();
+                    return;
+                }
                 var settingCollectionObject = new JObject();
 
                 if (value.LazyLoaded) {
@@ -41,8 +45,8 @@ namespace Blish_HUD.Settings {
                 settingCollectionObject.WriteTo(writer);
             }
 
-            public override SettingCollection ReadJson(JsonReader reader, Type objectType, SettingCollection existingValue, bool hasExistingValue, JsonSerializer serializer) {
-                if (reader.TokenType == JsonToken.Null) return null;
+        public override SettingCollection? ReadJson(JsonReader reader, Type objectType, SettingCollection? existingValue, bool hasExistingValue, JsonSerializer serializer) {
+            if (reader.TokenType == JsonToken.Null) return null;
 
                 var jObj = JObject.Load(reader);
 
@@ -50,11 +54,11 @@ namespace Blish_HUD.Settings {
                 bool renderInUi = false;
 
                 if (jObj[ATTR_LAZY] != null) {
-                    isLazy = jObj[ATTR_LAZY].Value<bool>();
+                    isLazy = jObj[ATTR_LAZY]?.Value<bool>() ?? false;
                 }
 
                 if (jObj[ATTR_RENDERINUI] != null) {
-                    renderInUi = jObj[ATTR_RENDERINUI].Value<bool>();
+                    renderInUi = jObj[ATTR_RENDERINUI]?.Value<bool>() ?? false;
                 }
 
                 return jObj[ATTR_ENTRIES] != null
@@ -64,12 +68,12 @@ namespace Blish_HUD.Settings {
 
         }
 
-        private JToken _entryTokens;
+        private JToken? _entryTokens;
 
         private readonly ReaderWriterLockSlim _entryLock = new ReaderWriterLockSlim();
 
         private readonly List<SettingEntry> _definedEntries = new List<SettingEntry>();
-        private          List<SettingEntry> _undefinedEntries;
+        private          List<SettingEntry>? _undefinedEntries;
 
         public bool LazyLoaded { get; }
 
@@ -78,7 +82,7 @@ namespace Blish_HUD.Settings {
                 if (!this.Loaded) Load();
 
                 _entryLock.EnterReadLock();
-                var combinedEntries = _definedEntries.Concat(_undefinedEntries).ToList().AsReadOnly();
+                var combinedEntries = _definedEntries.Concat(_undefinedEntries ?? new List<SettingEntry>()).ToList().AsReadOnly();
                 _entryLock.ExitReadLock();
 
                 return combinedEntries;
@@ -96,7 +100,7 @@ namespace Blish_HUD.Settings {
             _undefinedEntries = new List<SettingEntry>();
         }
 
-        public SettingCollection(bool lazy, JToken entryTokens) {
+        public SettingCollection(bool lazy, JToken? entryTokens) {
             this.LazyLoaded  = lazy;
             _entryTokens = entryTokens;
 
@@ -105,19 +109,19 @@ namespace Blish_HUD.Settings {
             }
         }
 
-        public SettingEntry<TEntry> DefineSetting<TEntry>(string entryKey, TEntry defaultValue, Func<string> displayNameFunc = null, Func<string> descriptionFunc = null) {
+        public SettingEntry<TEntry> DefineSetting<TEntry>(string entryKey, TEntry defaultValue, Func<string>? displayNameFunc = null, Func<string>? descriptionFunc = null) {
             // We don't need to check if we've loaded because the first check uses this[key] which
             // will load if we haven't already since it references this.Entries instead of _entries
             if (!(this[entryKey] is SettingEntry<TEntry> definedEntry)) {
                 definedEntry = SettingEntry<TEntry>.InitSetting(entryKey, defaultValue);
             }
 
-            definedEntry.GetDisplayNameFunc = displayNameFunc ?? (() => null);
-            definedEntry.GetDescriptionFunc = descriptionFunc ?? (() => null);
+            definedEntry.GetDisplayNameFunc = displayNameFunc ?? (() => null!);
+            definedEntry.GetDescriptionFunc = descriptionFunc ?? (() => null!);
             definedEntry.SessionDefined     = true;
 
             _entryLock.EnterWriteLock();
-            _undefinedEntries.Remove(definedEntry);
+            _undefinedEntries?.Remove(definedEntry);
             _definedEntries.Remove(definedEntry);
             _definedEntries.Add(definedEntry);
             _entryLock.ExitWriteLock();
@@ -126,7 +130,7 @@ namespace Blish_HUD.Settings {
         }
 
         [Obsolete("This function does not produce a localization friendly SettingEntry.")]
-        public SettingEntry<TEntry> DefineSetting<TEntry>(string entryKey, TEntry defaultValue, string displayName, string description, SettingsService.SettingTypeRendererDelegate renderer = null) {
+        public SettingEntry<TEntry> DefineSetting<TEntry>(string entryKey, TEntry defaultValue, string displayName, string description, SettingsService.SettingTypeRendererDelegate? renderer = null) {
             return DefineSetting(entryKey, defaultValue, () => displayName, () => description);
         }
 
@@ -135,7 +139,7 @@ namespace Blish_HUD.Settings {
 
             if (entryToRemove != null) {
                 _entryLock.EnterWriteLock();
-                _undefinedEntries.Remove(entryToRemove);
+                _undefinedEntries?.Remove(entryToRemove);
                 _definedEntries.Remove(entryToRemove);
                 _entryLock.ExitWriteLock();
             }
@@ -149,11 +153,11 @@ namespace Blish_HUD.Settings {
             return AddSubCollection(collectionKey, renderInUi, lazyLoaded, null);
         }
 
-        public SettingCollection AddSubCollection(string collectionKey, bool renderInUi, Func<string> displayNameFunc = null) {
+        public SettingCollection AddSubCollection(string collectionKey, bool renderInUi, Func<string>? displayNameFunc = null) {
             return AddSubCollection(collectionKey, renderInUi, false, displayNameFunc);
         }
 
-        public SettingCollection AddSubCollection(string collectionKey, bool renderInUi, bool lazyLoaded = false, Func<string> displayNameFunc = null) {
+        public SettingCollection AddSubCollection(string collectionKey, bool renderInUi, bool lazyLoaded = false, Func<string>? displayNameFunc = null) {
             return DefineSetting(collectionKey, new SettingCollection(lazyLoaded) { RenderInUi = renderInUi }, displayNameFunc).Value;
         }
 
@@ -161,13 +165,13 @@ namespace Blish_HUD.Settings {
             return (this.Entries.Any(entry => string.Equals(entry.EntryKey, entryKey, StringComparison.OrdinalIgnoreCase)));
         }
 
-        public bool TryGetSetting(string entryKey, out SettingEntry settingEntry) {
+        public bool TryGetSetting(string entryKey, out SettingEntry? settingEntry) {
             settingEntry = this[entryKey];
 
             return settingEntry != null;
         }
 
-        public bool TryGetSetting<T>(string entryKey, out SettingEntry<T> settingEntry) {
+        public bool TryGetSetting<T>(string entryKey, out SettingEntry<T>? settingEntry) {
             settingEntry = this[entryKey] as SettingEntry<T>;
 
             return settingEntry != null;
@@ -185,9 +189,9 @@ namespace Blish_HUD.Settings {
 
         public SettingEntry this[int index] => this.Entries[index];
 
-        public SettingEntry this[string entryKey] => GetSettingByName(this.Entries, entryKey);
+        public SettingEntry? this[string entryKey] => GetSettingByName(this.Entries, entryKey);
 
-        private SettingEntry GetSettingByName(IEnumerable<SettingEntry> entries, string entryKey) {
+        private SettingEntry? GetSettingByName(IEnumerable<SettingEntry> entries, string entryKey) {
             _entryLock.EnterReadLock();
             var resultingEntry = entries.FirstOrDefault(se => string.Equals(se.EntryKey, entryKey, StringComparison.OrdinalIgnoreCase));
             _entryLock.ExitReadLock();

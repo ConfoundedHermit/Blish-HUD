@@ -36,7 +36,7 @@ namespace Blish_HUD.Controls {
     [StructLayout(LayoutKind.Sequential)]
     internal class UndoRedoRecord {
         public OperationType OperationType;
-        public string        Data;
+        public string        Data = string.Empty;
         public int           Index;
         public int           Length;
     }

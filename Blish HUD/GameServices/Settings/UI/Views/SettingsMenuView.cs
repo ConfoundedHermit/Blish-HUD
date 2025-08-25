@@ -14,10 +14,10 @@ namespace Blish_HUD.Settings.UI.Views {
     /// </summary>
     public class SettingsMenuView : View {
 
-        public event EventHandler<ControlActivatedEventArgs> MenuItemSelected;
+        public event EventHandler<ControlActivatedEventArgs> MenuItemSelected = null!;
 
-        private Menu          _menuSettingsList;
-        private ViewContainer _settingViewContainer;
+        private Menu          _menuSettingsList = null!;
+        private ViewContainer _settingViewContainer = null!;
 
         public SettingsMenuView() { /* NOOP */ }
 
@@ -68,7 +68,7 @@ namespace Blish_HUD.Settings.UI.Views {
             }
 
             if (selectedMenuItem?.Parent != _menuSettingsList) {
-                _menuSettingsList.Select(_menuSettingsList.First() as MenuItem);
+                _menuSettingsList.Select((_menuSettingsList.First() as MenuItem)!);
             }
         }
 

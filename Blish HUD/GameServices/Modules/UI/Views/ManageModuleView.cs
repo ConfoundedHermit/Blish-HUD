@@ -10,35 +10,35 @@ using Version = SemVer.Version;
 namespace Blish_HUD.Modules.UI.Views {
     public class ManageModuleView : View {
 
-        public event EventHandler<EventArgs> EnableModuleClicked;
-        public event EventHandler<EventArgs> DisableModuleClicked;
+        public event EventHandler<EventArgs>? EnableModuleClicked;
+        public event EventHandler<EventArgs>? DisableModuleClicked;
 
-        private Label _moduleTextLabel;
-        private Label _moduleAssemblyDirtiedWarning;
-        private Image _moduleHeaderLabel;
-        private Label _moduleNameLabel;
-        private Label _moduleVersionLabel;
-        private Label _moduleStateLabel;
+        private Label _moduleTextLabel = null!;
+        private Label _moduleAssemblyDirtiedWarning = null!;
+        private Image _moduleHeaderLabel = null!;
+        private Label _moduleNameLabel = null!;
+        private Label _moduleVersionLabel = null!;
+        private Label _moduleStateLabel = null!;
 
-        private Image _authorImage;
-        private Label _authoredByLabel;
-        private Label _authorNameLabel;
+        private Image _authorImage = null!;
+        private Label _authoredByLabel = null!;
+        private Label _authorNameLabel = null!;
 
-        private StandardButton _enableButton;
-        private StandardButton _disableButton;
+        private StandardButton _enableButton = null!;
+        private StandardButton _disableButton = null!;
 
-        private Panel _collapsePanel;
+        private Panel _collapsePanel = null!;
 
-        private Panel _descriptionPanel;
-        private Label _descriptionLabel;
+        private Panel _descriptionPanel = null!;
+        private Label _descriptionLabel = null!;
 
-        private ViewContainer _permissionView;
-        private ViewContainer _dependencyView;
+        private ViewContainer _permissionView = null!;
+        private ViewContainer _dependencyView = null!;
 
-        private Label         _settingMessageLabel;
-        private ViewContainer _settingView;
+        private Label         _settingMessageLabel = null!;
+        private ViewContainer _settingView = null!;
 
-        private GlowButton _settingsButton;
+        private GlowButton _settingsButton = null!;
 
         private readonly Dictionary<ModuleRunState, (string Status, Color color)> _moduleStatusLookup = new Dictionary<ModuleRunState, (string Status, Color color)> {
             {ModuleRunState.Unloaded, (Strings.GameServices.ModulesService.ModuleState_Disabled, Control.StandardColors.DisabledText)},
@@ -59,23 +59,23 @@ namespace Blish_HUD.Modules.UI.Views {
         }
 
         public string ModuleNamespace {
-            get => _moduleNameLabel.BasicTooltipText;
+            get => _moduleNameLabel.BasicTooltipText ?? string.Empty;
             set => _moduleNameLabel.BasicTooltipText = value;
         }
 
-        private Version _moduleVersion;
-        public Version ModuleVersion {
+        private Version? _moduleVersion;
+        public Version? ModuleVersion {
             get => _moduleVersion;
             set {
                 _moduleVersion = value;
 
-                _moduleVersionLabel.Text = $"v{_moduleVersion}";
+                _moduleVersionLabel.Text = _moduleVersion != null ? $"v{_moduleVersion}" : string.Empty;
 
                 UpdateHeaderLayout();
             }
         }
 
-        public string ModuleErrorReason { get; set; }
+        public string ModuleErrorReason { get; set; } = string.Empty;
 
         private ModuleRunState _moduleRunState = ModuleRunState.Unloaded;
         public ModuleRunState ModuleState {
@@ -116,9 +116,9 @@ namespace Blish_HUD.Modules.UI.Views {
             set => _disableButton.Enabled = value;
         }
 
-        private ContextMenuStrip _settingMenu;
+        private ContextMenuStrip? _settingMenu;
 
-        public ContextMenuStrip SettingMenu {
+        public ContextMenuStrip? SettingMenu {
             get => _settingMenu;
             set {
                 _settingMenu = value;
@@ -133,19 +133,24 @@ namespace Blish_HUD.Modules.UI.Views {
             this.WithPresenter(new ManageModulePresenter(this, moduleManager));
         }
 
-        public void SetPermissionsView(ModulePermissionView view) {
-            _permissionView.Show(view);
+        public void SetPermissionsView(ModulePermissionView? view) {
+            if (view != null) {
+                _permissionView.Show(view);
+            }
         }
 
-        public void SetDependenciesView(ModuleDependencyView view) {
-            _dependencyView.Show(view);
+        public void SetDependenciesView(ModuleDependencyView? view) {
+            if (view != null) {
+                _dependencyView.Show(view);
+            }
         }
 
-        public void SetSettingsView(IView view) {
+        public void SetSettingsView(IView? view) {
             _settingMessageLabel.Hide();
-            _settingView.Show(view);
-
-            if (view == null) {
+            
+            if (view != null) {
+                _settingView.Show(view);
+            } else {
                 _settingMessageLabel.Show();
             }
         }
@@ -353,7 +358,7 @@ namespace Blish_HUD.Modules.UI.Views {
             _moduleStateLabel.Location   = new Point(_moduleVersionLabel.Right + 8, _moduleNameLabel.Top);
         }
 
-        private void UpdateModuleRunState(string status, Color color, string tooltip = null) {
+        private void UpdateModuleRunState(string status, Color color, string? tooltip = null) {
             _moduleStateLabel.Text      = status;
             _moduleStateLabel.TextColor = color;
             _moduleStateLabel.BasicTooltipText = tooltip;

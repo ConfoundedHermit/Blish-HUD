@@ -13,7 +13,12 @@ namespace Blish_HUD.Modules {
 
         internal class VersionDependenciesConverter : JsonConverter<List<ModuleDependency>> {
 
-            public override void WriteJson(JsonWriter writer, List<ModuleDependency> value, JsonSerializer serializer) {
+            public override void WriteJson(JsonWriter writer, List<ModuleDependency>? value, JsonSerializer serializer) {
+                if (value == null) {
+                    writer.WriteNull();
+                    return;
+                }
+
                 writer.WriteStartObject();
 
                 foreach (var dependency in value) {
@@ -24,7 +29,7 @@ namespace Blish_HUD.Modules {
                 writer.WriteEndObject();
             }
 
-            public override List<ModuleDependency> ReadJson(JsonReader reader, Type objectType, List<ModuleDependency> existingValue, bool hasExistingValue, JsonSerializer serializer) {
+            public override List<ModuleDependency>? ReadJson(JsonReader reader, Type objectType, List<ModuleDependency>? existingValue, bool hasExistingValue, JsonSerializer serializer) {
                 if (reader.TokenType == JsonToken.Null) return null;
 
                 var moduleDependencyList = new List<ModuleDependency>();
@@ -33,7 +38,7 @@ namespace Blish_HUD.Modules {
 
                 foreach (var prop in mdObj) {
                     string dependencyNamespace    = prop.Key;
-                    string dependencyVersionRange = prop.Value.ToString();
+                    string dependencyVersionRange = prop.Value?.ToString() ?? "";
 
                     moduleDependencyList.Add(new ModuleDependency() {
                         Namespace    = dependencyNamespace,
@@ -45,9 +50,9 @@ namespace Blish_HUD.Modules {
             }
         }
 
-        public string Namespace { get; private set; }
+        public string Namespace { get; private set; } = null!;
 
-        public Range VersionRange { get; private set; }
+        public Range VersionRange { get; private set; } = null!;
 
         public bool IsBlishHud => string.Equals(this.Namespace, BLISHHUD_DEPENDENCY_NAME, StringComparison.OrdinalIgnoreCase);
 

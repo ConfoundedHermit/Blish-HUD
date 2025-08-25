@@ -161,7 +161,7 @@ namespace Blish_HUD.Controls {
             protected override void DisposeControl() {
                 if (_assocDropdown != null) {
                     _assocDropdown._lastPanel = null;
-                    _assocDropdown            = null;
+                    _assocDropdown            = null!;
                 }
 
                 Input.Mouse.LeftMouseButtonPressed  -= InputOnMousedOffDropdownPanel;
@@ -190,7 +190,7 @@ namespace Blish_HUD.Controls {
         /// <summary>
         /// Occurs when the <see cref="SelectedItem"/> property has changed.
         /// </summary>
-        public event EventHandler<ValueChangedEventArgs> ValueChanged;
+        public event EventHandler<ValueChangedEventArgs>? ValueChanged;
 
         protected virtual void OnValueChanged(ValueChangedEventArgs e) {
             this.ValueChanged?.Invoke(this, e);
@@ -203,17 +203,17 @@ namespace Blish_HUD.Controls {
         /// </summary>
         public ObservableCollection<string> Items { get; }
 
-        private string _selectedItem;
+        private string? _selectedItem;
         /// <summary>
         /// Gets or sets the currently selected item in the <see cref="Dropdown"/>.
         /// </summary>
-        public string SelectedItem {
+        public string? SelectedItem {
             get => _selectedItem;
             set {
-                string previousValue = _selectedItem;
+                string? previousValue = _selectedItem;
 
                 if (SetProperty(ref _selectedItem, value)) {
-                    OnValueChanged(new ValueChangedEventArgs(previousValue, _selectedItem));
+                    OnValueChanged(new ValueChangedEventArgs(previousValue ?? string.Empty, _selectedItem ?? string.Empty));
                 }
             }
         }
@@ -224,7 +224,7 @@ namespace Blish_HUD.Controls {
         /// </summary>
         public bool PanelOpen => _lastPanel != null;
 
-        private DropdownPanel _lastPanel = null;
+        private DropdownPanel? _lastPanel = null;
         private bool          _hadPanel  = false;
 
         /// <summary>
@@ -296,7 +296,7 @@ namespace Blish_HUD.Controls {
 
             // Draw text
             spriteBatch.DrawStringOnCtrl(this,
-                                         _selectedItem,
+                                         _selectedItem ?? string.Empty,
                                          Content.DefaultFont14,
                                          new Rectangle(5, 0,
                                                        _size.X - 10 - _textureArrow.Width,

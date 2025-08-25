@@ -24,7 +24,7 @@ namespace Blish_HUD.Controls {
         /// <summary>
         /// Fires when <see cref="Keys.Enter"/> is pressed while this <see cref="TextBox"/> is focused (<see cref="TextInputBase.Focused" /> is <c>true</c>).
         /// </summary>
-        public event EventHandler<EventArgs> EnterPressed;
+        public event EventHandler<EventArgs>? EnterPressed;
 
         private HorizontalAlignment _horizontalAlignment = HorizontalAlignment.Left;
         public HorizontalAlignment HorizontalAlignment {

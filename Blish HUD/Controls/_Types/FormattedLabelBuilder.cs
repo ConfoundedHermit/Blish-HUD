@@ -15,7 +15,7 @@ namespace Blish_HUD.Controls {
         public FormattedLabelPartBuilder CreatePart(string text)
             => new FormattedLabelPartBuilder(text);
 
-        public FormattedLabelBuilder CreatePart(string text, Action<FormattedLabelPartBuilder> creationFunc = null) {
+        public FormattedLabelBuilder CreatePart(string text, Action<FormattedLabelPartBuilder>? creationFunc = null) {
             var builder = new FormattedLabelPartBuilder(text);
             creationFunc?.Invoke(builder);
             _parts.Add(builder.Build());

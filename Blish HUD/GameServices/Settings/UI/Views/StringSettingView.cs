@@ -9,8 +9,8 @@ namespace Blish_HUD.Settings.UI.Views {
         private const int TEXTBOX_WIDTH  = 250;
         private const int TEXTBOX_HEIGHT = 27;
 
-        private Label   _displayNameLabel;
-        private TextBox _stringTextbox;
+        private Label   _displayNameLabel = null!;
+        private TextBox _stringTextbox = null!;
 
         public StringSettingView(SettingEntry<string> setting, int definedWidth = -1) : base(setting, definedWidth) { /* NOOP */ }
 

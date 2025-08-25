@@ -30,7 +30,7 @@ namespace Blish_HUD.Controls {
         /// <summary>
         /// The secondary path of the back button.  Format is "Text: NavTitle"
         /// </summary>
-        protected string _navTitle;
+        protected string _navTitle = string.Empty;
         public string NavTitle {
             get => _navTitle;
             set => SetProperty(ref _navTitle, value);

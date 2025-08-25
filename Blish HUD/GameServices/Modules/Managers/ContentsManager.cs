@@ -54,7 +54,7 @@ namespace Blish_HUD.Modules.Managers {
         /// </summary>
         /// <typeparam name="TEffect">A custom effect wrapper (similar to the function of <see cref="BasicEffect"/>).</typeparam>
         /// <param name="effectPath">The path to the compiled shader.</param>
-        public Effect GetEffect<TEffect>(string effectPath) where TEffect : Effect {
+        public Effect? GetEffect<TEffect>(string effectPath) where TEffect : Effect {
             if (GetEffect(effectPath) is TEffect effect) {
                 return effect;
             }
@@ -66,7 +66,7 @@ namespace Blish_HUD.Modules.Managers {
         /// Loads a compiled shader in from a file as an <see cref="Effect"/>.
         /// </summary>
         /// <param name="effectPath">The path to the compiled shader.</param>
-        public Effect GetEffect(string effectPath) {
+        public Effect? GetEffect(string effectPath) {
             long effectDataLength = _reader.GetFileBytes(effectPath, out byte[] effectData);
 
             if (effectDataLength > 0) {
@@ -83,7 +83,7 @@ namespace Blish_HUD.Modules.Managers {
         /// Loads a <see cref="SoundEffect"/> from a file.
         /// </summary>
         /// <param name="soundPath">The path to the sound file.</param>
-        public SoundEffect GetSound(string soundPath) {
+        public SoundEffect? GetSound(string soundPath) {
             using (var soundStream = _reader.GetFileStream(soundPath)) {
                 if (soundStream != null)
                     return SoundEffect.FromStream(soundStream);
@@ -108,7 +108,7 @@ namespace Blish_HUD.Modules.Managers {
         /// Retrieves the stream of a file.
         /// </summary>
         /// <param name="filePath">The path to the file.</param>
-        public Stream GetFileStream(string filePath) {
+        public Stream? GetFileStream(string filePath) {
             return _reader.GetFileStream(filePath);
         }
 

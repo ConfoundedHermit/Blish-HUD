@@ -26,15 +26,17 @@ namespace Blish_HUD.Modules.Managers {
 
         private void PrepareDirectories() {
             foreach (string directoryName in _directoryNames) {
-                string registeredDirectory = DirectoryUtil.RegisterDirectory(directoryName);
+                string? registeredDirectory = DirectoryUtil.RegisterDirectory(directoryName);
 
-                Logger.Info("Directory {directoryName} ({$registeredPath}) was registered.", directoryName, registeredDirectory);
+                Logger.Info("Directory {directoryName} ({$registeredPath}) was registered.", directoryName, registeredDirectory ?? "null");
 
-                _directoryPaths.Add(directoryName, registeredDirectory);
+                if (registeredDirectory != null) {
+                    _directoryPaths.Add(directoryName, registeredDirectory);
+                }
             }
         }
 
-        public string GetFullDirectoryPath(string directoryName) {
+        public string? GetFullDirectoryPath(string directoryName) {
             if (!_directoryNames.Contains(directoryName)) return null;
 
             return _directoryPaths[directoryName];

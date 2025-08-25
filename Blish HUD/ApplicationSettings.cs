@@ -10,9 +10,9 @@ namespace Blish_HUD {
     [Help("Optional launch arguments that modify overlay behavior.")]
     public class ApplicationSettings : BaseCliArguments {
 
-        private static ApplicationSettings _instance;
+        private static ApplicationSettings? _instance;
 
-        public static ApplicationSettings Instance => _instance;
+        public static ApplicationSettings Instance => _instance!;
 
         public bool CliExitEarly => this.UserFacingExceptionThrown || this.HelpInvoked;
 
@@ -70,7 +70,7 @@ namespace Blish_HUD {
             OptionParameter(OPTION_PROCESSNAME, 'p'),
             Help("The name of the process to overlay (without '.exe').")
         ]
-        public string ProcessName { get; private set; }
+        public string? ProcessName { get; private set; }
 
         public const string OPTION_WINDOWNAME = "window";
         /// <summary>
@@ -80,7 +80,7 @@ namespace Blish_HUD {
             OptionParameter(OPTION_WINDOWNAME, 'w'),
             Help("The name of the window to overlay.")
         ]
-        public string WindowName { get; private set; }
+        public string? WindowName { get; private set; }
 
         public const string MUMBLEMAPNAME = "mumble";
         /// <summary>
@@ -90,7 +90,7 @@ namespace Blish_HUD {
             OptionParameter(MUMBLEMAPNAME, 'm'),
             Help("The MumbleLink map name to be used.")
         ]
-        public string MumbleMapName { get; private set; }
+        public string? MumbleMapName { get; private set; }
 
         #endregion
 
@@ -115,7 +115,7 @@ namespace Blish_HUD {
             OptionParameter(OPTION_USERSETTINGSPATH, 's'),
             Help("The path where Blish HUD will save settings and other files.")
         ]
-        public string UserSettingsPath { get; private set; }
+        public string? UserSettingsPath { get; private set; }
 
         public const string OPTION_PROGRAMDATA = "progdata";
         /// <summary>
@@ -125,7 +125,7 @@ namespace Blish_HUD {
             OptionParameter(OPTION_PROGRAMDATA, 'a'),
             Help("The path used by Blish HUD to store non-user data related to the application.")
         ]
-        public string ProgramDataPath { get; private set; }
+        public string? ProgramDataPath { get; private set; }
 
         public const string OPTION_REFPATH = "ref";
         /// <summary>
@@ -179,7 +179,7 @@ namespace Blish_HUD {
             OptionParameter(OPTION_DEBUGMODULEPATH, 'M'),
             Help("The path to a module (*.bhm) that will be force loaded when Blish HUD launches.")
         ]
-        public string DebugModulePath { get; private set; }
+        public string? DebugModulePath { get; private set; }
 
         #endregion
 

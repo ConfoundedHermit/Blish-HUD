@@ -24,20 +24,20 @@ namespace Blish_HUD.GameServices.ArcDps {
         private readonly Dictionary<int, MessageProcessor> _processors = new Dictionary<int, MessageProcessor>();
         private readonly ArcDpsBridgeVersion _arcDpsBridgeVersion;
         private bool _isConnected = false;
-        private NetworkStream _networkStream;
-        private CancellationTokenSource _cancellationTokenSource;
-        private CancellationTokenSource _linkedTokenSource;
+        private NetworkStream _networkStream = null!;
+        private CancellationTokenSource _cancellationTokenSource = null!;
+        private CancellationTokenSource _linkedTokenSource = null!;
         private CancellationToken _linkedToken;
         private bool _disposedValue;
         private CancellationToken _ct;
 
-        public event EventHandler<SocketError> Error;
+        public event EventHandler<SocketError> Error = null!;
 
         public bool IsConnected => _isConnected && (Client?.Connected ?? false);
 
-        public TcpClient Client { get; private set; }
+        public TcpClient Client { get; private set; } = null!;
 
-        public event Action Disconnected;
+        public event Action Disconnected = null!;
 
         public ArcDpsClient(ArcDpsBridgeVersion arcDpsBridgeVersion) {
             this._arcDpsBridgeVersion = arcDpsBridgeVersion;
@@ -199,7 +199,9 @@ namespace Blish_HUD.GameServices.ArcDps {
 
                 // Reconnect if the bridge closes the connection.
                 // Pass on the cancellationToken from the creator of this class
-                this.Initialize((IPEndPoint)this.Client.Client.RemoteEndPoint, this._ct);
+                if (this.Client?.Client?.RemoteEndPoint != null) {
+                    this.Initialize((IPEndPoint)this.Client.Client.RemoteEndPoint, this._ct);
+                }
             } catch (ObjectDisposedException) {
                 // We ignore DisposedExceptions, because it is clear, that the cancellation token already got cancelled
             } catch (OperationCanceledException) {

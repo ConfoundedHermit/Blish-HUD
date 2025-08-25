@@ -22,19 +22,19 @@ namespace Blish_HUD.Controls {
 
         #endregion
 
-        public event EventHandler<CheckChangedEvent> CheckedChanged;
+        public event EventHandler<CheckChangedEvent>? CheckedChanged;
         protected virtual void OnCheckedChanged(CheckChangedEvent e) {
             this.CheckedChanged?.Invoke(this, e);
         }
 
-        private string _text;
+        private string _text = string.Empty;
         public string Text {
             get => _text;
             set => SetProperty(ref _text, value, true);
         }
 
-        private ContextMenuStrip _submenu;
-        public ContextMenuStrip Submenu {
+        private ContextMenuStrip? _submenu;
+        public ContextMenuStrip? Submenu {
             get => _submenu;
             set => SetProperty(ref _submenu, value, true);
         }

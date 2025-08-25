@@ -54,14 +54,14 @@ namespace Blish_HUD.Gw2WebApi.UI.Views {
 
         private (TokenInfo TokenInfo, Account AccountInfo) _loadedDetails;
 
-        private TextBox        _apiKeyTextBox;
-        private Image          _tokenStatusImg;
-        private LoadingSpinner _loadingSpinner;
-        private Label          _tokenStatusLbl;
-        private StandardButton _registerKeyBttn;
-        private FlowPanel      _tokensList;
+        private TextBox        _apiKeyTextBox = null!;
+        private Image          _tokenStatusImg = null!;
+        private LoadingSpinner _loadingSpinner = null!;
+        private Label          _tokenStatusLbl = null!;
+        private StandardButton _registerKeyBttn = null!;
+        private FlowPanel      _tokensList = null!;
 
-        private CancellationTokenSource _tokenTestCanceller;
+        private CancellationTokenSource? _tokenTestCanceller;
 
         private readonly Action<string> _tokenCheckDebounceWrapper;
 
@@ -278,7 +278,10 @@ namespace Blish_HUD.Gw2WebApi.UI.Views {
                 var apiTokenView      = new ApiTokenView();
                 var apiTokenPresenter = new ApiTokenPresenter(apiTokenView, key);
 
-                nPanel.Show(apiTokenView.WithPresenter(apiTokenPresenter));
+                var viewWithPresenter = apiTokenView.WithPresenter(apiTokenPresenter);
+                if (viewWithPresenter != null) {
+                    nPanel.Show(viewWithPresenter);
+                }
             }
         }
 

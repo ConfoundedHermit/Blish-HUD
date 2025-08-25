@@ -6,10 +6,10 @@ namespace Blish_HUD.Modules.Pkgs {
         public override SupportedModulePkgVersion ManifestVersion => SupportedModulePkgVersion.V1;
 
         [JsonProperty("url")]
-        public string Url { get; set; }
+        public string Url { get; set; } = null!;
 
         [JsonProperty("description")]
-        public string Description { get; set; }
+        public string Description { get; set; } = null!;
 
     }
 }

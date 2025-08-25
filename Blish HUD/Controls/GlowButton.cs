@@ -10,12 +10,13 @@ namespace Blish_HUD.Controls {
         private const int BUTTON_WIDTH = 32;
         private const int BUTTON_HEIGHT = 32;
 
-        public event EventHandler<CheckChangedEvent> CheckedChanged;
+        public event EventHandler<CheckChangedEvent>? CheckedChanged;
 
         private void OnChecked(CheckChangedEvent e) {
             CheckedChanged?.Invoke(this, e);
         }
 
+        private SpriteBatchParameters _spriteBatchParameters = null!;
         private bool _checked = false;
         public bool Checked {
             get => _checked;
@@ -32,17 +33,17 @@ namespace Blish_HUD.Controls {
             }
         }
 
-        protected AsyncTexture2D _icon;
-        public AsyncTexture2D Icon {
+        protected AsyncTexture2D? _icon;
+        public AsyncTexture2D? Icon {
             get => _icon;
             set => SetProperty(ref _icon, value);
         }
 
-        protected AsyncTexture2D _activeIcon;
+        protected AsyncTexture2D? _activeIcon;
         /// <summary>
         /// If provided, this icon will be shown when the button is active.  If not provided, a basic glow shader will be used instead.
         /// </summary>
-        public AsyncTexture2D ActiveIcon {
+        public AsyncTexture2D? ActiveIcon {
             get => _activeIcon;
             set => SetProperty(ref _activeIcon, value);
         }
@@ -67,14 +68,17 @@ namespace Blish_HUD.Controls {
             set => SetProperty(ref _toggleGlow, value);
         }
 
-        private static Effect _glowEffect;
+        private static Effect? _glowEffect;
         private Effect GetGlowEffect() {
             _glowEffect ??= GameService.Content.ContentManager.Load<Effect>(@"effects\glow");
-            _glowEffect.Parameters["TextureWidth"].SetValue((float)this.Width);
-            _glowEffect.Parameters["GlowColor"].SetValue(_glowColor.ToVector4());
-            _glowEffect.Parameters["Opacity"].SetValue(this.Opacity);
+            
+            if (_glowEffect != null) {
+                _glowEffect.Parameters["TextureWidth"].SetValue((float)this.Width);
+                _glowEffect.Parameters["GlowColor"].SetValue(_glowColor.ToVector4());
+                _glowEffect.Parameters["Opacity"].SetValue(this.Opacity);
+            }
 
-            return _glowEffect;
+            return _glowEffect!;
         }
 
         public GlowButton() {

@@ -28,13 +28,13 @@ namespace Blish_HUD {
         ///     Triggered upon error of the underlaying socket listener.
         /// </summary>
         [Obsolete("This class only wraps the V2 service, please use that one instead")]
-        public event EventHandler<SocketError> Error;
+        public event EventHandler<SocketError> Error = null!;
 
         /// <summary>
         ///     Provides common fields that multiple modules might want to track
         /// </summary>
         [Obsolete("This class only wraps the V2 service, please use that one instead")]
-        public CommonFields Common { get; private set; }
+        public CommonFields Common { get; private set; } = null!;
 
         /// <summary>
         ///     Indicates if arcdps updated <see cref="HudIsActive" /> in the last second (it should every in-game frame)
@@ -60,7 +60,7 @@ namespace Blish_HUD {
         /// </summary>
         private readonly TimeSpan _leeway = TimeSpan.FromMilliseconds(1000);
 
-        private Stopwatch _stopwatch;
+        private Stopwatch _stopwatch = null!;
         private bool _subscribed;
 
         [Obsolete("This class only wraps the V2 service, please use that one instead")]
@@ -106,7 +106,7 @@ namespace Blish_HUD {
         ///     Holds unprocessed combat data
         /// </summary>
         [Obsolete("This class only wraps the V2 service, please use that one instead")]
-        public event EventHandler<RawCombatEventArgs> RawCombatEvent;
+        public event EventHandler<RawCombatEventArgs> RawCombatEvent = null!;
 
         protected override void Initialize() {
             GameService.ArcDpsV2.Error += Error;
@@ -152,7 +152,7 @@ namespace Blish_HUD {
 
         private static RawCombatEventArgs ConvertFrom(CombatCallback combatEvent, RawCombatEventArgs.CombatEventType combatEventType) {
 
-            Ev ev = null;
+            Ev? ev = null;
 
             if (combatEvent.Event.Time != default) {
                 ev = new Ev(
@@ -202,7 +202,7 @@ namespace Blish_HUD {
                         combatEvent.Destination.Team);
 
             return new RawCombatEventArgs(new ArcDps.Models.CombatEvent(
-                        ev,
+                        ev!,
                         source,
                         destination,
                         combatEvent.SkillName,

@@ -20,9 +20,9 @@ namespace Blish_HUD.Overlay.UI.Presenters {
 
         public void DoUnload() { /* NOOP */ }
 
-        public string ConnectionName    => _connectionName.Invoke();
-        public bool   Connected         => _connected.Invoke();
-        public string ConnectionDetails => _connectionDetails.Invoke();
+        public string? ConnectionName    => _connectionName.Invoke();
+        public bool    Connected         => _connected.Invoke();
+        public string? ConnectionDetails => _connectionDetails.Invoke();
 
     }
 }

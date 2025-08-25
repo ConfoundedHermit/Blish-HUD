@@ -11,7 +11,7 @@ namespace Blish_HUD.Controls {
 
         private const int CHECKBOX_SIZE = 32;
 
-        public event EventHandler<CheckChangedEvent> CheckedChanged;
+        public event EventHandler<CheckChangedEvent> CheckedChanged = delegate { };
 
         protected virtual void OnCheckedChanged(CheckChangedEvent e) {
             this.CheckedChanged?.Invoke(this, e);

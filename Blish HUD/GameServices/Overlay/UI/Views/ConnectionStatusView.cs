@@ -9,8 +9,8 @@ namespace Blish_HUD.Overlay.UI.Views {
 
         private const int UPDATE_INTERVAL = 1500;
 
-        private Label _connectionNameLabel;
-        private Image _connectionStatusImage;
+        private Label _connectionNameLabel = null!;
+        private Image _connectionStatusImage = null!;
 
         private readonly Timer _updateTimer;
 
@@ -20,13 +20,20 @@ namespace Blish_HUD.Overlay.UI.Views {
             _updateTimer.Start();
         }
 
-        private void UiUpdateTimerElapsed(object sender, ElapsedEventArgs e) => OnPresenterAssigned(this.Presenter);
+        private void UiUpdateTimerElapsed(object sender, ElapsedEventArgs e) {
+            if (this.Presenter != null) {
+                OnPresenterAssigned(this.Presenter);
+            }
+        }
 
         protected override void Build(Container buildPanel) {
+            var primaryTexture = GameService.Content.GetTexture(@"157330-cantint");
+            var fallbackTexture = GameService.Content.GetTexture("common/button-states");
+            
             _connectionStatusImage = new Image() {
                 Size     = new Point(16, 16),
                 Location = new Point(2,  2),
-                Texture  = GameService.Content.GetTexture(@"157330-cantint"),
+                Texture  = (primaryTexture ?? fallbackTexture ?? ContentService.Textures.Pixel)!,
                 Parent   = buildPanel
             };
 
@@ -43,17 +50,13 @@ namespace Blish_HUD.Overlay.UI.Views {
         protected override void OnPresenterAssigned(IConnectionStatusPresenter presenter) {
             if (_connectionNameLabel == null || _connectionStatusImage == null) return;
 
-            _connectionNameLabel.Text = presenter == null
-                                            ? string.Empty
-                                            : presenter.ConnectionName;
+            _connectionNameLabel.Text = presenter?.ConnectionName ?? string.Empty;
 
             _connectionStatusImage.Tint = !(presenter is { Connected: true })
                                               ? Color.White
                                               : Color.LightGreen;
 
-            _connectionStatusImage.BasicTooltipText = presenter == null
-                                                          ? string.Empty
-                                                          : presenter.ConnectionDetails;
+            _connectionStatusImage.BasicTooltipText = presenter?.ConnectionDetails ?? string.Empty;
 
             _connectionNameLabel.BasicTooltipText = _connectionStatusImage.BasicTooltipText;
         }

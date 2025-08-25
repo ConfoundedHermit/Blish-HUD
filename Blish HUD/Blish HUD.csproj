@@ -5,6 +5,7 @@
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <OutputType>WinExe</OutputType>
     <LangVersion>8</LangVersion>
+    <Nullable>enable</Nullable>
     <RootNamespace>Blish_HUD</RootNamespace>
     <ApplicationIcon>blishraster2_0dw_icon.ico</ApplicationIcon>
     <ApplicationManifest>app.manifest</ApplicationManifest>

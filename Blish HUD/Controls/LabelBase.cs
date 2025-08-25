@@ -7,8 +7,8 @@ using MonoGame.Extended.BitmapFonts;
 namespace Blish_HUD.Controls {
     public abstract class LabelBase : Control {
 
-        private   CachedStringRender  _labelRender;
-        protected string              _text;
+        private   CachedStringRender  _labelRender = null!;
+        protected string              _text = string.Empty;
         protected BitmapFont          _font;
         protected bool                _cacheLabel          = false;
         protected Color               _textColor           = Color.White;
@@ -63,7 +63,7 @@ namespace Blish_HUD.Controls {
             }
         }
 
-        protected Size2 GetTextDimensions(string text = null) {
+        protected Size2 GetTextDimensions(string? text = null) {
             text = text ?? _text;
 
             if (!_autoSizeWidth && _wrapText) {
@@ -73,7 +73,7 @@ namespace Blish_HUD.Controls {
             return _font.MeasureString(text ?? _text);
         }
         
-        protected void DrawText(SpriteBatch spriteBatch, Rectangle bounds, string text = null) {
+        protected void DrawText(SpriteBatch spriteBatch, Rectangle bounds, string? text = null) {
             text = text ?? _text;
 
             if (_font == null || string.IsNullOrEmpty(text)) return;

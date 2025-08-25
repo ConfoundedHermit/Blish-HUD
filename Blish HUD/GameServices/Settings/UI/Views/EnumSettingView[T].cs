@@ -16,10 +16,10 @@ namespace Blish_HUD.Settings.UI.Views {
         private const int DROPDOWN_WIDTH  = 250;
         private const int DROPDOWN_HEIGHT = 27;
 
-        private Label    _displayNameLabel;
-        private Dropdown _enumDropdown;
+        private Label    _displayNameLabel = null!;
+        private Dropdown _enumDropdown = null!;
 
-        private TEnum[] _enumValues;
+        private TEnum[] _enumValues = null!;
 
         public EnumSettingView(SettingEntry<TEnum> setting, int definedWidth = -1) : base(setting, definedWidth) { /* NOOP */ }
 

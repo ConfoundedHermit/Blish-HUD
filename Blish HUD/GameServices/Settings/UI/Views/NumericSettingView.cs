@@ -11,8 +11,8 @@ namespace Blish_HUD.Settings.UI.Views {
         private const int TRACKBAR_WIDTH  = 277;
         private const int TRACKBAR_HEIGHT = 16;
         
-        protected Label    _displayNameLabel;
-        protected TrackBar _valueTrackBar;
+        protected Label    _displayNameLabel = null!;
+        protected TrackBar _valueTrackBar = null!;
 
         protected NumericSettingView(SettingEntry<T> setting, int definedWidth = -1) : base(setting, definedWidth) { /* NOOP */ }
 

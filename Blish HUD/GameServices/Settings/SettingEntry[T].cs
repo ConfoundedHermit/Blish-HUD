@@ -5,7 +5,7 @@ namespace Blish_HUD.Settings {
 
     public sealed class SettingEntry<T> : SettingEntry {
 
-        public event EventHandler<ValueChangedEventArgs<T>> SettingChanged;
+        public event EventHandler<ValueChangedEventArgs<T>>? SettingChanged;
 
         private void OnSettingChanged(ValueChangedEventArgs<T> e) {
             GameService.Settings.Save();
@@ -15,7 +15,7 @@ namespace Blish_HUD.Settings {
             this.SettingChanged?.Invoke(this, e);
         }
 
-        private T _value;
+        private T _value = default(T)!;
 
         [JsonProperty(SETTINGVALUE_KEY), JsonRequired]
         public T Value {
@@ -34,11 +34,13 @@ namespace Blish_HUD.Settings {
             return typeof(T);
         }
 
-        protected override object GetSettingValue() {
+        protected override object? GetSettingValue() {
             return _value;
         }
 
-        public SettingEntry() { /* NOOP */ }
+        public SettingEntry() { 
+            _value = default(T)!;
+        }
 
         /// <summary>
         /// Creates a new <see cref="SettingEntry"/> of type <see cref="T"/>.

@@ -11,7 +11,7 @@ namespace Blish_HUD.Graphics {
         private static readonly HashSet<SharedEffect> _loadedEffects = new HashSet<SharedEffect>();
 
         internal static void UpdateEffects(GameTime gameTime) {
-            SharedEffect[] loadedEffects = null;
+            SharedEffect[] loadedEffects;
 
             lock (_loadedEffects) {
                 loadedEffects = _loadedEffects.ToArray();

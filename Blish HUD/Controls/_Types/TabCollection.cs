@@ -42,7 +42,7 @@ namespace Blish_HUD.Controls {
         public void Clear() {
             _tabs.Clear();
 
-            _owner.SelectedTab = null;
+            _owner.SelectedTab = null!;
         }
 
         public bool Contains(Tab item) {
@@ -67,7 +67,7 @@ namespace Blish_HUD.Controls {
         /// <summary>
         /// Returns the <see cref="Tab"/> at the provided index based on <see cref="Tab.OrderPriority"/>.
         /// </summary>
-        public Tab FromIndex(int tabIndex) {
+        public Tab? FromIndex(int tabIndex) {
             if (tabIndex >= 0 && tabIndex < _tabs.Count) {
                 return _tabs[tabIndex];
             }

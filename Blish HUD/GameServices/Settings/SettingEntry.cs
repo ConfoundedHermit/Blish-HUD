@@ -16,26 +16,30 @@ namespace Blish_HUD.Settings {
 
             private static readonly Logger Logger = Logger.GetLogger<SettingEntryConverter>();
 
-            public override void WriteJson(JsonWriter writer, SettingEntry value, JsonSerializer serializer) {
+            public override void WriteJson(JsonWriter writer, SettingEntry? value, JsonSerializer serializer) {
+                if (value == null) {
+                    writer.WriteNull();
+                    return;
+                }
                 var entryObject = new JObject();
 
                 var entryType = value.GetSettingType();
 
                 entryObject.Add(SETTINGTYPE_KEY,  $"{entryType.FullName}, {entryType.Assembly.GetName().Name}");
                 entryObject.Add(SETTINGNAME_KEY,  value.EntryKey);
-                entryObject.Add(SETTINGVALUE_KEY, JToken.FromObject(value.GetSettingValue(), serializer));
+                entryObject.Add(SETTINGVALUE_KEY, JToken.FromObject(value.GetSettingValue() ?? new object(), serializer));
 
                 entryObject.WriteTo(writer);
             }
 
-            public override SettingEntry ReadJson(JsonReader reader, Type objectType, SettingEntry existingValue, bool hasExistingValue, JsonSerializer serializer) {
+            public override SettingEntry? ReadJson(JsonReader reader, Type objectType, SettingEntry? existingValue, bool hasExistingValue, JsonSerializer serializer) {
                 var jObj = JObject.Load(reader);
 
-                string entryTypeString = jObj[SETTINGTYPE_KEY].Value<string>();
+                string? entryTypeString = jObj[SETTINGTYPE_KEY]?.Value<string>();
                 var    entryType       = Type.GetType(entryTypeString);
 
                 if (entryType == null) {
-                    Logger.Warn("Failed to load setting of missing type '{settingDefinedType}'.", entryTypeString);
+                    Logger.Warn("Failed to load setting of missing type '{settingDefinedType}'.", entryTypeString ?? "null");
 
                     return null;
                 }
@@ -50,30 +54,30 @@ namespace Blish_HUD.Settings {
         }
 
         [JsonIgnore]
-        public Func<string> GetDescriptionFunc { get; set; } = () => null;
+        public Func<string?> GetDescriptionFunc { get; set; } = () => null;
 
         [JsonIgnore]
-        public Func<string> GetDisplayNameFunc { get; set; } = () => null;
+        public Func<string?> GetDisplayNameFunc { get; set; } = () => null;
 
 
         [JsonIgnore]
-        public string Description => this.GetDescriptionFunc();
+        public string? Description => this.GetDescriptionFunc();
 
         [JsonIgnore]
-        public string DisplayName => this.GetDisplayNameFunc();
+        public string? DisplayName => this.GetDisplayNameFunc();
 
         /// <summary>
         /// The unique key used to identify the <see cref="SettingEntry"/> in the <see cref="SettingCollection"/>.
         /// </summary>
         [JsonProperty(SETTINGNAME_KEY)]
-        public string EntryKey { get; protected set; }
+        public string EntryKey { get; protected set; } = string.Empty;
 
         [JsonIgnore]
         public bool SessionDefined { get; internal set; }
 
         protected abstract Type GetSettingType();
 
-        protected abstract object GetSettingValue();
+        protected abstract object? GetSettingValue();
 
         [JsonIgnore]
         public bool IsNull => this.GetSettingValue() == null;
@@ -83,9 +87,9 @@ namespace Blish_HUD.Settings {
 
         #region Property Binding
 
-        public event PropertyChangedEventHandler PropertyChanged;
+        public event PropertyChangedEventHandler? PropertyChanged;
 
-        protected void OnPropertyChanged([CallerMemberName] string propertyName = null) {
+        protected void OnPropertyChanged([CallerMemberName] string? propertyName = null) {
             this.PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
         }
 

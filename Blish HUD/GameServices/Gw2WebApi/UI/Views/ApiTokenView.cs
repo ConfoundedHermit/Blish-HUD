@@ -21,36 +21,36 @@ namespace Blish_HUD.Gw2WebApi.UI.Views {
             { "23", (Strings.GameServices.Gw2ApiService.TokenRegion_Spain,        AsyncTexture2D.FromAssetId(784344)) }
         };
 
-        public event EventHandler<EventArgs> DeleteClicked;
+        public event EventHandler<EventArgs>? DeleteClicked;
 
-        private Label _accountNameLbl;
-        private Label _tokenKeyLbl;
-        private Label _tokenNameLbl;
-        private Label _failedTokenLbl;
+        private Label _accountNameLbl = null!;
+        private Label _tokenKeyLbl = null!;
+        private Label _tokenNameLbl = null!;
+        private Label _failedTokenLbl = null!;
 
-        private Image _regionFlagImg;
-        private Image _accountCommanderImg;
+        private Image _regionFlagImg = null!;
+        private Image _accountCommanderImg = null!;
 
-        private GlowButton _deleteBttn;
+        private GlowButton _deleteBttn = null!;
 
         private bool _errored;
         private bool _active;
 
-        private TokenInfo                _tokenInfo;
-        private Account                  _accountInfo;
-        private IApiV2ObjectList<string> _characterList;
+        private TokenInfo?                _tokenInfo;
+        private Account?                  _accountInfo;
+        private IApiV2ObjectList<string>? _characterList;
 
-        public TokenInfo TokenInfo {
+        public TokenInfo? TokenInfo {
             get => _tokenInfo;
             set => SetTokenInfo(value);
         }
 
-        public Account AccountInfo {
+        public Account? AccountInfo {
             get => _accountInfo;
             set => SetAccountInfo(value);
         }
 
-        public IApiV2ObjectList<string> CharacterList {
+        public IApiV2ObjectList<string>? CharacterList {
             get => _characterList;
             set => SetCharacterList(value);
         }
@@ -80,33 +80,39 @@ namespace Blish_HUD.Gw2WebApi.UI.Views {
             set => SetActive(value);
         }
 
-        public void SetTokenInfo(TokenInfo tokenInfo) {
+        public void SetTokenInfo(TokenInfo? tokenInfo) {
             _tokenInfo = tokenInfo;
 
-            _tokenNameLbl.Text             = _tokenInfo.Name;
-            _tokenNameLbl.BasicTooltipText = _tokenInfo.Name;
+            if (_tokenInfo != null) {
+                _tokenNameLbl.Text             = _tokenInfo.Name;
+                _tokenNameLbl.BasicTooltipText = _tokenInfo.Name;
+            }
         }
 
-        public void SetAccountInfo(Account accountInfo) {
+        public void SetAccountInfo(Account? accountInfo) {
             _accountInfo = accountInfo;
 
-            _accountNameLbl.Text = _accountInfo.Name;
+            if (_accountInfo != null) {
+                _accountNameLbl.Text = _accountInfo.Name;
 
-            // Set flag for region
-            if (_worldRegionFlags.TryGetValue(_accountInfo.World.ToString().Substring(0, 2), out var regionInfo)) {
-                _regionFlagImg.Texture          = regionInfo.Flag;
-                _regionFlagImg.BasicTooltipText = regionInfo.Region;
+                // Set flag for region
+                if (_worldRegionFlags.TryGetValue(_accountInfo.World.ToString().Substring(0, 2), out var regionInfo)) {
+                    _regionFlagImg.Texture          = regionInfo.Flag;
+                    _regionFlagImg.BasicTooltipText = regionInfo.Region;
+                }
+
+                // Set commander status
+                _accountCommanderImg.Visible = _accountInfo.Commander;
             }
-
-            // Set commander status
-            _accountCommanderImg.Visible = _accountInfo.Commander;
         }
 
-        public void SetCharacterList(IApiV2ObjectList<string> characterList) {
+        public void SetCharacterList(IApiV2ObjectList<string>? characterList) {
             _characterList = characterList;
 
-            _tokenKeyLbl.Text             = Strings.GameServices.Gw2ApiService.AccountInfo_Character.ToQuantity(_characterList.Count);
-            _tokenKeyLbl.BasicTooltipText = string.Join("\n", _characterList);
+            if (_characterList != null) {
+                _tokenKeyLbl.Text             = Strings.GameServices.Gw2ApiService.AccountInfo_Character.ToQuantity(_characterList.Count);
+                _tokenKeyLbl.BasicTooltipText = string.Join("\n", _characterList);
+            }
         }
 
         private void SetActive(bool active) {

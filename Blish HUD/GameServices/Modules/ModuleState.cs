@@ -8,11 +8,11 @@ namespace Blish_HUD.Modules {
 
         public bool Enabled { get; set; }
 
-        public TokenPermission[] UserEnabledPermissions { get; set; }
+        public TokenPermission[] UserEnabledPermissions { get; set; } = null!;
 
         public bool IgnoreDependencies { get; set; }
 
-        public SettingCollection Settings { get; set; }
+        public SettingCollection Settings { get; set; } = null!;
 
     }
 

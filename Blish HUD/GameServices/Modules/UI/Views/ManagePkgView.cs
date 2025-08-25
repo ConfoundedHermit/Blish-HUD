@@ -23,8 +23,8 @@ namespace Blish_HUD.Modules.UI.Views {
             CurrentVersion
         }
 
-        public event EventHandler<ValueEventArgs<Version>> VersionSelected;
-        public event EventHandler<EventArgs>               ActionClicked;
+        public event EventHandler<ValueEventArgs<Version>>? VersionSelected;
+        public event EventHandler<EventArgs>?               ActionClicked;
 
         public string PackageActionText {
             get => _actionButton?.Text ?? throw new ViewNotBuiltException();
@@ -58,7 +58,7 @@ namespace Blish_HUD.Modules.UI.Views {
             set => (_nameLabel ?? throw new ViewNotBuiltException()).BasicTooltipText = value;
         }
 
-        private ModuleContributor _moduleContributor;
+        private ModuleContributor _moduleContributor = null!;
 
         public ModuleContributor ModuleContributor {
             get =>
@@ -84,7 +84,7 @@ namespace Blish_HUD.Modules.UI.Views {
             }
         }
 
-        private IEnumerable<Version> _moduleVersions;
+        private IEnumerable<Version> _moduleVersions = null!;
 
         public IEnumerable<Version> ModuleVersions {
             get =>
@@ -101,7 +101,7 @@ namespace Blish_HUD.Modules.UI.Views {
             }
         }
 
-        private Version _selectedVersion;
+        private Version _selectedVersion = null!;
 
         public Version SelectedVersion {
             get =>
@@ -148,13 +148,13 @@ namespace Blish_HUD.Modules.UI.Views {
             }
         }
 
-        private Label          _nameLabel;
-        private Label          _previewLabel;
-        private Label          _authLabel;
-        private Label          _descLabel;
-        private Image          _statusImage;
-        private Dropdown       _versionDropdown;
-        private StandardButton _actionButton;
+        private Label          _nameLabel = null!;
+        private Label          _previewLabel = null!;
+        private Label          _authLabel = null!;
+        private Label          _descLabel = null!;
+        private Image          _statusImage = null!;
+        private Dropdown       _versionDropdown = null!;
+        private StandardButton _actionButton = null!;
 
         public ManagePkgView() { /* NOOP */ }
 

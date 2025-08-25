@@ -39,9 +39,9 @@ namespace Blish_HUD.Controls {
         /// <param name="view">A function which returns an <see cref="IView"/> to be displayed when the tab is clicked.</param>
         /// <param name="name">The name of the tab to be displayed as a tooltip.</param>
         /// <param name="priority">The order used to determine where in order the tab will be placed.  Tabs are sorted by descending OrderPriority.</param>
-        public Tab(AsyncTexture2D icon, Func<IView> view, string name = null, int? priority = null) {
+        public Tab(AsyncTexture2D icon, Func<IView> view, string? name = null, int? priority = null) {
             this.Icon          = icon;
-            this.Name          = name;
+            this.Name          = name ?? string.Empty;
             this.OrderPriority = priority ?? 0;
             this.View          = view;
         }

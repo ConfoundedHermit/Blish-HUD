@@ -21,7 +21,7 @@ namespace Blish_HUD {
         /// <summary>
         /// Fires when the availability status changes.
         /// </summary>
-        public event EventHandler<ValueEventArgs<bool>> IsAvailableChanged;
+        public event EventHandler<ValueEventArgs<bool>>? IsAvailableChanged;
 
         private void OnIsAvailableChanged(ValueEventArgs<bool> e) => IsAvailableChanged?.Invoke(this, e);
 
@@ -34,7 +34,7 @@ namespace Blish_HUD {
         #endregion
 
         /// <inheritdoc cref="Gw2MumbleClient"/>
-        public IGw2MumbleClient RawClient { get; private set; }
+        public IGw2MumbleClient RawClient { get; private set; } = null!;
 
         public string CurrentMumbleMapName { get; private set; } = DEFAULT_MUMBLEMAPNAME;
 
@@ -123,7 +123,7 @@ namespace Blish_HUD {
                     && GameService.GameIntegration.Gw2Instance.Gw2IsRunning
                     && this.TimeSinceTick.TotalSeconds < 0.5) {
 
-                    BlishHud.Instance.SkipDraw();
+            BlishHud.Instance!.SkipDraw();
                 }
             }
         }
@@ -151,14 +151,14 @@ namespace Blish_HUD {
                 DEFAULT_MUMBLEMAPNAME;
         }
 
-        private string GetLinkNameFromCommandLine() {
-            string commandLine = GameService.GameIntegration?.Gw2Instance?.CommandLine;
+        private string? GetLinkNameFromCommandLine() {
+            string? commandLine = GameService.GameIntegration?.Gw2Instance?.CommandLine;
 
             if (string.IsNullOrWhiteSpace(commandLine)) {
                 return null;
             }
 
-            Match m = MUMBLE_LINK_REGEX.Match(commandLine);
+            Match m = MUMBLE_LINK_REGEX.Match(commandLine!);
             if (m.Success) {
                 return m.Groups[1].Value;
             } else {

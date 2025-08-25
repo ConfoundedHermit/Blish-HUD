@@ -6,17 +6,17 @@ using Blish_HUD.Settings.UI.Presenters;
 namespace Blish_HUD.Settings.UI.Views {
     public abstract class SettingView<TSetting> : View {
 
-        public event EventHandler<ValueEventArgs<TSetting>> ValueChanged;
+        public event EventHandler<ValueEventArgs<TSetting>> ValueChanged = null!;
 
         protected void OnValueChanged(ValueEventArgs<TSetting> e) => this.ValueChanged?.Invoke(this, e);
 
         private readonly int _definedWidth;
 
-        private string   _displayName;
-        private string   _description;
+        private string   _displayName = null!;
+        private string   _description = null!;
         private TSetting _value;
 
-        public Func<TSetting, SettingValidationResult> ValidationFunc { get; set; }
+        public Func<TSetting, SettingValidationResult> ValidationFunc { get; set; } = null!;
 
         public string DisplayName {
             get => _displayName;

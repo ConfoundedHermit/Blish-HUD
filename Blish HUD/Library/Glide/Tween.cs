@@ -10,8 +10,8 @@ namespace Glide {
         }
 
         #region Callbacks
-        private Func<float, float> ease;
-        private Action begin, update, complete, repeat;
+        private Func<float, float> ease = null!;
+        private Action begin = null!, update = null!, complete = null!, repeat = null!;
         #endregion
 
         #region Timing
@@ -323,10 +323,10 @@ namespace Glide {
                     continue;
 
                 varHash.Remove(properties[i]);
-                vars[index] = null;
-                lerpers[index] = null;
-                start[index] = null;
-                end[index] = null;
+                vars[index] = null!;
+                lerpers[index] = null!;
+                start[index] = null!;
+                end[index] = null!;
 
                 canceled++;
             }
@@ -347,7 +347,7 @@ namespace Glide {
         /// </summary>
         public void CancelAndComplete() {
             time = Time = Duration;
-            update = null;
+            update = null!;
             Remover.Remove(this);
         }
 

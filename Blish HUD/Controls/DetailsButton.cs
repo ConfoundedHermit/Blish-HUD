@@ -67,7 +67,7 @@ namespace Blish_HUD.Controls {
 
         #region Textures
 
-        private readonly AsyncTexture2D _textureFillCrest              = Content.GetTexture(@"controls/detailsbutton/605004");
+        private readonly AsyncTexture2D? _textureFillCrest              = Content.GetTexture(@"controls/detailsbutton/605004");
         private readonly AsyncTexture2D _textureVignette               = AsyncTexture2D.FromAssetId(605003);
         private readonly AsyncTexture2D _textureCornerButton           = AsyncTexture2D.FromAssetId(605011);
         private readonly AsyncTexture2D _textureBottomSectionSeparator = AsyncTexture2D.FromAssetId(157218);
@@ -76,9 +76,9 @@ namespace Blish_HUD.Controls {
 
         private DetailsDisplayMode   _displayMode = DetailsDisplayMode.Standard;
         private DetailsIconSize      _iconSize    = DetailsIconSize.Large;
-        private string               _text;
-        private string               _iconDetails;
-        private AsyncTexture2D       _icon;
+        private string               _text = string.Empty;
+        private string               _iconDetails = string.Empty;
+        private AsyncTexture2D?      _icon;
         private bool                 _showVignette = true;
         private int                  _maxFill;
         private int                  _currentFill;
@@ -117,7 +117,7 @@ namespace Blish_HUD.Controls {
         /// <summary>
         /// The icon to display on the left side of the <see cref="DetailsButton"/>.
         /// </summary>
-        public AsyncTexture2D Icon {
+        public AsyncTexture2D? Icon {
             get => _icon;
             set => SetProperty(ref _icon, value);
         }
@@ -221,7 +221,7 @@ namespace Blish_HUD.Controls {
             set => SetProperty(ref _bottomSectionHeight, value, true);
         }
 
-        private          Glide.Tween              _animFill;
+        private          Glide.Tween?             _animFill;
         private readonly ScrollingHighlightEffect _scrollEffect;
 
         public DetailsButton() {
@@ -341,7 +341,7 @@ namespace Blish_HUD.Controls {
                     spriteBatch.DrawOnCtrl(this, ContentService.Textures.Pixel, new Rectangle(0, (int)(iconSize - fillSpace), iconSize, (int)(fillSpace)), _fillColor * 0.3f);
 
                     // Only show the fill crest if we aren't full
-                    if (fillPercent < 0.99)
+                    if (fillPercent < 0.99 && _textureFillCrest != null)
                         spriteBatch.DrawOnCtrl(this, _textureFillCrest,  new Rectangle(0, iconSize - (int) (fillSpace), iconSize, (int)fillSpace));
                 }
 

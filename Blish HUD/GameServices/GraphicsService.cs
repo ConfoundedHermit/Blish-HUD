@@ -163,22 +163,22 @@ namespace Blish_HUD {
 
         public World World => _world;
 
-        public GraphicsDeviceManager GraphicsDeviceManager => BlishHud.Instance.ActiveGraphicsDeviceManager;
+        public GraphicsDeviceManager GraphicsDeviceManager => BlishHud.Instance!.ActiveGraphicsDeviceManager;
 
         [Obsolete("To ensure exclusive use of the graphics device use LendGraphicsDevice or LendGraphicsDeviceContext.", true)]
-        public GraphicsDevice GraphicsDevice => BlishHud.Instance.ActiveGraphicsDeviceManager.GraphicsDevice;
+        public GraphicsDevice GraphicsDevice => BlishHud.Instance!.ActiveGraphicsDeviceManager.GraphicsDevice;
 
-        public int WindowWidth  => BlishHud.Instance.ActiveGraphicsDeviceManager.GraphicsDevice.Viewport.Width;
-        public int WindowHeight => BlishHud.Instance.ActiveGraphicsDeviceManager.GraphicsDevice.Viewport.Height;
+        public int WindowWidth  => BlishHud.Instance!.ActiveGraphicsDeviceManager.GraphicsDevice.Viewport.Width;
+        public int WindowHeight => BlishHud.Instance!.ActiveGraphicsDeviceManager.GraphicsDevice.Viewport.Height;
 
         public  float AspectRatio { get; private set; }
 
-        public SettingCollection GraphicsSettings { get; private set; }
+        public SettingCollection GraphicsSettings { get; private set; } = null!;
 
-        private SettingEntry<FramerateMethod> _frameLimiterSetting;
-        private SettingEntry<bool>            _smoothCharacterPositionSetting;
-        private SettingEntry<DpiMethod>       _dpiScalingMethodSetting;
-        private SettingEntry<ManualUISize>    _UISizeSetting;
+        private SettingEntry<FramerateMethod> _frameLimiterSetting = null!;
+        private SettingEntry<bool>            _smoothCharacterPositionSetting = null!;
+        private SettingEntry<DpiMethod>       _dpiScalingMethodSetting = null!;
+        private SettingEntry<ManualUISize>    _UISizeSetting = null!;
 
         public FramerateMethod FrameLimiter {
             get => ApplicationSettings.Instance.TargetFramerate > 0
@@ -202,14 +202,14 @@ namespace Blish_HUD {
         }
 
         public Point Resolution {
-            get => new Point(BlishHud.Instance.ActiveGraphicsDeviceManager.PreferredBackBufferWidth, BlishHud.Instance.ActiveGraphicsDeviceManager.PreferredBackBufferHeight);
+            get => new Point(BlishHud.Instance!.ActiveGraphicsDeviceManager.PreferredBackBufferWidth, BlishHud.Instance!.ActiveGraphicsDeviceManager.PreferredBackBufferHeight);
             set {
                 if (!this.Resolution.Equals(value)) {
                     try {
                         using (var ctx = GameService.Graphics.LendGraphicsDeviceContext()) {
-                            BlishHud.Instance.ActiveGraphicsDeviceManager.PreferredBackBufferWidth  = value.X;
-                            BlishHud.Instance.ActiveGraphicsDeviceManager.PreferredBackBufferHeight = value.Y;
-                            BlishHud.Instance.ActiveGraphicsDeviceManager.ApplyChanges();
+                            BlishHud.Instance!.ActiveGraphicsDeviceManager.PreferredBackBufferWidth  = value.X;
+                            BlishHud.Instance!.ActiveGraphicsDeviceManager.PreferredBackBufferHeight = value.Y;
+                            BlishHud.Instance!.ActiveGraphicsDeviceManager.ApplyChanges();
                         }
                         
                         // Exception would be from the code above, but don't update our
@@ -318,7 +318,7 @@ namespace Blish_HUD {
             };
 
             if (frameRateLookup.TryGetValue(e.NewValue, out var settings)) {
-                BlishHud.Instance.IsFixedTimeStep = settings.IsFixedTimeStep;
+                BlishHud.Instance!.IsFixedTimeStep = settings.IsFixedTimeStep;
                 BlishHud.Instance.TargetElapsedTime = settings.TargetElapsedTime;
                 if (settings.VSync != currentVsync) {
                     GraphicsDeviceManager.SynchronizeWithVerticalRetrace = settings.VSync;
@@ -357,7 +357,7 @@ namespace Blish_HUD {
                 Monitor.Exit(_lendLockNext);
             }
 
-            return BlishHud.Instance.ActiveGraphicsDeviceManager.GraphicsDevice;
+            return BlishHud.Instance!.ActiveGraphicsDeviceManager.GraphicsDevice;
         }
 
         /// <summary>
@@ -439,7 +439,7 @@ namespace Blish_HUD {
 
             GameService.Debug.StartTimeFunc("UI Elements");
 
-            if (this.SpriteScreen != null && this.SpriteScreen.Visible) {
+            if (this.SpriteScreen.Visible) {
                 this.SpriteScreen.Draw(spriteBatch, this.SpriteScreen.LocalBounds, this.SpriteScreen.LocalBounds);
             }
 
@@ -460,8 +460,8 @@ namespace Blish_HUD {
 
         private void Rescale() {
             Point backbufferSize = new Point(
-                BlishHud.Instance.ActiveGraphicsDeviceManager.PreferredBackBufferWidth,
-                BlishHud.Instance.ActiveGraphicsDeviceManager.PreferredBackBufferHeight);
+                BlishHud.Instance!.ActiveGraphicsDeviceManager.PreferredBackBufferWidth,
+                BlishHud.Instance!.ActiveGraphicsDeviceManager.PreferredBackBufferHeight);
 
             int integerDpi = (int)GetDpiScaleRatio();
             Point scaledMinimumGameResolution = MinimumUnscaledGameResolution * new Point(integerDpi, integerDpi);

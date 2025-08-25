@@ -9,12 +9,12 @@ using Microsoft.Xna.Framework;
 namespace Blish_HUD.Modules.UI.Views {
     public class ModulePermissionView : TitledDetailView {
 
-        public event EventHandler<KeyedValueChangedEventArgs<TokenPermission, bool>> PermissionStateChanged;
+        public event EventHandler<KeyedValueChangedEventArgs<TokenPermission, bool>>? PermissionStateChanged;
 
-        private FlowPanel _permissionFlowPanel;
-        private Label     _messageLabel;
+        private FlowPanel? _permissionFlowPanel;
+        private Label?     _messageLabel;
 
-        private bool[] _checkboxStates;
+        private bool[]? _checkboxStates;
 
         private bool _editable;
 
@@ -64,8 +64,8 @@ namespace Blish_HUD.Modules.UI.Views {
         }
 
         public void SetPermissions(IEnumerable<(TokenPermission Permission, bool Optional, string Description, bool Set)> permissions) {
-            _permissionFlowPanel.ClearChildren();
-            _permissionFlowPanel.Hide();
+            _permissionFlowPanel?.ClearChildren();
+            _permissionFlowPanel?.Hide();
 
             _checkboxStates = permissions.Select(permission => permission.Optional).ToArray();
 
@@ -85,10 +85,14 @@ namespace Blish_HUD.Modules.UI.Views {
             }
 
             // Show "No permissions requested" if there are none
-            _messageLabel.Visible = !(_permissionFlowPanel.Visible = _permissionFlowPanel.Children.Count > 0);
+            if (_messageLabel != null && _permissionFlowPanel != null) {
+                _messageLabel.Visible = !(_permissionFlowPanel.Visible = _permissionFlowPanel.Children.Count > 0);
+            }
         }
 
         private void ResetCheckboxStates() {
+            if (_permissionFlowPanel == null || _checkboxStates == null) return;
+            
             var checkboxes = _permissionFlowPanel.GetChildrenOfType<Checkbox>().ToArray();
             if (Editable) {
                 for (int i = 0; i < checkboxes.Length; i++)

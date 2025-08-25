@@ -5,7 +5,7 @@ using Microsoft.Xna.Framework.Graphics;
 namespace Blish_HUD.Controls {
     public class Image : Control {
 
-        protected AsyncTexture2D _texture;
+        protected AsyncTexture2D _texture = null!;
         public AsyncTexture2D Texture {
             get => _texture;
             set => SetProperty(ref _texture, value);

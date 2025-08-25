@@ -39,10 +39,10 @@ namespace Blish_HUD {
         }
 
         public static class Textures {
-            public static Texture2D Error { get; private set; }
-            public static Texture2D Pixel { get; private set; }
+            public static Texture2D Error { get; private set; } = null!;
+            public static Texture2D Pixel { get; private set; } = null!;
 
-            public static Texture2D TransparentPixel { get; private set; }
+            public static Texture2D TransparentPixel { get; private set; } = null!;
 
             public static void Load() {
                 using (var ctx = Graphics.LendGraphicsDeviceContext(true)) {
@@ -57,21 +57,21 @@ namespace Blish_HUD {
             }
         }
 
-        private IDataReader _audioDataReader;
+        private IDataReader _audioDataReader = null!;
 
-        private BitmapFont  _defaultFont12;
+        private BitmapFont?  _defaultFont12;
         public  BitmapFont  DefaultFont12 => _defaultFont12 ??= GetFont(FontFace.Menomonia, FontSize.Size12, FontStyle.Regular);
 
-        private BitmapFont _defaultFont14;
+        private BitmapFont? _defaultFont14;
         public  BitmapFont DefaultFont14 => _defaultFont14 ??= GetFont(FontFace.Menomonia, FontSize.Size14, FontStyle.Regular);
 
-        private BitmapFont _defaultFont16;
+        private BitmapFont? _defaultFont16;
         public  BitmapFont DefaultFont16 => _defaultFont16 ??= GetFont(FontFace.Menomonia, FontSize.Size16, FontStyle.Regular);
 
-        private BitmapFont _defaultFont18;
+        private BitmapFont? _defaultFont18;
         public  BitmapFont DefaultFont18 => _defaultFont18 ??= GetFont(FontFace.Menomonia, FontSize.Size18, FontStyle.Regular);
 
-        private BitmapFont _defaultFont32;
+        private BitmapFont? _defaultFont32;
         public  BitmapFont DefaultFont32 => _defaultFont32 ??= GetFont(FontFace.Menomonia, FontSize.Size32, FontStyle.Regular);
 
         public enum FontFace {
@@ -138,8 +138,11 @@ namespace Blish_HUD {
                 const string SOUND_EFFECT_FILE_EXTENSION = ".wav";
                 var          filePath                    = soundName + SOUND_EFFECT_FILE_EXTENSION;
 
-                if (_audioDataReader.FileExists(filePath)) {
-                    SoundEffect.FromStream(_audioDataReader.GetFileStream(filePath)).Play(GameService.GameIntegration.Audio.Volume, 0, 0);
+                if (_audioDataReader?.FileExists(filePath) == true) {
+                    var fileStream = _audioDataReader?.GetFileStream(filePath);
+                    if (fileStream != null) {
+                        SoundEffect.FromStream(fileStream).Play(GameService.GameIntegration.Audio.Volume, 0, 0);
+                    }
                 }
 
                 _playRemainingAttempts = 3;
@@ -152,7 +155,7 @@ namespace Blish_HUD {
         private static string RefPath => ApplicationSettings.Instance.RefPath ?? REF_FILE;
 
         // Used while debugging since it's easier
-        private static Texture2D TextureFromFile(string filepath) {
+        private static Texture2D? TextureFromFile(string filepath) {
             if (File.Exists(filepath)) {
                 using (var fileStream = new FileStream(filepath, FileMode.Open, FileAccess.Read, FileShare.Read)) {
                     return TextureUtil.FromStreamPremultiplied(BlishHud.Instance.GraphicsDevice, fileStream);
@@ -160,7 +163,7 @@ namespace Blish_HUD {
             } else return null;
         }
 
-        private static Texture2D TextureFromFileSystem(string filepath) {
+        private static Texture2D? TextureFromFileSystem(string filepath) {
             var refPath = RefPath;
             if (!File.Exists(refPath)) {
                 Logger.Warn("{refFileName} is missing!  Lots of assets will be missing!", refPath);
@@ -208,14 +211,14 @@ namespace Blish_HUD {
                 return cachedTexture;
 
             if (File.Exists(textureName)) {
-                return TextureFromFile(textureName);
+                return TextureFromFile(textureName) ?? defaultTexture;
             }
 
             cachedTexture = TextureFromFileSystem($"{textureName}.png");
 
             if (cachedTexture == null) {
                 try {
-                    cachedTexture = GameService.Content.ContentManager.Load<Texture2D>(textureName);
+                    cachedTexture = GameService.Content.ContentManager?.Load<Texture2D>(textureName);
                 } catch (ContentLoadException) {
                     Logger.Warn("Could not find {textureName} precompiled or in the ref archive.", textureName);
                 }

@@ -33,7 +33,7 @@ namespace Blish_HUD.Controls {
 
         private static readonly Rectangle StandardTabBounds = new Rectangle(TAB_SECTION_WIDTH, 24, TAB_WIDTH, TAB_HEIGHT);
 
-        public event EventHandler<EventArgs> TabChanged;
+        public event EventHandler<EventArgs>? TabChanged;
 
         protected int _selectedTabIndex = -1;
         public int SelectedTabIndex {
@@ -45,7 +45,7 @@ namespace Blish_HUD.Controls {
             }
         }
 
-        public WindowTab SelectedTab => _tabs.Count > _selectedTabIndex ? _tabs[_selectedTabIndex] : null;
+        public WindowTab? SelectedTab => _tabs.Count > _selectedTabIndex ? _tabs[_selectedTabIndex] : null;
 
         private int _hoveredTabIndex = 0;
         private int HoveredTabIndex {
@@ -86,9 +86,10 @@ namespace Blish_HUD.Controls {
                 Content.PlaySoundEffectByName($"tab-swap-{RandomUtil.GetRandom(1, 5)}");
             }
 
-            this.Subtitle = SelectedTab.Name;
-
-            Navigate(_views[this.SelectedTab](), false);
+            if (SelectedTab != null) {
+                this.Subtitle = SelectedTab.Name;
+                Navigate(_views[SelectedTab](), false);
+            }
 
             this.TabChanged?.Invoke(this, e);
         }
@@ -172,7 +173,9 @@ namespace Blish_HUD.Controls {
 
             _currentNav.Clear();
 
-            _currentNav.AddFirst(_activeViewContainer.CurrentView);
+            if (_activeViewContainer.CurrentView != null) {
+                _currentNav.AddFirst(_activeViewContainer.CurrentView);
+            }
         }
 
         #endregion
@@ -279,10 +282,10 @@ namespace Blish_HUD.Controls {
         public override void RecalculateLayout() {
             base.RecalculateLayout();
 
-            if (_tabs.Count == 0) return;
+            if (_tabs.Count == 0 || SelectedTab == null) return;
 
             var firstTabBounds    = TabBoundsFromIndex(0);
-            var selectedTabBounds = _tabRegions[this.SelectedTab];
+            var selectedTabBounds = _tabRegions[SelectedTab];
             var lastTabBounds     = TabBoundsFromIndex(_tabRegions.Count - 1);
 
             _layoutTopTabBarBounds    = new Rectangle(0, 0,                    TAB_SECTION_WIDTH, firstTabBounds.Top);

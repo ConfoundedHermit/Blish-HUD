@@ -11,16 +11,20 @@ using Microsoft.Xna.Framework;
 namespace Blish_HUD.Modules.UI.Views {
     public class ModuleRepoView : View {
 
-        public FlowPanel        RepoFlowPanel { get; private set; }
-        public ContextMenuStrip SettingsMenu  { get; private set; }
+        public FlowPanel        RepoFlowPanel { get; private set; } = null!;
+        public ContextMenuStrip SettingsMenu  { get; private set; } = null!;
 
-        private TextBox        _searchbox;
-        private StandardButton _restartBlishHud;
-        private Label          _restartBlishHudWarning;
+        private TextBox?        _searchbox;
+        private StandardButton? _restartBlishHud;
+        private Label?          _restartBlishHudWarning;
 
         public bool DirtyAssemblyStateExists {
-            get => (_restartBlishHud ?? throw new ViewNotBuiltException()).Visible;
-            set => _restartBlishHudWarning.Visible = (_restartBlishHud ?? throw new ViewNotBuiltException()).Visible = value;
+            get => _restartBlishHud?.Visible ?? false;
+            set {
+                if (_restartBlishHudWarning != null && _restartBlishHud != null) {
+                    _restartBlishHudWarning.Visible = _restartBlishHud.Visible = value;
+                }
+            }
         }
 
         public ModuleRepoView() { /* NOOP */ }
@@ -96,6 +100,7 @@ namespace Blish_HUD.Modules.UI.Views {
 
         private bool PkgSearchFilter(ViewContainer viewContainer) {
             var pkgView = viewContainer.CurrentView as ManagePkgView;
+            if (pkgView == null || _searchbox == null) return true;
 
             var searchText = _searchbox.Text.ToLowerInvariant();
             return pkgView.ModuleName.ToLowerInvariant().Contains(searchText) || pkgView.ModuleDescription.ToLowerInvariant().Contains(searchText);

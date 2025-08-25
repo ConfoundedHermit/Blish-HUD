@@ -14,7 +14,7 @@ namespace Blish_HUD.ArcDps {
 
         private readonly int _bufferSize;
 
-        private CancellationTokenSource _cancellationTokenSource;
+        private CancellationTokenSource _cancellationTokenSource = null!;
 
         /// <summary>
         /// Defines the socket errors on which a retry can be attempted. Max retry count is defined by <see cref="RETRY_RECEIVE_COUNT"/>.
@@ -32,9 +32,9 @@ namespace Blish_HUD.ArcDps {
         /// </summary>
         public bool Running { get; private set; }
 
-        public event EventHandler<MessageData> ReceivedMessage;
+        public event EventHandler<MessageData>? ReceivedMessage;
 
-        public event EventHandler<SocketError> OnSocketError;
+        public event EventHandler<SocketError>? OnSocketError;
 
         /// <summary>
         /// Starts the <see cref="SocketListener"/> and attempts to connect to the specified <paramref name="localEndPoint"/>.
@@ -136,7 +136,7 @@ namespace Blish_HUD.ArcDps {
         /// <param name="socket">The socket which should start receiving.</param>
         /// <param name="state">The prior socket state if not all data has been received or <c>null</c> if state can be (re)created for a new receive session.</param>
         /// <param name="retries">The amount of retries left after a <see cref="SocketError"/> specified by <see cref="_retryReceiveOnSocketErrors"/>.</param>
-        private void StartReceive(Socket socket, SocketState state = null, int retries = RETRY_RECEIVE_COUNT) {
+        private void StartReceive(Socket socket, SocketState? state = null, int retries = RETRY_RECEIVE_COUNT) {
             try {
                 // Create the state object.
                 state ??= new SocketState() {

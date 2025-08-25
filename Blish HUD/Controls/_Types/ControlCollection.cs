@@ -31,7 +31,7 @@ namespace Blish_HUD.Controls {
                 _inner.Reset();
             }
 
-            public object Current => _inner.Current;
+            public object? Current => _inner.Current;
 
             TEnum IEnumerator<TEnum>.Current => _inner.Current;
 
@@ -174,7 +174,7 @@ namespace Blish_HUD.Controls {
                 _listLock.EnterReadLock();
 
             try {
-                return _innerList.Count;
+                return _innerList.IndexOf(item);
             } finally {
                 _listLock.ExitReadLock();
             }

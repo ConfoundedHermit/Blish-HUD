@@ -13,7 +13,7 @@ namespace Blish_HUD.GameIntegration {
     public sealed class AudioIntegration : ServiceModule<GameIntegrationService> {
         private static readonly Logger Logger = Logger.GetLogger<AudioIntegration>();
 
-        public event EventHandler<ValueEventArgs<float>> VolumeChanged;
+        public event EventHandler<ValueEventArgs<float>>? VolumeChanged;
 
         public enum Devices {
             [Description("GW2 Output Device")]
@@ -32,10 +32,10 @@ namespace Blish_HUD.GameIntegration {
         private const    float                 MAX_VOLUME                   = 0.4f;
         private readonly RingBuffer<float>     _audioPeakBuffer             = new RingBuffer<float>(AUDIOBUFFER_LENGTH);
         private readonly MMDeviceEnumerator    _deviceEnumerator;
-        private          SettingEntry<bool>    _useGameVolume;
-        private          SettingEntry<Devices> _deviceSetting;
-        private          SettingEntry<float>   _volumeSetting;
-        private          SettingEntry<bool>    _muteIfNoGameAudio;
+        private          SettingEntry<bool>    _useGameVolume = null!;
+        private          SettingEntry<Devices> _deviceSetting = null!;
+        private          SettingEntry<float>   _volumeSetting = null!;
+        private          SettingEntry<bool>    _muteIfNoGameAudio = null!;
 
         private readonly AudioEndpointNotificationReceiver                                    _audioEndpointNotificationReceiver;
         private readonly List<(MMDevice AudioDevice, AudioMeterInformation MeterInformation)> _gw2AudioDevices = new List<(MMDevice AudioDevice, AudioMeterInformation MeterInformation)>();
@@ -64,7 +64,7 @@ namespace Blish_HUD.GameIntegration {
         /// Current used AudioDevice. This either the same as GW2 is using
         /// or the selected one in the settings.
         /// </summary>
-        public MMDevice AudioDevice { get; private set; }
+        public MMDevice? AudioDevice { get; private set; }
 
         internal AudioIntegration(GameIntegrationService service) : base(service) {
             _audioEndpointNotificationReceiver = new AudioEndpointNotificationReceiver();
@@ -161,7 +161,7 @@ namespace Blish_HUD.GameIntegration {
 
         private void UpdateAudioDevice() {
             if (_deviceSetting.Value == Devices.DefaultDevice) {
-                if (TryGetDefaultAudioEndpoint(_deviceEnumerator, DataFlow.Render, Role.Multimedia, out MMDevice defaultDevice)) {
+                if (TryGetDefaultAudioEndpoint(_deviceEnumerator, DataFlow.Render, Role.Multimedia, out MMDevice? defaultDevice)) {
                     this.AudioDevice = defaultDevice;
                 } else {
                     this.AudioDevice = null;
@@ -171,7 +171,7 @@ namespace Blish_HUD.GameIntegration {
             InitializeProcessMeterInformations();
         }
 
-        private static bool TryGetDefaultAudioEndpoint(MMDeviceEnumerator deviceEnumerator, DataFlow dataFlow, Role role, out MMDevice device) {
+        private static bool TryGetDefaultAudioEndpoint(MMDeviceEnumerator deviceEnumerator, DataFlow dataFlow, Role role, out MMDevice? device) {
             try {
                 device = deviceEnumerator.GetDefaultAudioEndpoint(dataFlow, role);
                 return true;
@@ -187,7 +187,7 @@ namespace Blish_HUD.GameIntegration {
 
             _gw2AudioDevices.Clear();
             foreach (var device in _deviceEnumerator.EnumerateAudioEndPoints(DataFlow.Render, DeviceState.Active)) {
-                SessionCollection sessionEnumerator = null;
+                SessionCollection? sessionEnumerator = null;
 
                 try {
                     sessionEnumerator = device.AudioSessionManager.Sessions;
@@ -205,8 +205,8 @@ namespace Blish_HUD.GameIntegration {
                 }
 
                 bool shouldDispose = true;
-                for (int i = 0; i < sessionEnumerator.Count; i++) {
-                    using var audioSession = sessionEnumerator[i];
+                for (int i = 0; i < sessionEnumerator?.Count; i++) {
+                    using var audioSession = sessionEnumerator![i];
 
                     if (audioSession.GetProcessID == _service.Gw2Instance.Gw2Process.Id) {
                         _gw2AudioDevices.Add((device, audioSession.AudioMeterInformation));

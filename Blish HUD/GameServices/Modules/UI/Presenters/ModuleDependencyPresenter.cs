@@ -8,7 +8,7 @@ using Blish_HUD.Modules.UI.Views;
 namespace Blish_HUD.Modules.UI.Presenters {
     public class ModuleDependencyPresenter : Presenter<ModuleDependencyView, ModuleManager> {
 
-        private ModuleDependencyCheckDetails[] _moduleDependencyDetails;
+        private ModuleDependencyCheckDetails[] _moduleDependencyDetails = null!;
 
         public ModuleDependencyPresenter(ModuleDependencyView view, ModuleManager model) : base(view, model) { /* NOOP */ }
 

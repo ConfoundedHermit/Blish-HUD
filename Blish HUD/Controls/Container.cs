@@ -15,10 +15,10 @@ namespace Blish_HUD.Controls {
     /// </summary>
     public abstract class Container : Control, IEnumerable<Control> {
 
-        public event EventHandler<ChildChangedEventArgs> ChildAdded;
-        public event EventHandler<ChildChangedEventArgs> ChildRemoved;
+        public event EventHandler<ChildChangedEventArgs>? ChildAdded;
+        public event EventHandler<ChildChangedEventArgs>? ChildRemoved;
 
-        public event EventHandler<RegionChangedEventArgs> ContentResized;
+        public event EventHandler<RegionChangedEventArgs>? ContentResized;
 
         protected ControlCollection<Control> _children;
 
@@ -210,9 +210,9 @@ namespace Blish_HUD.Controls {
             }
         }
 
-        public override Control TriggerMouseInput(MouseEventType mouseEventType, MouseState ms) {
-            Control thisResult  = null;
-            Control childResult = null;
+        public override Control? TriggerMouseInput(MouseEventType mouseEventType, MouseState ms) {
+            Control? thisResult  = null;
+            Control? childResult = null;
 
             if (CapturesInput() != CaptureType.None) {
                 thisResult = base.TriggerMouseInput(mouseEventType, ms);
@@ -236,7 +236,7 @@ namespace Blish_HUD.Controls {
                 }
             }
 
-            return childResult ?? thisResult;
+            return childResult ?? thisResult ?? this;
         }
 
         public virtual void UpdateContainer(GameTime gameTime) { /* NOOP */ }

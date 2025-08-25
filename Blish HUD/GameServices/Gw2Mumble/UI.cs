@@ -14,32 +14,32 @@ namespace Blish_HUD.Gw2Mumble {
         /// <summary>
         /// Fires when the user changes the compass size.
         /// </summary>
-        public event EventHandler<ValueEventArgs<Size>> CompassSizeChanged;
+        public event EventHandler<ValueEventArgs<Size>>? CompassSizeChanged;
 
         /// <summary>
         /// Fires when the user toggles compass rotation.
         /// </summary>
-        public event EventHandler<ValueEventArgs<bool>> IsCompassRotationEnabledChanged;
+        public event EventHandler<ValueEventArgs<bool>>? IsCompassRotationEnabledChanged;
 
         /// <summary>
         /// Fires when the user moves the compass between the top-right and the bottom-right.
         /// </summary>
-        public event EventHandler<ValueEventArgs<bool>> IsCompassTopRightChanged;
+        public event EventHandler<ValueEventArgs<bool>>? IsCompassTopRightChanged;
 
         /// <summary>
         /// Fires when the player selects or deselects a Guild Wars 2 text field (chat bar, search, etc.).
         /// </summary>
-        public event EventHandler<ValueEventArgs<bool>> IsTextInputFocusedChanged;
+        public event EventHandler<ValueEventArgs<bool>>? IsTextInputFocusedChanged;
 
         /// <summary>
         /// Fires when the world map is opened or closed.
         /// </summary>
-        public event EventHandler<ValueEventArgs<bool>> IsMapOpenChanged;
+        public event EventHandler<ValueEventArgs<bool>>? IsMapOpenChanged;
 
         /// <summary>
         /// Fires when the user changes their in-game interface size.
         /// </summary>
-        public event EventHandler<ValueEventArgs<UiSize>> UISizeChanged;
+        public event EventHandler<ValueEventArgs<UiSize>>? UISizeChanged;
 
         private void OnCompassSizeChanged(ValueEventArgs<Size>              e) => CompassSizeChanged?.Invoke(this, e);
         private void OnIsCompassRotationEnabledChanged(ValueEventArgs<bool> e) => this.IsCompassRotationEnabledChanged?.Invoke(this, e);

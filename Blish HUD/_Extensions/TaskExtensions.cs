@@ -6,7 +6,7 @@ namespace Blish_HUD {
     public static class TaskExtensions {
 
         public static Action<T> Debounce<T>(this Action<T> func, int milliseconds = 300) {
-            CancellationTokenSource cancelTokenSource = null;
+            CancellationTokenSource? cancelTokenSource = null;
 
             return arg => {
                 cancelTokenSource?.Cancel();

@@ -10,14 +10,14 @@ namespace Blish_HUD.Controls {
         private readonly Texture2D HealthPoolPressedSprite;
         private bool IsBeingPressed;
 
-        private string _text;
+        private string _text = string.Empty;
         public string Text {
             get => _text;
             set => SetProperty(ref _text, value);
         }
         public HealthPoolButton() {
-            HealthPoolSprite = HealthPoolSprite ?? Content.GetTexture("healthpool");
-            HealthPoolPressedSprite = HealthPoolPressedSprite ?? Content.GetTexture("healthpool_pressed");
+            HealthPoolSprite = Content.GetTexture("healthpool");
+            HealthPoolPressedSprite = Content.GetTexture("healthpool_pressed");
             this.Size = new Point(111, 111); // set static bounds.
             UpdateLocation(null, null);
             Graphics.SpriteScreen.Resized += UpdateLocation;
@@ -35,7 +35,7 @@ namespace Blish_HUD.Controls {
             base.OnLeftMouseButtonReleased(e);
         }
 
-        private void UpdateLocation(object sender, EventArgs e) {
+        private void UpdateLocation(object? sender, EventArgs? e) {
             this.Location = new Point((Graphics.SpriteScreen.Width / 2 - this.Width / 2), (Graphics.SpriteScreen.Height - this.Height) - BOTTOMEDGE_GAP);
         }
 

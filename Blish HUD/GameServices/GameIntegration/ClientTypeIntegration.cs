@@ -14,17 +14,26 @@ namespace Blish_HUD.GameIntegration {
         public override void Load() {
             GameService.Gw2Mumble.Info.BuildIdChanged += delegate { DetectClientType(); };
 
-            GameService.Contexts.GetContext<CdnInfoContext>().StateChanged += OnCdnInfoContextStateChanged;
+            var cdnInfoContext = GameService.Contexts.GetContext<CdnInfoContext>();
+            if (cdnInfoContext != null) {
+                cdnInfoContext.StateChanged += OnCdnInfoContextStateChanged;
+            }
         }
 
-        private void OnCdnInfoContextStateChanged(object sender, EventArgs e) {
-            if (((Context)sender).State == ContextState.Ready) {
+        private void OnCdnInfoContextStateChanged(object? sender, EventArgs e) {
+            if (sender is Context context && context.State == ContextState.Ready) {
                 DetectClientType();
             }
         }
 
         private void DetectClientType() {
-            var checkClientTypeResult = GameService.Contexts.GetContext<Gw2ClientContext>().TryGetClientType(out var contextResult);
+            var gw2ClientContext = GameService.Contexts.GetContext<Gw2ClientContext>();
+            if (gw2ClientContext == null) {
+                Logger.Warn("Failed to detect current Guild Wars 2 client version: Context not available");
+                return;
+            }
+
+            var checkClientTypeResult = gw2ClientContext.TryGetClientType(out var contextResult);
 
             switch (checkClientTypeResult) {
                 case ContextAvailability.Available:

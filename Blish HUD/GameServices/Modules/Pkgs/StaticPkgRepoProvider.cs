@@ -19,7 +19,7 @@ namespace Blish_HUD.Modules.Pkgs {
 
         private readonly List<Func<PkgManifest, bool>> _activeFilters = new List<Func<PkgManifest, bool>> { FilterShowOnlySupportedVersion };
 
-        public virtual string PkgUrl { get; }
+        public virtual string PkgUrl { get; } = null!;
 
         protected StaticPkgRepoProvider() { /* NOOP */ }
 
@@ -27,7 +27,7 @@ namespace Blish_HUD.Modules.Pkgs {
             this.PkgUrl = pkgUrl;
         }
 
-        public async Task<bool> Load(IProgress<string> progress = null) {
+        public async Task<bool> Load(IProgress<string>? progress = null) {
             if (!_pkgCache.ContainsKey(this.PkgUrl)) {
                 progress ??= new Progress<string>(Logger.Info);
 
@@ -44,7 +44,7 @@ namespace Blish_HUD.Modules.Pkgs {
             return _pkgCache.ContainsKey(this.PkgUrl);
         }
 
-        protected virtual async Task<PkgManifest[]> LoadRepo(IProgress<string> progress = null, bool preview = false) {
+        protected virtual async Task<PkgManifest[]> LoadRepo(IProgress<string>? progress = null, bool preview = false) {
             progress?.Report(Strings.GameServices.ModulesService.PkgManagement_Progress_GettingModuleList);
             var manifests = await LoadPkgManifests(Flurl.Url.Combine(this.PkgUrl, preview ? PREVIEWASSET_PACKAGE_NAME : ASSET_PACKAGE_NAME));
 
@@ -62,7 +62,7 @@ namespace Blish_HUD.Modules.Pkgs {
             return manifests.PkgManifests;
         }
 
-        protected async Task<(PkgManifest[] PkgManifests, Exception Exception)> LoadPkgManifests(string pkgUrl) {
+        protected async Task<(PkgManifest[] PkgManifests, Exception? Exception)> LoadPkgManifests(string pkgUrl) {
             try {
                 using var compressedRelease = await pkgUrl.GetStreamAsync();
 
@@ -71,7 +71,7 @@ namespace Blish_HUD.Modules.Pkgs {
                 using var jsonTextReader = new JsonTextReader(streamReader);
                 var serializer = new JsonSerializer();
 
-                return (serializer.Deserialize<PkgManifest[]>(jsonTextReader), null);
+                return (serializer.Deserialize<PkgManifest[]>(jsonTextReader) ?? Array.Empty<PkgManifest>(), null);
             } catch (Exception ex) {
                 Logger.Warn(ex, $"Failed to load modules from '{pkgUrl}'.");
                 return (Array.Empty<PkgManifest>(), ex);

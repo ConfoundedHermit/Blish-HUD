@@ -20,14 +20,14 @@ namespace Blish_HUD.Controls {
         /// Indicates that the assignment was accepted and the resulting primary and
         /// modifier keys should update their target.
         /// </summary>
-        public event EventHandler<EventArgs> AssignmentAccepted;
+        public event EventHandler<EventArgs>? AssignmentAccepted;
 
         /// <summary>
         /// Fires when the "Cancel" button or escape is pressed within the assignment window.
         /// Indicates that the assignment was canceled and the resulting primary and modifier
         /// keys should be ignored.
         /// </summary>
-        public event EventHandler<EventArgs> AssignmentCanceled;
+        public event EventHandler<EventArgs>? AssignmentCanceled;
 
         private void OnAssignmentAccepted(EventArgs e) {
             this.AssignmentAccepted?.Invoke(this, e);
@@ -67,7 +67,7 @@ namespace Blish_HUD.Controls {
 
         private readonly string _assignmentName;
 
-        private string _assignmentDisplayString;
+        private string _assignmentDisplayString = string.Empty;
 
         public KeybindingAssignmentWindow(string assignmentName, ModifierKeys modifierKeys = ModifierKeys.None, Keys primaryKey = Keys.None) {
             _assignmentName = assignmentName;
@@ -114,9 +114,9 @@ namespace Blish_HUD.Controls {
             this.Dispose();
         }
 
-        private StandardButton _acceptBttn;
-        private StandardButton _unbindBttn;
-        private StandardButton _cancelBttn;
+        private StandardButton _acceptBttn = null!;
+        private StandardButton _unbindBttn = null!;
+        private StandardButton _cancelBttn = null!;
 
         private void BuildChildElements() {
             var assignInputsLbl = new Label() {

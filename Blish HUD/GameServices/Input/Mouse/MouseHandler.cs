@@ -29,11 +29,11 @@ namespace Blish_HUD.Input {
         /// </summary>
         public bool CameraDragging { get; private set; }
 
-        private Control _activeControl;
+        private Control? _activeControl;
         /// <summary>
         /// The <see cref="Controls.Control" /> that the mouse last moved over.
         /// </summary>
-        public Control ActiveControl {
+        public Control? ActiveControl {
             get => _activeControl;
             private set {
                 _hudFocused    = value != null;
@@ -66,9 +66,17 @@ namespace Blish_HUD.Input {
         }
 
         private bool           _hudFocused;
-        private MouseEventArgs _mouseEvent;
+        private MouseEventArgs? _mouseEvent;
 
-        internal MouseHandler() { }
+        internal MouseHandler() {
+            // Initialize events to avoid CS8618 warnings
+            MouseMoved = delegate { };
+            LeftMouseButtonPressed = delegate { };
+            LeftMouseButtonReleased = delegate { };
+            RightMouseButtonPressed = delegate { };
+            RightMouseButtonReleased = delegate { };
+            MouseWheelScrolled = delegate { };
+        }
 
         public bool HandleInput(MouseEventArgs mouseEventArgs) {
             if (mouseEventArgs.EventType == MouseEventType.MouseMoved) {
@@ -97,7 +105,7 @@ namespace Blish_HUD.Input {
 
             return mouseEventArgs.EventType != MouseEventType.LeftMouseButtonReleased             // Never block the users input if they are releasing the left mouse button
                 && mouseEventArgs.EventType != MouseEventType.RightMouseButtonReleased            // Never block the users input if they are releasing the right mouse button
-                && (_hudFocused && !this.ActiveControl.Captures.HasFlag(CaptureType.DoNotBlock)); // If no control, or if the current control has capture forced off, then do not block
+                && (_hudFocused && this.ActiveControl != null && !this.ActiveControl.Captures.HasFlag(CaptureType.DoNotBlock)); // If no control, or if the current control has capture forced off, then do not block
         }
 
         private bool HandleHookedMouseEvent(MouseEventArgs e) {

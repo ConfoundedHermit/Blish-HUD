@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Threading.Tasks;
+using Blish_HUD.Content;
 using Blish_HUD.Graphics.UI;
 using Glide;
 using Microsoft.Xna.Framework;
@@ -26,11 +27,11 @@ namespace Blish_HUD.Controls {
             set => SetProperty(ref _fadeView, value);
         }
         
-        public IView CurrentView { get; private set; }
+        public IView? CurrentView { get; private set; } = null;
 
-        private Tween _fadeInAnimation;
+        private Tween? _fadeInAnimation = null;
 
-        private string _loadingMessage;
+        private string _loadingMessage = string.Empty;
 
         /// <summary>
         /// Shows the provided view.
@@ -67,7 +68,7 @@ namespace Blish_HUD.Controls {
 
             // Reset panel defaults
             this.BackgroundColor   = Color.Transparent;
-            this.BackgroundTexture = null;
+            this.BackgroundTexture = null!;
             this.ClipsBounds       = true;
 
             // Potentially prepare for next fade-in
@@ -81,13 +82,15 @@ namespace Blish_HUD.Controls {
         }
 
         private void BuildView(object sender, EventArgs e) {
-            this.CurrentView.Loaded -= BuildView;
+            if (this.CurrentView != null) {
+                this.CurrentView.Loaded -= BuildView;
+            }
 
             ViewState = ViewState.Loaded;
         }
 
         private void BuildView(Task<bool> loadResult) {
-            if (loadResult.Result) {
+            if (loadResult.Result && this.CurrentView != null) {
                 this.CurrentView.DoBuild(this);
             }
         }

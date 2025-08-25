@@ -9,8 +9,8 @@ namespace Blish_HUD.Content {
     /// </summary>
     public sealed class AsyncTexture2D : IDisposable {
 
-        private Texture2D _stagedTexture2D;
-        private Texture2D _activeTexture2D;
+        private Texture2D? _stagedTexture2D;
+        private Texture2D _activeTexture2D = null!;
 
         /// <summary>
         /// <c>true</c>, if the <see cref="AsyncTexture2D"/>'s <see cref="Texture"/> is set.
@@ -60,7 +60,7 @@ namespace Blish_HUD.Content {
         /// <summary>
         /// Occurs when the <see cref="Texture"/> of the <see cref="AsyncTexture2D"/> is replaced.
         /// </summary>
-        public event EventHandler<ValueChangedEventArgs<Texture2D>> TextureSwapped;
+        public event EventHandler<ValueChangedEventArgs<Texture2D>>? TextureSwapped;
 
         /// <summary>
         /// Create an <see cref="AsyncTexture2D"/> where the current <see cref="Texture"/> is a single transparent pixel.
@@ -91,9 +91,9 @@ namespace Blish_HUD.Content {
             }
         }
 
-        private void ApplyTextureSwap(GameTime gameTime) {
+        private void ApplyTextureSwap(GameTime? gameTime) {
             var previousTexture2D = _activeTexture2D;
-            _activeTexture2D = _stagedTexture2D;
+            _activeTexture2D = _stagedTexture2D!;
             this.HasSwapped  = true;
             _stagedTexture2D = null;
             this.TextureSwapped?.Invoke(this, new ValueChangedEventArgs<Texture2D>(previousTexture2D, _activeTexture2D));
@@ -124,11 +124,11 @@ namespace Blish_HUD.Content {
             return _activeTexture2D?.GetHashCode() ?? 0;
         }
 
-        public static implicit operator Texture2D(AsyncTexture2D asyncTexture2D) {
-            return asyncTexture2D._activeTexture2D;
+        public static implicit operator Texture2D(AsyncTexture2D? asyncTexture2D) {
+            return asyncTexture2D?._activeTexture2D ?? throw new ArgumentNullException(nameof(asyncTexture2D));
         }
 
-        public static implicit operator AsyncTexture2D(Texture2D texture2D) {
+        public static implicit operator AsyncTexture2D?(Texture2D? texture2D) {
             if (texture2D == null) return null;
 
             return new AsyncTexture2D(texture2D);

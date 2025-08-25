@@ -19,8 +19,8 @@ namespace Blish_HUD.Overlay {
 
         private CoreVersionManifest[] _availableUpdates = Array.Empty<CoreVersionManifest>();
 
-        private SettingEntry<SemVer.Version> _lastAcknowledgedUpdate;
-        private SettingEntry<bool>           _notifyOfNewReleases;
+        private SettingEntry<SemVer.Version>? _lastAcknowledgedUpdate;
+        private SettingEntry<bool>?           _notifyOfNewReleases;
 
         private int _releaseLoadAttemptsRemaining = 3;
 
@@ -28,16 +28,16 @@ namespace Blish_HUD.Overlay {
         /// The last update <see cref="SemVer.Version"/> that was acknowledged by the user.
         /// </summary>
         public SemVer.Version LastAcknowledgedRelease {
-            get => _lastAcknowledgedUpdate.Value;
-            set => _lastAcknowledgedUpdate.Value = value;
+            get => _lastAcknowledgedUpdate?.Value ?? new SemVer.Version("0.0.0");
+            set { if (_lastAcknowledgedUpdate != null) _lastAcknowledgedUpdate.Value = value; }
         }
 
         public bool NotifyOfNewReleases {
-            get => _notifyOfNewReleases.Value;
-            set => _notifyOfNewReleases.Value = value;
+            get => _notifyOfNewReleases?.Value ?? true;
+            set { if (_notifyOfNewReleases != null) _notifyOfNewReleases.Value = value; }
         }
 
-        private SelfUpdateWindow _activeUpdateWindow;
+        private SelfUpdateWindow? _activeUpdateWindow;
 
         /// <summary>
         /// The highest version release.  Will include prereleases only if <see cref="OverlayService.ShowPreviews"/> is <c>true</c>.

@@ -16,12 +16,12 @@ namespace Blish_HUD.Input {
         /// <summary>
         /// Fires when the keys of the <see cref="KeyBinding"/> are changed.
         /// </summary>
-        public event EventHandler<EventArgs> BindingChanged; 
+        public event EventHandler<EventArgs> BindingChanged = null!; 
 
         /// <summary>
         /// Fires when the <see cref="KeyBinding"/> is triggered.
         /// </summary>
-        public event EventHandler<EventArgs> Activated;
+        public event EventHandler<EventArgs> Activated = null!;
 
         protected void OnActivated(EventArgs e) {
             Activated?.Invoke(this, e);
@@ -72,7 +72,7 @@ namespace Blish_HUD.Input {
             set {
                 if (_enabled != value) {
                     if (value) {
-                        KeyboardOnKeyStateChanged(null, null);
+                        KeyboardOnKeyStateChanged(null!, null!);
                         GameService.Input.Keyboard.KeyStateChanged += KeyboardOnKeyStateChanged;
                     } else {
                         GameService.Input.Keyboard.KeyStateChanged -= KeyboardOnKeyStateChanged;

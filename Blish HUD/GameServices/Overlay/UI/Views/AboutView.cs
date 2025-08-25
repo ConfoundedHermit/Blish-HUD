@@ -11,12 +11,15 @@ namespace Blish_HUD.Overlay.UI.Views {
     public class AboutView : View {
 
         protected override void Build(Container buildPanel) {
-            _ = new Image(AsyncTexture2D.FromAssetId(1025164)) {
-                SpriteEffects = SpriteEffects.FlipHorizontally | SpriteEffects.FlipVertically,
-                Location      = new Point(buildPanel.Width - 969, buildPanel.Height - 220),
-                ClipsBounds   = false,
-                Parent        = buildPanel
-            };
+            var backgroundTexture = AsyncTexture2D.FromAssetId(1025164);
+            if (backgroundTexture != null) {
+                _ = new Image(backgroundTexture) {
+                    SpriteEffects = SpriteEffects.FlipHorizontally | SpriteEffects.FlipVertically,
+                    Location      = new Point(buildPanel.Width - 969, buildPanel.Height - 220),
+                    ClipsBounds   = false,
+                    Parent        = buildPanel
+                };
+            }
 
             var infoPanel = new Panel() {
                 Width  = buildPanel.Width,
@@ -41,18 +44,22 @@ namespace Blish_HUD.Overlay.UI.Views {
                 Parent = aboutPanel,
             };
 
-            var heart = new Image(AsyncTexture2D.FromAssetId(156127)) {
-                Size     = new Point(64, 64),
-                Location = new Point(0,  lovePanel.Height / 2 - 32),
-                Parent   = lovePanel
-            };
+            var heartTexture = AsyncTexture2D.FromAssetId(156127);
+            Image? heart = null;
+            if (heartTexture != null) {
+                heart = new Image(heartTexture) {
+                    Size     = new Point(64, 64),
+                    Location = new Point(0,  lovePanel.Height / 2 - 32),
+                    Parent   = lovePanel
+                };
+            }
 
             _ = new Label() {
                 Font              = GameService.Content.DefaultFont16,
                 Text              = Strings.GameServices.OverlayService.AboutLoveMessage,
                 AutoSizeWidth     = true,
                 Height            = lovePanel.Height,
-                Left              = heart.Right,
+                Left              = heart?.Right ?? 64,
                 VerticalAlignment = VerticalAlignment.Middle,
                 StrokeText        = true,
                 Parent            = lovePanel
@@ -62,14 +69,28 @@ namespace Blish_HUD.Overlay.UI.Views {
 
             #region "Discord Callout"
 
-            var discordSection = new Image(GameService.Content.GetTexture("views/about/section-splitter")) {
-                Parent          = aboutPanel,
-                Width           = aboutPanel.Width - 64,
-                Left            = 8,
-                Height          = 16,
-                Top             = lovePanel.Bottom,
-                Opacity = 0.5f
-            };
+            var discordSectionTexture = GameService.Content.GetTexture("views/about/section-splitter");
+            Image discordSection;
+            if (discordSectionTexture != null) {
+                discordSection = new Image(discordSectionTexture!) {
+                    Parent          = aboutPanel,
+                    Width           = aboutPanel.Width - 64,
+                    Left            = 8,
+                    Height          = 16,
+                    Top             = lovePanel.Bottom,
+                    Opacity = 0.5f
+                };
+            } else {
+                // Create a placeholder panel if texture is null
+                discordSection = new Image() {
+                    Parent          = aboutPanel,
+                    Width           = aboutPanel.Width - 64,
+                    Left            = 8,
+                    Height          = 16,
+                    Top             = lovePanel.Bottom,
+                    Opacity = 0.5f
+                };
+            }
 
             var discordNote = new FormattedLabelBuilder()
                              .CreatePart(Strings.GameServices.OverlayService.About_DiscordCallToAction1, b => b.SetFontSize(ContentService.FontSize.Size16))
@@ -108,38 +129,59 @@ namespace Blish_HUD.Overlay.UI.Views {
 
             discordBttn.Click += (s, e) => Process.Start("https://link.blishhud.com/discord");
 
-            var bottomDiscordSection = new Image(GameService.Content.GetTexture("views/about/section-splitter")) {
-                Parent  = aboutPanel,
-                Width   = aboutPanel.Width - 64,
-                Left    = 8,
-                Height  = 16,
-                Top     = discordNote.Bottom + 8,
-                Opacity = 0.5f
-            };
+            var bottomDiscordSectionTexture = GameService.Content.GetTexture("views/about/section-splitter");
+            Image bottomDiscordSection;
+            if (bottomDiscordSectionTexture != null) {
+                bottomDiscordSection = new Image(bottomDiscordSectionTexture!) {
+                    Parent  = aboutPanel,
+                    Width   = aboutPanel.Width - 64,
+                    Left    = 8,
+                    Height  = 16,
+                    Top     = discordNote.Bottom + 8,
+                    Opacity = 0.5f
+                };
+            } else {
+                // Create a placeholder if texture is null
+                bottomDiscordSection = new Image() {
+                    Parent  = aboutPanel,
+                    Width   = aboutPanel.Width - 64,
+                    Left    = 8,
+                    Height  = 16,
+                    Top     = discordNote.Bottom + 8,
+                    Opacity = 0.5f
+                };
+            }
 
             int fadeTop    = discordSection.Top       + discordSection.Height       / 2;
             int fadeBottom = bottomDiscordSection.Top + bottomDiscordSection.Height / 2;
 
-            var leftFade = new Image(AsyncTexture2D.FromAssetId(156044)) {
-                Width         = bottomDiscordSection.Width / 2,
-                Left          = bottomDiscordSection.Left,
-                Top           = fadeTop,
-                ZIndex        = -1,
-                Height        = fadeBottom - fadeTop,
-                Parent        = aboutPanel,
-                SpriteEffects = SpriteEffects.FlipHorizontally,
-                Opacity       = 0.4f
-            };
+            var leftFadeTexture = AsyncTexture2D.FromAssetId(156044);
+            Image? leftFade = null;
+            if (leftFadeTexture != null) {
+                leftFade = new Image(leftFadeTexture) {
+                    Width         = bottomDiscordSection.Width / 2,
+                    Left          = bottomDiscordSection.Left,
+                    Top           = fadeTop,
+                    ZIndex        = -1,
+                    Height        = fadeBottom - fadeTop,
+                    Parent        = aboutPanel,
+                    SpriteEffects = SpriteEffects.FlipHorizontally,
+                    Opacity       = 0.4f
+                };
+            }
 
-            _ = new Image(AsyncTexture2D.FromAssetId(156044)) {
-                Width   = bottomDiscordSection.Width / 2,
-                Left    = leftFade.Right,
-                Top     = fadeTop,
-                ZIndex  = -1,
-                Height  = fadeBottom - fadeTop,
-                Parent  = aboutPanel,
-                Opacity = 0.4f
-            };
+            var rightFadeTexture = AsyncTexture2D.FromAssetId(156044);
+            if (rightFadeTexture != null) {
+                _ = new Image(rightFadeTexture) {
+                    Width   = bottomDiscordSection.Width / 2,
+                    Left    = leftFade?.Right ?? bottomDiscordSection.Left + bottomDiscordSection.Width / 2,
+                    Top     = fadeTop,
+                    ZIndex  = -1,
+                    Height  = fadeBottom - fadeTop,
+                    Parent  = aboutPanel,
+                    Opacity = 0.4f
+                };
+            }
 
             #endregion
 
@@ -186,14 +228,17 @@ namespace Blish_HUD.Overlay.UI.Views {
                 };
             }
 
-            _ = new Image(GameService.Content.GetTexture("views/about/section-splitter")) {
-                Parent = aboutPanel,
-                Width = aboutPanel.Width - 64,
-                Left = 8,
-                Height = 16,
-                Top = fadeBottom + 90,
-                Opacity = 0.25f
-            };
+            var finalSectionTexture = GameService.Content.GetTexture("views/about/section-splitter");
+            if (finalSectionTexture != null) {
+                _ = new Image(finalSectionTexture!) {
+                    Parent = aboutPanel,
+                    Width = aboutPanel.Width - 64,
+                    Left = 8,
+                    Height = 16,
+                    Top = fadeBottom + 90,
+                    Opacity = 0.25f
+                };
+            }
 
             #endregion
 
@@ -262,17 +307,23 @@ namespace Blish_HUD.Overlay.UI.Views {
                 Parent = infoPanel
             };
 
-            mumbleConnection.Show(new ConnectionStatusView().WithPresenter(new ConnectionStatusPresenter(() => Strings.GameServices.OverlayService.ConnectionStatus_Mumble_Name,
-                                                                                                         () => GameService.Gw2Mumble.IsAvailable,
-                                                                                                         () => GameService.Gw2Mumble.IsAvailable
-                                                                                                                   ? string.Format(Strings.GameServices.OverlayService.ConnectionStatus_Mumble_Connected, GameService.Gw2Mumble.CurrentMumbleMapName)
-                                                                                                                   : string.Format(Strings.GameServices.OverlayService.ConnectionStatus_Mumble_Disconnected, GameService.Gw2Mumble.CurrentMumbleMapName))));
+            var mumbleView = new ConnectionStatusView().WithPresenter(new ConnectionStatusPresenter(() => Strings.GameServices.OverlayService.ConnectionStatus_Mumble_Name,
+                                                                                                   () => GameService.Gw2Mumble.IsAvailable,
+                                                                                                   () => GameService.Gw2Mumble.IsAvailable
+                                                                                                             ? string.Format(Strings.GameServices.OverlayService.ConnectionStatus_Mumble_Connected, GameService.Gw2Mumble.CurrentMumbleMapName)
+                                                                                                             : string.Format(Strings.GameServices.OverlayService.ConnectionStatus_Mumble_Disconnected, GameService.Gw2Mumble.CurrentMumbleMapName)));
+            if (mumbleView != null) {
+                mumbleConnection.Show(mumbleView);
+            }
 
-            arcdpsBridgeConnection.Show(new ConnectionStatusView().WithPresenter(new ConnectionStatusPresenter(() => Strings.GameServices.OverlayService.ConnectionStatus_ArcDPSBridge_Name,
-                                                                                                               () => GameService.ArcDps.Running,
-                                                                                                               () => GameService.ArcDps.Running
-                                                                                                                         ? Strings.GameServices.OverlayService.ConnectionStatus_ArcDPSBridge_Connected
-                                                                                                                         : Strings.GameServices.OverlayService.ConnectionStatus_ArcDPSBridge_Disconnected)));
+            var arcdpsView = new ConnectionStatusView().WithPresenter(new ConnectionStatusPresenter(() => Strings.GameServices.OverlayService.ConnectionStatus_ArcDPSBridge_Name,
+                                                                                                   () => GameService.ArcDps.Running,
+                                                                                                   () => GameService.ArcDps.Running
+                                                                                                             ? Strings.GameServices.OverlayService.ConnectionStatus_ArcDPSBridge_Connected
+                                                                                                             : Strings.GameServices.OverlayService.ConnectionStatus_ArcDPSBridge_Disconnected));
+            if (arcdpsView != null) {
+                arcdpsBridgeConnection.Show(arcdpsView);
+            }
         }
     }
 }

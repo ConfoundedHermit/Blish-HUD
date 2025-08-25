@@ -26,12 +26,12 @@ namespace Blish_HUD.Controls {
         /// <summary>
         /// Fires when the value of the <see cref="TrackBar"/> is changed.
         /// </summary>
-        public event EventHandler<ValueEventArgs<float>> ValueChanged;
+        public event EventHandler<ValueEventArgs<float>>? ValueChanged;
 
         /// <summary>
         /// Fires when the <see cref="TrackBar"/> starts or stops being dragged.
         /// </summary>
-        public event EventHandler<ValueEventArgs<bool>> IsDraggingChanged;
+        public event EventHandler<ValueEventArgs<bool>>? IsDraggingChanged;
 
         protected float _maxValue = 100f;
 

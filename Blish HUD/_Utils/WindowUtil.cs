@@ -227,7 +227,7 @@ namespace Blish_HUD {
 
         internal static string GetClassNameOfWindow(IntPtr hwnd) {
             string        className = "";
-            StringBuilder classText = null;
+            StringBuilder? classText = null;
             try {
                 int cls_max_length = 1000;
                 classText = new StringBuilder("", cls_max_length + 5);

@@ -159,13 +159,13 @@ namespace Blish_HUD.Controls {
             set => SetProperty(ref _canResize, value);
         }
 
-        private AsyncTexture2D _emblem = null;
+        private AsyncTexture2D? _emblem = null;
         /// <summary>
         /// The emblem/badge displayed in the top left corner of the window.
         /// </summary>
-        public Texture2D Emblem {
+        public Texture2D? Emblem {
             get => _emblem;
-            set => SetProperty(ref _emblem, value, true);
+            set => SetProperty(ref _emblem, value != null ? (AsyncTexture2D?)value : null, true);
         }
 
         private bool _topMost;
@@ -200,7 +200,7 @@ namespace Blish_HUD.Controls {
             set => SetProperty(ref _savesSize, value);
         }
 
-        private string _id;
+        private string _id = string.Empty;
         /// <summary>
         /// A unique id to identify the window.  Used with <see cref="SavesPosition"/> and <see cref="SavesSize"/> as a unique
         /// identifier to remember where the window is positioned and its size.
@@ -345,7 +345,7 @@ namespace Blish_HUD.Controls {
         #region ViewContainer
 
         public ViewState ViewState   { get; protected set; } = ViewState.None;
-        public IView     CurrentView { get; protected set; }
+        public IView?    CurrentView { get; protected set; } = null;
 
         protected void ShowView(IView view) {
             ClearView();
@@ -373,13 +373,15 @@ namespace Blish_HUD.Controls {
         }
 
         private void OnViewBuilt(object sender, EventArgs e) {
-            this.CurrentView.Loaded -= OnViewBuilt;
+            if (this.CurrentView != null) {
+                this.CurrentView.Loaded -= OnViewBuilt;
+            }
 
             ViewState = ViewState.Loaded;
         }
 
         private void BuildView(Task<bool> loadResult) {
-            if (loadResult.Result) {
+            if (loadResult != null && loadResult.Result && this.CurrentView != null) {
                 this.CurrentView.DoBuild(this);
             }
         }
@@ -573,49 +575,65 @@ namespace Blish_HUD.Controls {
 
         #region Window Construction
 
-        protected AsyncTexture2D WindowBackground            { get; set; }
+        protected AsyncTexture2D? WindowBackground            { get; set; } = null;
         protected Rectangle      WindowRegion                { get; set; }
         protected Rectangle      WindowRelativeContentRegion { get; set; }
 
         private Point _contentMargin;
 
-        protected void ConstructWindow(AsyncTexture2D background, Rectangle windowRegion, Rectangle contentRegion) {
+        protected void ConstructWindow(AsyncTexture2D? background, Rectangle windowRegion, Rectangle contentRegion) {
             ConstructWindow(background, windowRegion, contentRegion, new Point(windowRegion.Width, windowRegion.Height + STANDARD_TITLEBAR_HEIGHT));
         }
 
-        protected void ConstructWindow(Texture2D background, Rectangle windowRegion, Rectangle contentRegion) {
-            ConstructWindow((AsyncTexture2D)background, windowRegion, contentRegion);
+        protected void ConstructWindow(Texture2D? background, Rectangle windowRegion, Rectangle contentRegion) {
+            ConstructWindow(background != null ? (AsyncTexture2D?)background : null, windowRegion, contentRegion);
         }
 
-        protected void ConstructWindow(AsyncTexture2D background, Rectangle windowRegion, Rectangle contentRegion, Point windowSize) {
+        protected void ConstructWindow(AsyncTexture2D? background, Rectangle windowRegion, Rectangle contentRegion, Point windowSize) {
             this.WindowBackground = background;
 
             this.WindowRegion = windowRegion;
             this.WindowRelativeContentRegion = contentRegion;
 
-            this.Padding = new Thickness(Math.Max(windowRegion.Top - STANDARD_TITLEBAR_HEIGHT, STANDARD_TITLEBAR_VERTICAL_OFFSET), // We have to include the padding of the titlebar just in case
-                                         background.Width - windowRegion.Right,
-                                         background.Height - windowRegion.Bottom + STANDARD_TITLEBAR_HEIGHT,
-                                         windowRegion.Left);
+            if (background != null) {
+                this.Padding = new Thickness(Math.Max(windowRegion.Top - STANDARD_TITLEBAR_HEIGHT, STANDARD_TITLEBAR_VERTICAL_OFFSET), // We have to include the padding of the titlebar just in case
+                                             background.Width - windowRegion.Right,
+                                             background.Height - windowRegion.Bottom + STANDARD_TITLEBAR_HEIGHT,
+                                             windowRegion.Left);
 
-            this.ContentRegion = new Rectangle(contentRegion.X - (int)this.Padding.Left,
-                                               contentRegion.Y + STANDARD_TITLEBAR_HEIGHT - (int)this.Padding.Top,
-                                               contentRegion.Width,
-                                               contentRegion.Height);
+                this.ContentRegion = new Rectangle(contentRegion.X - (int)this.Padding.Left,
+                                                   contentRegion.Y + STANDARD_TITLEBAR_HEIGHT - (int)this.Padding.Top,
+                                                   contentRegion.Width,
+                                                   contentRegion.Height);
 
-            _contentMargin = new Point(windowRegion.Right - contentRegion.Right, windowRegion.Bottom - contentRegion.Bottom);
+                _contentMargin = new Point(windowRegion.Right - contentRegion.Right, windowRegion.Bottom - contentRegion.Bottom);
 
-            _windowToTextureWidthRatio  = (this.ContentRegion.Width                                            + _contentMargin.X + this.ContentRegion.X) / (float)background.Width;
-            _windowToTextureHeightRatio = (this.ContentRegion.Height + _contentMargin.Y + this.ContentRegion.Y - STANDARD_TITLEBAR_HEIGHT)                / (float)background.Height;
+                _windowToTextureWidthRatio  = (this.ContentRegion.Width                                            + _contentMargin.X + this.ContentRegion.X) / (float)background.Width;
+                _windowToTextureHeightRatio = (this.ContentRegion.Height + _contentMargin.Y + this.ContentRegion.Y - STANDARD_TITLEBAR_HEIGHT)                / (float)background.Height;
 
-            _windowLeftOffsetRatio = -windowRegion.Left / (float)background.Width;
-            _windowTopOffsetRatio  = -windowRegion.Top  / (float)background.Height;
+                _windowLeftOffsetRatio = -windowRegion.Left / (float)background.Width;
+                _windowTopOffsetRatio  = -windowRegion.Top  / (float)background.Height;
+            } else {
+                // Handle null background case with default values
+                this.Padding = new Thickness(Math.Max(windowRegion.Top - STANDARD_TITLEBAR_HEIGHT, STANDARD_TITLEBAR_VERTICAL_OFFSET), 0, 0, 0);
+                
+                this.ContentRegion = new Rectangle(contentRegion.X,
+                                                   contentRegion.Y + STANDARD_TITLEBAR_HEIGHT,
+                                                   contentRegion.Width,
+                                                   contentRegion.Height);
+
+                _contentMargin = new Point(0, 0);
+                _windowToTextureWidthRatio = 1.0f;
+                _windowToTextureHeightRatio = 1.0f;
+                _windowLeftOffsetRatio = 0.0f;
+                _windowTopOffsetRatio = 0.0f;
+            }
 
             this.Size = windowSize;
         }
 
-        protected void ConstructWindow(Texture2D background, Rectangle windowRegion, Rectangle contentRegion, Point windowSize) {
-            ConstructWindow((AsyncTexture2D)background, windowRegion, contentRegion, windowSize);
+        protected void ConstructWindow(Texture2D? background, Rectangle windowRegion, Rectangle contentRegion, Point windowSize) {
+            ConstructWindow(background != null ? (AsyncTexture2D?)background : null, windowRegion, contentRegion, windowSize);
         }
 
         private float _windowToTextureWidthRatio;
@@ -664,11 +682,11 @@ namespace Blish_HUD.Controls {
 
         private void PaintCorner(SpriteBatch spriteBatch) {
             if (this.CanResize) {
-                spriteBatch.DrawOnCtrl(this,
-                                       this.MouseOverResizeHandle || this.Resizing
-                                       ? _textureWindowResizableCornerActive
-                                       : _textureWindowResizableCorner,
-                                       this.ResizeHandleBounds);
+            spriteBatch.DrawOnCtrl(this,
+                                   this.MouseOverResizeHandle || this.Resizing
+                                   ? _textureWindowResizableCornerActive!
+                                   : _textureWindowResizableCorner!,
+                                   this.ResizeHandleBounds);
             } else {
                 spriteBatch.DrawOnCtrl(this, _textureWindowCorner, this.ResizeHandleBounds);
             }
@@ -683,12 +701,16 @@ namespace Blish_HUD.Controls {
                 spriteBatch.DrawOnCtrl(this, _textureBlackFade, _sidebarInactiveDrawBounds);
 
                 // Draw the splitter
-                spriteBatch.DrawOnCtrl(this, _textureSplitLine, new Rectangle(this.SidebarActiveBounds.Right - _textureSplitLine.Width / 2, this.SidebarActiveBounds.Top, _textureSplitLine.Width, _sidebarInactiveDrawBounds.Bottom - this.SidebarActiveBounds.Top));
+                if (_textureSplitLine != null) {
+                    spriteBatch.DrawOnCtrl(this, _textureSplitLine, new Rectangle(this.SidebarActiveBounds.Right - _textureSplitLine.Width / 2, this.SidebarActiveBounds.Top, _textureSplitLine.Width, _sidebarInactiveDrawBounds.Bottom - this.SidebarActiveBounds.Top));
+                }
             }
         }
 
         private void PaintWindowBackground(SpriteBatch spriteBatch) {
-            spriteBatch.DrawOnCtrl(this, this.WindowBackground, this.BackgroundDestinationBounds);
+            if (this.WindowBackground != null) {
+                spriteBatch.DrawOnCtrl(this, this.WindowBackground, this.BackgroundDestinationBounds);
+            }
         }
 
         private void PaintTitleBar(SpriteBatch spriteBatch) {
@@ -722,7 +744,7 @@ namespace Blish_HUD.Controls {
 
         private void PaintEmblem(SpriteBatch spriteBatch) {
             if (_emblem != null) {
-                spriteBatch.DrawOnCtrl(this, this.Emblem, _emblemDrawBounds);
+                spriteBatch.DrawOnCtrl(this, _emblem, _emblemDrawBounds);
             }
         }
 

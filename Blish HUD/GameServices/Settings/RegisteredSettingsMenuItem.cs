@@ -9,7 +9,7 @@ using Blish_HUD.Graphics.UI;
 namespace Blish_HUD.Settings {
     public class RegisteredSettingsMenuItem {
 
-        private Func<View> _view;
+        private Func<View>? _view;
 
     }
 }

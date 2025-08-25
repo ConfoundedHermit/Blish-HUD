@@ -12,8 +12,8 @@ namespace Blish_HUD.Controls {
     [EditorBrowsable(EditorBrowsableState.Never)]
     public class ColorBox : Control {
 
-        public event EventHandler<EventArgs> ColorChanged;
-        public event EventHandler<EventArgs> Selected;
+        public event EventHandler<EventArgs> ColorChanged = delegate { };
+        public event EventHandler<EventArgs> Selected = delegate { };
 
         private const int    DEFAULT_COLOR_SIZE                          = 32;
         private const string COLOR_CHANGE_SOUND_NAME                     = "color-change";
@@ -43,9 +43,9 @@ namespace Blish_HUD.Controls {
             }
         }
 
-        private Gw2Sharp.WebApi.V2.Models.Color color;
+        private Gw2Sharp.WebApi.V2.Models.Color? color;
 
-        public Gw2Sharp.WebApi.V2.Models.Color Color {
+        public Gw2Sharp.WebApi.V2.Models.Color? Color {
             get => color;
             set {
                 if (SetProperty(ref color, value)) {

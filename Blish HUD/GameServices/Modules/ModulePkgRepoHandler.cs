@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
+using Blish_HUD.Content;
 using Blish_HUD.Controls;
 using Blish_HUD.GameServices;
 using Blish_HUD.Graphics.UI;
@@ -48,11 +49,11 @@ namespace Blish_HUD.Modules {
         /// </summary>
         public IReadOnlyCollection<IPkgRepoProvider> PkgRepos => _repos.AsReadOnly();
 
-        private SettingEntry<string> _defaultRepoUrlSetting;
-        private SettingCollection    _acknowledgedUpdates;
+        private SettingEntry<string> _defaultRepoUrlSetting = null!;
+        private SettingCollection    _acknowledgedUpdates = null!;
 
-        private MenuItem         _repoMenuItem;
-        private IPkgRepoProvider _defaultRepoProvider;
+        private MenuItem         _repoMenuItem = null!;
+        private IPkgRepoProvider _defaultRepoProvider = null!;
 
         internal ModulePkgRepoHandler(ModuleService service) : base(service) { /* NOOP */ }
         
@@ -76,7 +77,7 @@ namespace Blish_HUD.Modules {
             GameService.Overlay.SettingsTab.RegisterSettingMenu(_repoMenuItem, GetRepoView, int.MaxValue - 11);
 
             // TODO: Check all repos
-            _defaultRepoProvider.Load(null).ContinueWith(RepoResultsLoaded);
+            _defaultRepoProvider.Load(null!).ContinueWith(RepoResultsLoaded);
         }
 
         private View GetRepoView(MenuItem repoMenuItem) {
@@ -88,8 +89,8 @@ namespace Blish_HUD.Modules {
         #region Module Update Indicators
 
         private bool GetUpdateIsNotAcknowledged(PkgManifest modulePkg) {
-            if (_acknowledgedUpdates.TryGetSetting(modulePkg.Namespace, out var setting) && setting is SettingEntry<string> acknowledgedModuleUpdate) {
-                return modulePkg.Version > new SemVer.Version(acknowledgedModuleUpdate.Value, true);
+            if (_acknowledgedUpdates.TryGetSetting<string>(modulePkg.Namespace, out var setting) && setting != null) {
+                return modulePkg.Version > new SemVer.Version(setting.Value, true);
             }
 
             return true;
@@ -105,8 +106,8 @@ namespace Blish_HUD.Modules {
                 _repoMenuItem.BasicTooltipText = $"{Strings.GameServices.ModulesService.PkgManagement_Update.Pluralize()}:\n\n{string.Join("\n", _pendingUpdates.Select(GetUpgradePathStringFromRepoPkgGroup))}";
 
                 // Main Blish HUD icon
-                GameService.Overlay.BlishMenuIcon.Icon      = GameService.Content.GetTexture("logo-update");
-                GameService.Overlay.BlishMenuIcon.HoverIcon = GameService.Content.GetTexture("logo-big-update");
+                GameService.Overlay.BlishMenuIcon.Icon = (GameService.Content.GetTexture("logo-update") ?? GameService.Content.GetTexture("logo") ?? ContentService.Textures.Pixel)!;
+                GameService.Overlay.BlishMenuIcon.HoverIcon = (GameService.Content.GetTexture("logo-big-update") ?? GameService.Content.GetTexture("logo-big") ?? ContentService.Textures.Pixel)!;
             } else {
                 // settings menu item indicator
                 _repoMenuItem.Icon             = GameService.Content.GetTexture(TEXTUREREF_REPOMENU);
@@ -114,18 +115,25 @@ namespace Blish_HUD.Modules {
                 _repoMenuItem.BasicTooltipText = null;
 
                 // Main Blish HUD icon
-                GameService.Overlay.BlishMenuIcon.Icon      = GameService.Content.GetTexture("logo");
-                GameService.Overlay.BlishMenuIcon.HoverIcon = GameService.Content.GetTexture("logo-big");
+                GameService.Overlay.BlishMenuIcon.Icon = (GameService.Content.GetTexture("logo") ?? GameService.Content.GetTexture("common/button-states") ?? ContentService.Textures.Pixel)!;
+                GameService.Overlay.BlishMenuIcon.HoverIcon = (GameService.Content.GetTexture("logo-big") ?? GameService.Content.GetTexture("common/button-states") ?? ContentService.Textures.Pixel)!;
             }
         }
 
         private void AcknowledgePendingModuleUpdates() {
             // Mark all updates as acknowledged
             foreach (var unacknowledgedModuleUpdate in this.UnacknowledgedUpdates) {
-                if (!_acknowledgedUpdates.TryGetSetting<string>(unacknowledgedModuleUpdate.Namespace, out SettingEntry<string> acknowledgementEntry)) {
+                SettingEntry<string> acknowledgementEntry;
+                
+                // Try to get existing setting entry or create a new one
+                if (_acknowledgedUpdates.TryGetSetting<string>(unacknowledgedModuleUpdate.Namespace, out var existingEntry) && existingEntry != null) {
+                    acknowledgementEntry = existingEntry;
+                } else {
+                    // Create new setting entry if it doesn't exist - DefineSetting never returns null
                     acknowledgementEntry = _acknowledgedUpdates.DefineSetting(unacknowledgedModuleUpdate.Namespace, "0.0.0");
                 }
 
+                // Update the setting - acknowledgementEntry is guaranteed to be non-null
                 acknowledgementEntry.Value = unacknowledgedModuleUpdate.Version.ToString();
             }
 
@@ -144,9 +152,9 @@ namespace Blish_HUD.Modules {
 
         private string GetUpgradePathStringFromRepoPkgGroup(IGrouping<string, PkgManifest> pkgGroup) {
             var latest = pkgGroup.Last();
-            var current = _service.Modules.FirstOrDefault(module => string.Equals(module.Manifest.Namespace, latest.Namespace, StringComparison.OrdinalIgnoreCase));
+            var current = _service?.Modules?.FirstOrDefault(module => string.Equals(module.Manifest?.Namespace, latest.Namespace, StringComparison.OrdinalIgnoreCase));
 
-            if (current != null) {
+            if (current?.Manifest?.Version != null) {
                 return $"{latest.Name} v{current.Manifest.Version} -> v{latest.Version}";
             }
 
@@ -158,13 +166,17 @@ namespace Blish_HUD.Modules {
 
         #region Module Install/Replace/Remove from PkgManifest
 
-        private ModuleManager FinalizeInstalledPackage(ModuleManager existingModule, string newModulePath) {
+        private ModuleManager? FinalizeInstalledPackage(ModuleManager? existingModule, string newModulePath) {
             existingModule?.DeleteModule();
 
             return GameService.Module.RegisterPackedModule(newModulePath);
         }
 
-        public async Task<(ModuleManager NewModule, bool Success, string Error)> ReplacePackage(PkgManifest pkgManifest, ModuleManager existingModule, IProgress<string> progress = null) {
+        public async Task<(ModuleManager? NewModule, bool Success, string Error)> ReplacePackage(PkgManifest pkgManifest, ModuleManager? existingModule, IProgress<string>? progress = null) {
+            if (existingModule == null) {
+                return (null, false, "Existing module cannot be null for replacement.");
+            }
+
             Logger.Info($"Package replacement initiated for {existingModule.Manifest.GetDetailedName()}.");
 
             bool wasEnabled = existingModule.Enabled;
@@ -176,9 +188,9 @@ namespace Blish_HUD.Modules {
 
             progress?.Report(Strings.GameServices.ModulesService.PkgInstall_Progress_Upgrading);
 
-            string moduleName = Path.GetFileName(existingModule.DataReader.PhysicalPath);
+            string? moduleName = Path.GetFileName(existingModule.DataReader.PhysicalPath);
 
-            if (moduleName == null || !moduleName.EndsWith(".bhm", StringComparison.InvariantCultureIgnoreCase)) {
+            if (string.IsNullOrEmpty(moduleName) || !moduleName.EndsWith(".bhm", StringComparison.InvariantCultureIgnoreCase)) {
                 // Module might be a directory one - not supported
                 Logger.Warn($"'{existingModule.DataReader.PhysicalPath}' could not be updated.  Module type may not support updates.");
 
@@ -188,16 +200,19 @@ namespace Blish_HUD.Modules {
 
             var installResult = await InstallPackage(pkgManifest, existingModule, progress);
 
-            if (wasEnabled) {
+            if (wasEnabled && existingModule?.Manifest?.Namespace != null) {
                 // Ensure that module is set to enabled for when Blish HUD restarts
-                GameService.Module.ModuleStates.Value[existingModule.Manifest.Namespace].Enabled = true;
-                GameService.Settings.Save();
+                var moduleStates = GameService.Module?.ModuleStates?.Value;
+                if (moduleStates?.ContainsKey(existingModule.Manifest.Namespace) == true) {
+                    moduleStates[existingModule.Manifest.Namespace].Enabled = true;
+                    GameService.Settings?.Save();
+                }
             }
 
             return installResult;
         }
 
-        public async Task<(ModuleManager NewModule, bool Success, string Error)> InstallPackage(PkgManifest pkgManifest, ModuleManager existingModule = null, IProgress<string> progress = null) {
+        public async Task<(ModuleManager? NewModule, bool Success, string Error)> InstallPackage(PkgManifest pkgManifest, ModuleManager? existingModule = null, IProgress<string>? progress = null) {
             Logger.Debug("Install package action.");
 
             progress?.Report(Strings.GameServices.ModulesService.PkgInstall_Progress_Installing);

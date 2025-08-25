@@ -6,7 +6,7 @@ namespace Blish_HUD.Settings.UI.Views {
 
         private const int CONTROL_PADDING = 5;
 
-        private Checkbox _boolCheckbox;
+        private Checkbox _boolCheckbox = null!;
 
         public BoolSettingView(SettingEntry<bool> setting, int definedWidth = -1) : base(setting, definedWidth) { /* NOOP */ }
 

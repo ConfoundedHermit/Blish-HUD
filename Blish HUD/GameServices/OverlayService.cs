@@ -31,52 +31,52 @@ namespace Blish_HUD {
 
         internal const int FORCE_EXIT_TIMEOUT = 4000;
 
-        public event EventHandler<ValueEventArgs<CultureInfo>> UserLocaleChanged;
+        public event EventHandler<ValueEventArgs<CultureInfo>>? UserLocaleChanged;
 
         /// <summary>
         /// Details and processing for automatic self updates.
         /// </summary>
-        internal OverlayUpdateHandler OverlayUpdateHandler { get; private set; }
+        internal OverlayUpdateHandler OverlayUpdateHandler { get; private set; } = null!;
 
-        public TabbedWindow     BlishHudWindow   { get; private set; }
-        public CornerIcon       BlishMenuIcon    { get; private set; }
+        public TabbedWindow     BlishHudWindow   { get; private set; } = null!;
+        public CornerIcon       BlishMenuIcon    { get; private set; } = null!;
         
         public  GameTime CurrentGameTime { get; private set; } = new GameTime(TimeSpan.Zero, TimeSpan.Zero);
 
-        internal SettingCollection OverlaySettings { get; private set; }
-        internal SettingCollection DynamicHUDSettings { get; private set; }
+        internal SettingCollection OverlaySettings { get; private set; } = null!;
+        internal SettingCollection DynamicHUDSettings { get; private set; } = null!;
 
-        public SettingEntry<Locale> UserLocale    { get; private set; }
-        public SettingEntry<bool>   StayInTray    { get; private set; }
-        public SettingEntry<bool>   ShowInTaskbar { get; private set; }
-        internal SettingEntry<KeyBinding> InteractKey { get; private set; }
-        public SettingEntry<KeyBinding> ToggleBlishWindow { get; private set; }
-        public SettingEntry<bool>   CloseWindowOnEscape { get; private set; }
-        public SettingEntry<KeyBinding> HideAllInterface { get; private set; }
-        internal SettingEntry<bool> ShowPreviews { get; private set; }
+        public SettingEntry<Locale> UserLocale    { get; private set; } = null!;
+        public SettingEntry<bool>   StayInTray    { get; private set; } = null!;
+        public SettingEntry<bool>   ShowInTaskbar { get; private set; } = null!;
+        internal SettingEntry<KeyBinding> InteractKey { get; private set; } = null!;
+        public SettingEntry<KeyBinding> ToggleBlishWindow { get; private set; } = null!;
+        public SettingEntry<bool>   CloseWindowOnEscape { get; private set; } = null!;
+        public SettingEntry<KeyBinding> HideAllInterface { get; private set; } = null!;
+        internal SettingEntry<bool> ShowPreviews { get; private set; } = null!;
 
         public bool InterfaceHidden = false;
 
         private readonly ConcurrentQueue<Action<GameTime>> _queuedUpdates = new ConcurrentQueue<Action<GameTime>>();
 
 
-        private SettingEntry<DynamicHUDMethod> _dynamicHUDMenuBar;
+        private SettingEntry<DynamicHUDMethod> _dynamicHUDMenuBar = null!;
         public DynamicHUDMethod DynamicHUDMenuBar {
             get => _dynamicHUDMenuBar.Value;
             set => _dynamicHUDMenuBar.Value = value;
         }
-        private SettingEntry<DynamicHUDMethod> _dynamicHUDWindows;
+        private SettingEntry<DynamicHUDMethod> _dynamicHUDWindows = null!;
         public DynamicHUDMethod DynamicHUDWindows {
             get => _dynamicHUDWindows.Value;
             set => _dynamicHUDWindows.Value = value;
         }
-        private SettingEntry<DynamicHUDMethod> _dynamicHUDLoading;
+        private SettingEntry<DynamicHUDMethod> _dynamicHUDLoading = null!;
         public DynamicHUDMethod DynamicHUDLoading {
             get => _dynamicHUDLoading.Value;
             set => _dynamicHUDLoading.Value = value;
         }
 
-        public OverlaySettingsTab SettingsTab { get; private set; }
+        public OverlaySettingsTab SettingsTab { get; private set; } = null!;
 
         /// <summary>
         /// Indicates that Blish HUD is actively attempting to exit.
@@ -338,16 +338,21 @@ namespace Blish_HUD {
         }
 
         private void BuildCornerIcon() {
-            this.BlishMenuIcon = new CornerIcon(Content.GetTexture("logo"), Content.GetTexture("logo-big"), Strings.Common.BlishHUD) {
-                Priority = int.MaxValue,
-                Parent   = Graphics.SpriteScreen,
-            };
+            var logoTexture = Content.GetTexture("logo");
+            var logoBigTexture = Content.GetTexture("logo-big");
+            
+            if (logoTexture != null) {
+                this.BlishMenuIcon = new CornerIcon(logoTexture!, logoBigTexture, Strings.Common.BlishHUD) {
+                    Priority = int.MaxValue,
+                    Parent   = Graphics.SpriteScreen,
+                };
 
-            this.BlishMenuIcon.Menu = new ContextMenuStrip(GetOverlayContextMenuItems);
+                this.BlishMenuIcon.Menu = new ContextMenuStrip(GetOverlayContextMenuItems);
 
-            this.BlishMenuIcon.LeftMouseButtonReleased += delegate {
-                this.BlishHudWindow.ToggleWindow();
-            };
+                this.BlishMenuIcon.LeftMouseButtonReleased += delegate {
+                    this.BlishHudWindow.ToggleWindow();
+                };
+            }
         }
 
         private IEnumerable<ContextMenuStripItem> GetOverlayContextMenuItems() {

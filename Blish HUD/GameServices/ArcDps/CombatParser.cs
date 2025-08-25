@@ -7,11 +7,11 @@ namespace Blish_HUD.ArcDps {
     internal static class CombatParser {
 
         public static CombatEvent ProcessCombat(byte[] data) {
-            Ev     ev        = null;
-            Ag     src       = null;
-            Ag     dst       = null;
-            string skillName = null;
-            int    offset    = 2;
+            Ev?     ev        = null;
+            Ag?     src       = null;
+            Ag?     dst       = null;
+            string? skillName = null;
+            int     offset    = 2;
 
             if ((byte) (data[1] & (byte) CombatMessageFlags.Ev) == (byte) CombatMessageFlags.Ev) (ev, offset) = ParseEv(data, offset);
 
@@ -25,7 +25,7 @@ namespace Blish_HUD.ArcDps {
             ulong revision = BitConverter.ToUInt64(data, offset + 8);
 
             return new CombatEvent(
-                                   ev, src, dst, skillName, id,
+                                   ev!, src!, dst!, skillName!, id,
                                    revision
                                   );
         }

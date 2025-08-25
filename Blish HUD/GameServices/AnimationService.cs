@@ -6,7 +6,7 @@ using Microsoft.Xna.Framework;
 namespace Blish_HUD {
     public class AnimationService:GameService {
 
-        public Glide.Tweener Tweener { get; private set; }
+        public Glide.Tweener Tweener { get; private set; } = null!;
 
         protected override void Initialize() {
             Glide.Tween.TweenerImpl.SetLerper<Library.Glide.CustomLerpers.PointLerper>(typeof(Point));

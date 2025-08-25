@@ -24,9 +24,9 @@ namespace Blish_HUD.Content {
         private const int    RETRY_DELAY  = 2000;
         private const double RETRY_RELOAD = 5000d;
 
-        private Point[]                           _textureSizes;
-        private Dictionary<int, TextureReference> _textureReferences;
-        private Texture2D[]                       _transparentTextures;
+        private Point[] _textureSizes = null!;
+        private Dictionary<int, TextureReference> _textureReferences = null!;
+        private Texture2D[] _transparentTextures = null!;
 
         private double _retryTokens = RETRY_COUNT;
 
@@ -34,7 +34,7 @@ namespace Blish_HUD.Content {
 
             public int SizeReference { get; }
 
-            public WeakReference<AsyncTexture2D> Texture { get; set; }
+            public WeakReference<AsyncTexture2D>? Texture { get; set; }
 
             public TextureReference(int sizeReference) {
                 this.SizeReference = sizeReference;
@@ -42,10 +42,10 @@ namespace Blish_HUD.Content {
 
         }
 
-        private readonly string _assetCachePath;
+        private readonly string _assetCachePath = string.Empty;
 
         internal DatAssetCache(ContentService service) : base(service) {
-            _assetCachePath = DirectoryUtil.RegisterDirectory(DirectoryUtil.CachePath, ASSETCACHE_PATH);
+            _assetCachePath = DirectoryUtil.RegisterDirectory(DirectoryUtil.CachePath, ASSETCACHE_PATH) ?? string.Empty;
 
             // We must load ASAP
             EarlyLoad();
@@ -56,7 +56,7 @@ namespace Blish_HUD.Content {
 
             if (datReader.FileExists(METADATA_FILE)) {
                 try {
-                    return datReader.GetFileStream(METADATA_FILE);
+                    return datReader.GetFileStream(METADATA_FILE) ?? Stream.Null;
                 } catch (Exception ex) {
                     Logger.Warn(ex, "Failed to load {metadataFile} from the ref.dat.", METADATA_FILE);
                 }
@@ -138,14 +138,14 @@ namespace Blish_HUD.Content {
         private string ReportDebug(GameTime gameTime) {
             // This reporting isn't particularly fast, so we only do it every 2 seconds (only gets called in debug, anyways)
             if (gameTime.TotalGameTime.TotalMilliseconds - _lastDebugReport > 2000) {
-                _lastDebugString = null;
+                _lastDebugString = string.Empty;
                 _lastDebugReport = gameTime.TotalGameTime.TotalMilliseconds;
             }
 
-            return _lastDebugString ??= "Loaded Asset Textures: " + _textureReferences.Values.Count(tf => 
+            return _lastDebugString ??= "Loaded Asset Textures: " + (_textureReferences?.Values.Count(tf => 
                                                                                                           tf.Texture != null 
                                                                                                        && tf.Texture.TryGetTarget(out var texture) 
-                                                                                                       && !texture.IsDisposed);
+                                                                                                       && !texture.IsDisposed) ?? 0);
         }
 
         public override void Update(GameTime gameTime) {
@@ -253,21 +253,22 @@ namespace Blish_HUD.Content {
         public AsyncTexture2D GetTextureFromAssetId(int assetId) {
             if (_textureReferences.TryGetValue(assetId, out var textureReference)) {
                 lock (textureReference) {
-                    AsyncTexture2D texture = null;
+                    AsyncTexture2D? texture = null;
 
                     if (textureReference.Texture == null) {
                         textureReference.Texture = new WeakReference<AsyncTexture2D>(texture = LoadTexture(assetId, textureReference));
-                    } else if (!textureReference.Texture.TryGetTarget(out texture) || texture.Texture.IsDisposed) {
+                    } else if (!textureReference.Texture.TryGetTarget(out texture) || texture?.Texture.IsDisposed == true) {
                         textureReference.Texture.SetTarget(texture = LoadTexture(assetId, textureReference));
                     }
 
-                    return texture;
+                    return texture ?? LoadTexture(assetId, textureReference);
                 }
             }
 
             Logger.Info("Failed to get assetId: " + assetId);
 
-            return null;
+            // Return a transparent texture as fallback
+            return new AsyncTexture2D(ContentService.Textures.TransparentPixel);
         }
 
         /// <summary>
@@ -276,9 +277,13 @@ namespace Blish_HUD.Content {
         /// or <c>false</c> if no such asset texture exists.
         /// </summary>
         public bool TryGetTextureFromAssetId(int assetId, out AsyncTexture2D texture) {
-            texture = GetTextureFromAssetId(assetId);
+            if (_textureReferences.ContainsKey(assetId)) {
+                texture = GetTextureFromAssetId(assetId);
+                return true;
+            }
 
-            return texture != null;
+            texture = new AsyncTexture2D(ContentService.Textures.TransparentPixel);
+            return false;
         }
 
     }

@@ -24,12 +24,12 @@ namespace Blish_HUD.ArcDps.Common {
         /// <summary>
         ///     Gets invoked whenever someone joins the squad or group.
         /// </summary>
-        public event PresentPlayersChange PlayerAdded;
+        public event PresentPlayersChange? PlayerAdded;
 
         /// <summary>
         ///     Gets invoked whenever someone leaves the squad or group.
         /// </summary>
-        public event PresentPlayersChange PlayerRemoved;
+        public event PresentPlayersChange? PlayerRemoved;
 
         /// <summary>
         ///     Activates the <see cref="CommonFields" /> service.

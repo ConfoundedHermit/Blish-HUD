@@ -70,7 +70,7 @@ namespace Blish_HUD.Controls {
             set => SetProperty(ref _canResize, value);
         }
 
-        protected Texture2D _emblem = null;
+        protected Texture2D _emblem = null!;
         /// <summary>
         /// The emblem/badge displayed in the top left corner of the window.
         /// </summary>
@@ -101,7 +101,7 @@ namespace Blish_HUD.Controls {
             set => SetProperty(ref _savesPosition, value);
         }
 
-        private string _id;
+        private string _id = string.Empty;
         /// <summary>
         /// A unique id to identify the window.  Used with <see cref="SavesPosition"/> as a unique
         /// identifier to remember where the window is positioned.
@@ -115,7 +115,7 @@ namespace Blish_HUD.Controls {
 
         protected bool StandardWindow = false;
 
-        private Panel _activePanel;
+        private Panel _activePanel = null!;
         public Panel ActivePanel {
             get => _activePanel;
             set {
@@ -149,7 +149,7 @@ namespace Blish_HUD.Controls {
 
         #region Window Construction
 
-        protected Texture2D _windowBackground;
+        protected Texture2D _windowBackground = null!;
         protected Vector2   _windowBackgroundOrigin;
         protected Rectangle _windowBackgroundBounds;
         protected Rectangle _titleBarBounds;

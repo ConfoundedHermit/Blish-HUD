@@ -21,7 +21,13 @@ namespace Blish_HUD.Settings.UI.Presenters {
         private void OnRegistrarListChanged(object sender, EventArgs e) => UpdateView();
 
         private void OnMenuItemSelected(object sender, ControlActivatedEventArgs e) {
-            this.View.SetSettingView(this.Model.GetMenuItemView(e.ActivatedControl as MenuItem));
+            var menuItem = e.ActivatedControl as MenuItem;
+            if (menuItem != null) {
+                var view = this.Model.GetMenuItemView(menuItem);
+                if (view != null) {
+                    this.View.SetSettingView(view);
+                }
+            }
         }
 
         protected override void UpdateView() {

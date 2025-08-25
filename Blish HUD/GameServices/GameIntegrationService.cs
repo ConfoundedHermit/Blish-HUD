@@ -59,22 +59,22 @@ namespace Blish_HUD {
         }
 
         [Obsolete("Use GameIntegration.Gw2Instance.Gw2Closed (0.11.0+) instead.")]
-        public event EventHandler<EventArgs> Gw2Closed;
+        public event EventHandler<EventArgs>? Gw2Closed;
 
         [Obsolete("Use GameIntegration.Gw2Instance.Gw2Started (0.11.0+) instead.")]
-        public event EventHandler<EventArgs> Gw2Started;
+        public event EventHandler<EventArgs>? Gw2Started;
 
 
         [Obsolete("Use GameIntegration.Gw2Instance.Gw2AcquiredFocus (0.11.0+) instead.")]
-        public event EventHandler<EventArgs> Gw2AcquiredFocus;
+        public event EventHandler<EventArgs>? Gw2AcquiredFocus;
 
         [Obsolete("Use GameIntegration.Gw2Instance.Gw2LostFocus (0.11.0+) instead.")]
-        public event EventHandler<EventArgs> Gw2LostFocus;
+        public event EventHandler<EventArgs>? Gw2LostFocus;
 
         [Obsolete("Use GameIntegration.Gw2Instance.IsInGameChanged (0.11.0+) instead.")]
-        public event EventHandler<ValueEventArgs<bool>> IsInGameChanged;
+        public event EventHandler<ValueEventArgs<bool>>? IsInGameChanged;
         
-        public IGameChat Chat { get; private set; }
+        public IGameChat Chat { get; private set; } = null!;
 
         [Obsolete("Use GameIntegration.Gw2Instance.IsInGame (0.11.0+) instead.")]
         public bool IsInGame => this.Gw2Instance.IsInGame;
@@ -89,17 +89,17 @@ namespace Blish_HUD {
         public IntPtr Gw2WindowHandle => this.Gw2Instance.Gw2WindowHandle;
 
         [Obsolete("Use GameIntegration.Gw2Instance.Gw2ExecutablePath (0.11.0+) instead.")]
-        public string Gw2ExecutablePath => this.Gw2Instance.Gw2ExecutablePath;
+        public string Gw2ExecutablePath => this.Gw2Instance?.Gw2ExecutablePath ?? "";
 
         [Obsolete("Use GameIntegration.Gw2Instance.Gw2Process (0.11.0+) instead.")]
-        public Process Gw2Process => this.Gw2Instance.Gw2Process;
+        public Process? Gw2Process => this.Gw2Instance.Gw2Process;
 
         [Obsolete("Use GameIntegration.Gw2Instance.FocusGw2() (0.11.0+) instead.")]
         public void FocusGw2() => this.Gw2Instance.FocusGw2();
 
         #endregion
 
-        internal SettingCollection ServiceSettings { get; private set; }
+        internal SettingCollection ServiceSettings { get; private set; } = null!;
 
         internal GameIntegrationService() {
             SetServiceModules(this.Gw2Instance = new Gw2InstanceIntegration(this),
@@ -117,7 +117,7 @@ namespace Blish_HUD {
         }
 
         protected override void Load() {
-            BlishHud.Instance.Form.Shown += delegate {
+            BlishHud.Instance.Form!.Shown += delegate {
                 WindowUtil.SetupOverlay(BlishHud.Instance.FormHandle);
             };
 
@@ -254,7 +254,7 @@ namespace Blish_HUD {
                 // More checks? (Symbols: https://wiki.guildwars2.com/wiki/User:MithranArkanere/Charset)
             }
             private bool IsBusy() {
-                return !GameIntegration.Gw2Instance.Gw2IsRunning || !GameIntegration.Gw2Instance.Gw2HasFocus || !GameIntegration.Gw2Instance.IsInGame;
+                return GameIntegration?.Gw2Instance == null || !GameIntegration.Gw2Instance.Gw2IsRunning || !GameIntegration.Gw2Instance.Gw2HasFocus || !GameIntegration.Gw2Instance.IsInGame;
             }
         }
         #endregion

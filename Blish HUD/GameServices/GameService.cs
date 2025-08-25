@@ -25,7 +25,7 @@ namespace Blish_HUD {
 
         public static IReadOnlyList<GameService> All => _allServices;
 
-        public event EventHandler<EventArgs> FinishedLoading;
+        public event EventHandler<EventArgs>? FinishedLoading;
 
         protected virtual void OnFinishedLoading(EventArgs e) {
             this.FinishedLoading?.Invoke(this, e);
@@ -36,7 +36,7 @@ namespace Blish_HUD {
         protected abstract void Unload();
         protected abstract void Update(GameTime gameTime);
 
-        private protected BlishHud ActiveBlishHud;
+        private protected BlishHud ActiveBlishHud = null!;
 
         public bool Loaded { get; private set; }
 

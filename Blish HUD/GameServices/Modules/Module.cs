@@ -15,10 +15,10 @@ namespace Blish_HUD.Modules {
 
         #region Module Events
 
-        public event EventHandler<ModuleRunStateChangedEventArgs> ModuleRunStateChanged;
-        public event EventHandler<EventArgs>                      ModuleLoaded;
+        public event EventHandler<ModuleRunStateChangedEventArgs>? ModuleRunStateChanged;
+        public event EventHandler<EventArgs>?                      ModuleLoaded;
 
-        public event EventHandler<UnobservedTaskExceptionEventArgs> ModuleException;
+        public event EventHandler<UnobservedTaskExceptionEventArgs>? ModuleException;
 
         internal void OnModuleRunStateChanged(ModuleRunStateChangedEventArgs e) {
             if (ModuleParameters != null) {
@@ -65,7 +65,7 @@ namespace Blish_HUD.Modules {
 
         public bool Loaded => _runState == ModuleRunState.Loaded;
 
-        internal string ErrorReason { get; set; }
+        internal string ErrorReason { get; set; } = "";
 
         #region Manifest & Parameter Aliases
 
@@ -79,7 +79,7 @@ namespace Blish_HUD.Modules {
 
         #endregion
 
-        private Task _loadTask;
+        private Task? _loadTask;
 
         [ImportingConstructor]
         protected Module([Import("ModuleParameters")] ModuleParameters moduleParameters) {
@@ -106,6 +106,8 @@ namespace Blish_HUD.Modules {
         }
 
         private void CheckForLoaded() {
+            if (_loadTask == null) return;
+            
             switch (_loadTask.Status) {
                 case TaskStatus.Faulted:
                     var loadError = new UnobservedTaskExceptionEventArgs(_loadTask.Exception);

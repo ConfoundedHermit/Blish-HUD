@@ -11,7 +11,7 @@ namespace Blish_HUD.Controls {
         /// <summary>
         /// The <see cref="IView"/> this container is currently displaying.
         /// </summary>
-        IView CurrentView { get; }
+        IView? CurrentView { get; }
 
     }
 }

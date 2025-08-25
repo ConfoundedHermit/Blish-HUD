@@ -12,25 +12,25 @@ namespace Blish_HUD.Modules.Pkgs {
         // Required attributes
 
         [JsonProperty("name", Required = Required.Always)]
-        public string Name { get; private set; }
+        public string Name { get; private set; } = null!;
 
         [JsonProperty("namespace", Required = Required.Always)]
-        public string Namespace { get; private set; }
+        public string Namespace { get; private set; } = null!;
 
         [JsonProperty("version", Required = Required.Always), JsonConverter(typeof(Content.Serialization.SemVerConverter))]
-        public SemVer.Version Version { get; private set; }
+        public SemVer.Version Version { get; private set; } = null!;
         
         [JsonProperty("contributors", Required = Required.Always)]
-        public List<ModuleContributor> Contributors { get; private set; }
+        public List<ModuleContributor> Contributors { get; private set; } = null!;
 
         [JsonProperty("dependencies", NullValueHandling = NullValueHandling.Ignore), JsonConverter(typeof(ModuleDependency.VersionDependenciesConverter))]
         public List<ModuleDependency> Dependencies { get; private set; } = new List<ModuleDependency>(0);
 
         [JsonProperty("location", Required = Required.Always)]
-        public string Location { get; set; }
+        public string Location { get; set; } = null!;
 
         [JsonProperty("hash", Required = Required.Always)]
-        public string Hash { get; set; }
+        public string Hash { get; set; } = null!;
 
         [JsonProperty("ispreview", Required = Required.Default)]
         public bool IsPreview { get; set; }

@@ -35,7 +35,7 @@ namespace Blish_HUD.Controls {
             _stack.Clear();
         }
 
-        public UndoRedoRecord Pop() {
+        public UndoRedoRecord? Pop() {
             if (_stack.Count == 0) return null;
 
             return _stack.Pop();

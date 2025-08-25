@@ -68,7 +68,7 @@ namespace Blish_HUD.Controls {
 
         private (Point Position, int DownOffset, int UpOffset) _targetOffset;
 
-        protected Func<IEnumerable<ContextMenuStripItem>> GetItemsDelegate { get; private set; }
+        protected Func<IEnumerable<ContextMenuStripItem>>? GetItemsDelegate { get; private set; }
 
         public ContextMenuStrip() {
             this.Visible = false;
@@ -136,7 +136,9 @@ namespace Blish_HUD.Controls {
             if (activeControl is ContextMenuStripItem parentMenu) {
                 SetPositionFromOffset(_targetOffset = (new Point(parentMenu.AbsoluteBounds.Right - 3, parentMenu.AbsoluteBounds.Top), 19, 0));
 
-                this.ZIndex = parentMenu.Parent.ZIndex + 1;
+                if (parentMenu.Parent != null) {
+                    this.ZIndex = parentMenu.Parent.ZIndex + 1;
+                }
             } else {
                 SetPositionFromOffset(_targetOffset = (activeControl.AbsoluteBounds.Location, 0, activeControl.Height));
             }

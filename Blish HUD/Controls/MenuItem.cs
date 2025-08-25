@@ -27,12 +27,12 @@ namespace Blish_HUD.Controls {
 
         #region Events
 
-        public event EventHandler<ControlActivatedEventArgs> ItemSelected;
+        public event EventHandler<ControlActivatedEventArgs>? ItemSelected;
         protected virtual void OnItemSelected(ControlActivatedEventArgs e) {
             this.ItemSelected?.Invoke(this, e);
         }
 
-        public event EventHandler<CheckChangedEvent> CheckedChanged;
+        public event EventHandler<CheckChangedEvent>? CheckedChanged;
         protected virtual void OnCheckedChanged(CheckChangedEvent e) {
             this.CheckedChanged?.Invoke(this, e);
         }
@@ -64,10 +64,12 @@ namespace Blish_HUD.Controls {
 
         public bool Selected => _selectedMenuItem == this;
 
-        protected MenuItem _selectedMenuItem;
-        public MenuItem SelectedMenuItem {
+        protected MenuItem? _selectedMenuItem;
+        public MenuItem? SelectedMenuItem {
             get => _selectedMenuItem;
         }
+        
+        MenuItem IMenuItem.SelectedMenuItem => _selectedMenuItem ?? throw new InvalidOperationException("No menu item is currently selected.");
 
         protected int _menuDepth = 0;
         protected int MenuDepth {
@@ -75,14 +77,14 @@ namespace Blish_HUD.Controls {
             set => SetProperty(ref _menuDepth, value);
         }
 
-        protected string _text;
+        protected string _text = string.Empty;
         public string Text {
             get => _text;
             set => SetProperty(ref _text, value);
         }
 
-        protected AsyncTexture2D _icon;
-        public AsyncTexture2D Icon {
+        protected AsyncTexture2D? _icon;
+        public AsyncTexture2D? Icon {
             get => _icon;
             set => SetProperty(ref _icon, value);
         }
@@ -168,14 +170,14 @@ namespace Blish_HUD.Controls {
 
         #endregion
 
-        private Glide.Tween                      _slideAnim;
-        private Effects.ScrollingHighlightEffect _scrollEffect;
+        private Glide.Tween?                     _slideAnim;
+        private Effects.ScrollingHighlightEffect _scrollEffect = null!;
 
         public MenuItem() : this("", null) { /* NOOP */ }
 
         public MenuItem(string text) : this(text, null) { /* NOOP */ }
 
-        public MenuItem(string text, AsyncTexture2D icon) {
+        public MenuItem(string text, AsyncTexture2D? icon) {
             _text = text;
             _icon = icon;
 
@@ -397,7 +399,7 @@ namespace Blish_HUD.Controls {
             if (!_children.IsEmpty)
                 DrawDropdownArrow(spriteBatch);
 
-            TextureRegion2D firstItemSprite = null;
+            TextureRegion2D? firstItemSprite = null;
 
             if (this.CanCheck) {
                 string state = this.Checked ? "-checked" : "-unchecked";

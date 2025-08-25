@@ -65,7 +65,7 @@ namespace Blish_HUD.Controls.Effects {
 
         private readonly Effect _scrollEffect;
 
-        private Glide.Tween _shaderAnim;
+        private Glide.Tween? _shaderAnim;
         private bool _mouseOver = false;
 
         public ScrollingHighlightEffect(Control assignedControl) : base(assignedControl) {
@@ -116,11 +116,11 @@ namespace Blish_HUD.Controls.Effects {
 
         protected override void OnEnable() {
             if (this.AssignedControl.MouseOver)
-                AssignedControlOnMouseEntered(this.AssignedControl, null);
+                AssignedControlOnMouseEntered(this.AssignedControl, null!);
         }
 
         protected override void OnDisable() {
-            AssignedControlOnMouseLeft(this.AssignedControl, null);
+            AssignedControlOnMouseLeft(this.AssignedControl, null!);
         }
 
         public override void PaintEffect(SpriteBatch spriteBatch, Rectangle bounds) {

@@ -12,20 +12,20 @@ namespace Blish_HUD.GameIntegration {
 
         private static readonly Logger Logger = Logger.GetLogger<WinFormsIntegration>();
 
-        private Form _formWrapper;
+        private Form _formWrapper = null!;
 
-        private NotifyIcon _trayIcon;
+        private NotifyIcon _trayIcon = null!;
 
-        private ToolStripItem _launchGw2Tsi;
-        private ToolStripItem _launchGw2AutoTsi;
-        private ToolStripItem _openBlishSettingsFolder;
-        private ToolStripItem _openBlishProgramDataFolder;
-        private ToolStripItem _exitTsi;
+        private ToolStripItem _launchGw2Tsi = null!;
+        private ToolStripItem _launchGw2AutoTsi = null!;
+        private ToolStripItem _openBlishSettingsFolder = null!;
+        private ToolStripItem _openBlishProgramDataFolder = null!;
+        private ToolStripItem _exitTsi = null!;
 
         /// <summary>
         /// The menu displayed when the tray icon is right-clicked.
         /// </summary>
-        public ContextMenuStrip TrayIconMenu { get; private set; }
+        public ContextMenuStrip TrayIconMenu { get; private set; } = null!;
 
         internal WinFormsIntegration(GameIntegrationService service) : base(service) { /* NOOP */ }
 
@@ -37,9 +37,11 @@ namespace Blish_HUD.GameIntegration {
 
         private void WrapMainForm() {
             _formWrapper = new Form();
-            BlishHud.Instance.Form.Hide();
-            BlishHud.Instance.Form.Show(_formWrapper);
-            BlishHud.Instance.Form.Visible = false;
+            BlishHud.Instance.Form?.Hide();
+            BlishHud.Instance.Form?.Show(_formWrapper);
+            if (BlishHud.Instance.Form != null) {
+                BlishHud.Instance.Form.Visible = false;
+            }
         }
 
         internal void SetShowInTaskbar(bool showInTaskbar) {

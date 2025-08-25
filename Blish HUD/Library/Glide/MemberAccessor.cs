@@ -8,17 +8,17 @@ namespace Glide {
         public Type MemberType { get; private set; }
 
         public void SetValue(object target, object value) {
-            setMethod(target, value);
+            setMethod?.Invoke(target, value);
         }
 
         public object GetValue(object target) {
-            return getMethod(target);
+            return getMethod?.Invoke(target) ?? throw new InvalidOperationException("Get method is not available");
         }
 
         public MemberAccessor(object target, string name, bool writeRequired = true) {
             var T = target.GetType();
-            PropertyInfo propInfo = null;
-            FieldInfo fieldInfo = null;
+            PropertyInfo? propInfo = null;
+            FieldInfo? fieldInfo = null;
 
             if ((propInfo = T.GetProperty(name, flags)) != null) {
                 this.MemberType = propInfo.PropertyType;
@@ -69,8 +69,8 @@ namespace Glide {
             }
         }
 
-        protected Func<object, object> getMethod;
-        protected Action<object, object> setMethod;
+        protected Func<object, object>? getMethod = null;
+        protected Action<object, object>? setMethod = null;
         private static BindingFlags flags = BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.Static;
     }
 }

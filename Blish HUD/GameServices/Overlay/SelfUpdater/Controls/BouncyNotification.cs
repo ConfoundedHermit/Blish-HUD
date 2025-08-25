@@ -25,8 +25,8 @@ namespace Blish_HUD.Overlay.SelfUpdater.Controls {
             set => SetProperty(ref _chestTexture, value);
         }
 
-        private AsyncTexture2D _openChestTexture;
-        public AsyncTexture2D OpenChestTexture {
+        private AsyncTexture2D? _openChestTexture;
+        public AsyncTexture2D? OpenChestTexture {
             get => _openChestTexture;
             set => SetProperty(ref _openChestTexture, value);
         }
@@ -41,9 +41,9 @@ namespace Blish_HUD.Overlay.SelfUpdater.Controls {
         private bool  _nonOpp          = false;
         private float _rotation        = 0f;
 
-        public BouncyNotification(AsyncTexture2D chestTexture, AsyncTexture2D openChestTexture = null) {
+        public BouncyNotification(AsyncTexture2D chestTexture, AsyncTexture2D? openChestTexture = null) {
             _chestTexture     = chestTexture;
-            _openChestTexture = openChestTexture;
+            _openChestTexture = openChestTexture ?? chestTexture; // Use chestTexture as fallback if openChestTexture is null
 
             this.Size             = new Point(64, 64);
             this.ClipsBounds      = false;
@@ -79,7 +79,7 @@ namespace Blish_HUD.Overlay.SelfUpdater.Controls {
             }
 
             spriteBatch.DrawOnCtrl(this, _shineTexture, bounds.ScaleBy(1.5f).OffsetBy(bounds.Width / 2, bounds.Height / 2), null, Color.White * 0.8f, (float)GameService.Overlay.CurrentGameTime.TotalGameTime.TotalSeconds * -1.3f, _shineTexture.Bounds.Size.ToVector2() / 2);
-            spriteBatch.DrawOnCtrl(this, this.MouseOver || this.ChestOpen ? this.OpenChestTexture : this.ChestTexture, bounds.OffsetBy(bounds.Width / 2, bounds.Height / 2), null, Color.White, this.ChestOpen ? 0 : _rotation * _wiggleDirection, this.ChestTexture.Texture.Bounds.Size.ToVector2() / 2);
+            spriteBatch.DrawOnCtrl(this, this.MouseOver || this.ChestOpen ? (this.OpenChestTexture ?? this.ChestTexture) : this.ChestTexture, bounds.OffsetBy(bounds.Width / 2, bounds.Height / 2), null, Color.White, this.ChestOpen ? 0 : _rotation * _wiggleDirection, this.ChestTexture.Texture.Bounds.Size.ToVector2() / 2);
         }
 
     }

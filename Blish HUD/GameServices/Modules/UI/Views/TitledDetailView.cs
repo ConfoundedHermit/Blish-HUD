@@ -12,11 +12,11 @@ namespace Blish_HUD.Modules.UI.Views {
             Warning
         }
 
-        private Panel      _rootPanel;
-        private GlowButton _warningIcon;
-        private GlowButton _menuButton;
+        private Panel      _rootPanel = null!;
+        private GlowButton _warningIcon = null!;
+        private GlowButton _menuButton = null!;
 
-        private ContextMenuStrip _menu;
+        private ContextMenuStrip _menu = null!;
 
         public ContextMenuStrip Menu {
             get => _menu;

@@ -33,18 +33,20 @@ namespace Blish_HUD.Content {
             return new ZipArchiveReader(_archivePath, Path.Combine(subPath));
         }
         
-        public string GetPathRepresentation(string relativeFilePath = null) {
+        public string GetPathRepresentation(string? relativeFilePath = null) {
             return $"{_archivePath}[{Path.GetFileName(Path.Combine(_subPath, relativeFilePath ?? string.Empty))}]";
         }
         
-        public void LoadOnFileType(Action<Stream, IDataReader> loadFileFunc, string fileExtension = "", IProgress<string> progress = null) {
+        public void LoadOnFileType(Action<Stream, IDataReader> loadFileFunc, string fileExtension = "", IProgress<string>? progress = null) {
             var validEntries = _archive.Entries.Where(e => e.Name.EndsWith($"{fileExtension}", StringComparison.OrdinalIgnoreCase)).ToList();
 
             foreach (var entry in validEntries) {
                 progress?.Report(string.Format(Strings.GameServices.ContentService.LoadingEntry, entry.Name));
                 var entryStream = GetFileStream(entry.FullName);
 
-                loadFileFunc.Invoke(entryStream, this);
+                if (entryStream != null) {
+                    loadFileFunc.Invoke(entryStream, this);
+                }
             }
         }
         
@@ -58,7 +60,7 @@ namespace Blish_HUD.Content {
             return filePath.Replace(@"\", "/").Replace("//", "/").Trim();
         }
 
-        private ZipArchiveEntry GetArchiveEntry(string filePath) {
+        private ZipArchiveEntry? GetArchiveEntry(string filePath) {
             var cleanFilePath = GetUniformFileName(Path.Combine(_subPath, filePath));
 
             foreach (var zipEntry in _archive.Entries) {
@@ -72,8 +74,8 @@ namespace Blish_HUD.Content {
             return null;
         }
         
-        public Stream GetFileStream(string filePath) {
-            ZipArchiveEntry fileEntry;
+        public Stream? GetFileStream(string filePath) {
+            ZipArchiveEntry? fileEntry;
 
             if ((fileEntry = this.GetArchiveEntry(filePath)) != null) {
                 _exclusiveStreamAccessMutex.WaitOne();
@@ -92,7 +94,7 @@ namespace Blish_HUD.Content {
             return null;
         }
         
-        public byte[] GetFileBytes(string filePath) {
+        public byte[]? GetFileBytes(string filePath) {
             // We know GetFileStream returns a MemoryStream, so we don't check
             using (var fileStream = GetFileStream(filePath) as MemoryStream) {
                 if (fileStream != null) {
@@ -104,7 +106,7 @@ namespace Blish_HUD.Content {
         }
         
         public int GetFileBytes(string filePath, out byte[] fileBuffer) {
-            fileBuffer = null;
+            fileBuffer = null!;
 
             // We know GetFileStream returns a MemoryStream, so we don't check
             using (var fileStream = GetFileStream(filePath) as MemoryStream) {
@@ -119,13 +121,13 @@ namespace Blish_HUD.Content {
 
         /// <inheritdoc />
         /// <remarks>For <see cref="ZipArchiveReader"/>, use <see cref="GetFileStream(string)"/> instead.</remarks>
-        public async Task<Stream> GetFileStreamAsync(string filePath) {
+        public async Task<Stream?> GetFileStreamAsync(string filePath) {
             return await Task.FromResult(GetFileStream(filePath));
         }
 
         /// <inheritdoc />
         /// <remarks>For <see cref="ZipArchiveReader"/>, use <see cref="GetFileBytes(string)"/> instead.</remarks>
-        public async Task<byte[]> GetFileBytesAsync(string filePath) {
+        public async Task<byte[]?> GetFileBytesAsync(string filePath) {
             return await Task.FromResult(GetFileBytes(filePath));
         }
 

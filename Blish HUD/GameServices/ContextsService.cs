@@ -77,7 +77,7 @@ namespace Blish_HUD {
         /// <c>null</c> if no <see cref="Context"/> of that type is
         /// currently registered.
         /// </returns>
-        public TContext GetContext<TContext>() where TContext : Context {
+        public TContext? GetContext<TContext>() where TContext : Context {
             if (!_registeredContexts.ContainsKey(typeof(TContext))) return null;
 
             return _registeredContexts[typeof(TContext)] as TContext;
@@ -92,7 +92,7 @@ namespace Blish_HUD {
         /// <c>null</c> if no <see cref="Context"/> that implements that type is
         /// currently registered.
         /// </returns>
-        public TBase GetContextImplementing<TBase>() {
+        public TBase? GetContextImplementing<TBase>() where TBase : class {
             foreach (var context in _registeredContexts) {
                 if (context.Value is TBase baseContext) {
                     return baseContext;

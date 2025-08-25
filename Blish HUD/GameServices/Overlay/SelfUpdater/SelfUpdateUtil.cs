@@ -123,7 +123,7 @@ namespace Blish_HUD.Overlay.SelfUpdater {
             return !timedout;
         }
 
-        public static async Task BeginUpdate(CoreVersionManifest coreVersionManifest, IProgress<string> progress = null) {
+        public static async Task BeginUpdate(CoreVersionManifest coreVersionManifest, IProgress<string>? progress = null) {
             // Download the archive
             Logger.Info($"Downloading version v{coreVersionManifest.Version} from {coreVersionManifest.Url}...");
             progress?.Report(string.Format(coreVersionManifest.IsPrerelease 

@@ -14,16 +14,16 @@ namespace Blish_HUD.Modules {
         // Required attribtes
 
         [JsonProperty("name", Required = Required.Always)]
-        public string Name { get; private set; }
+        public string Name { get; private set; } = null!;
 
         [JsonProperty("version", Required = Required.Always), JsonConverter(typeof(Content.Serialization.SemVerConverter))]
-        public SemVer.Version Version { get; private set; }
+        public SemVer.Version Version { get; private set; } = null!;
 
         [JsonProperty("namespace", Required = Required.Always)]
-        public string Namespace { get; private set; }
+        public string Namespace { get; private set; } = null!;
 
         [JsonProperty("package", Required = Required.Always)]
-        public string Package { get; private set; }
+        public string Package { get; private set; } = null!;
 
         // Recommended attributes
 
@@ -37,10 +37,10 @@ namespace Blish_HUD.Modules {
         public string Url { get; private set; } = "";
 
         [JsonProperty("author")]
-        public ModuleContributor Author { get; private set; }
+        public ModuleContributor Author { get; private set; } = null!;
 
         [JsonProperty("contributors")]
-        public List<ModuleContributor> Contributors { get; private set; }
+        public List<ModuleContributor> Contributors { get; private set; } = null!;
 
         // Optional attributes
 

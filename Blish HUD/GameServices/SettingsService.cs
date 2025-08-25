@@ -22,12 +22,12 @@ namespace Blish_HUD {
         public delegate void SettingTypeRendererDelegate(SettingEntry setting, Panel settingPanel);
         
         [JsonIgnore]
-        internal JsonSerializerSettings JsonReaderSettings { get; private set; }
+        internal JsonSerializerSettings JsonReaderSettings { get; private set; } = null!;
         
         [JsonIgnore]
-        private string _settingsPath;
+        private string _settingsPath = null!;
 
-        internal SettingCollection Settings { get; private set; }
+        internal SettingCollection Settings { get; private set; } = null!;
 
         private bool   _dirtySave;
         private double _saveBuffer;
@@ -54,7 +54,7 @@ namespace Blish_HUD {
         }
 
         private void LoadSettings(bool alreadyFailed = false) {
-            string rawSettings = null;
+            string? rawSettings = null;
 
             try {
                 rawSettings = File.ReadAllText(_settingsPath);
@@ -69,7 +69,7 @@ namespace Blish_HUD {
                     Logger.Warn(ex, "Failed to load settings due to an unexpected exception while attempting to read them. A new settings file will be generated.");
 
                     if (!string.IsNullOrEmpty(rawSettings)) {
-                        Logger.Info(rawSettings);
+                        Logger.Info(rawSettings!);
                     } else {
                         Logger.Warn("Settings were empty or could not be read.");
                     }

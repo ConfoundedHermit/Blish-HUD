@@ -52,17 +52,17 @@ namespace Blish_HUD.Controls {
         /// <summary>
         /// Fires when the <see cref="Text"/> is changed.
         /// </summary>
-        public event EventHandler<EventArgs> TextChanged;
+        public event EventHandler<EventArgs>? TextChanged;
 
         /// <summary>
         /// Fires when the <see cref="CursorIndex"/> is changed.
         /// </summary>
-        public event EventHandler<ValueEventArgs<int>> CursorIndexChanged;
+        public event EventHandler<ValueEventArgs<int>>? CursorIndexChanged;
 
         /// <summary>
         /// Fires when this control loses text input focus and <see cref="TextInputBase.Focused"/> has been set to <c>false</c>.
         /// </summary>
-        public event EventHandler<ValueEventArgs<bool>> InputFocusChanged;
+        public event EventHandler<ValueEventArgs<bool>>? InputFocusChanged;
 
         protected void OnTextChanged(ValueChangedEventArgs<string> e) => TextChanged?.Invoke(this, e);
 
@@ -104,7 +104,7 @@ namespace Blish_HUD.Controls {
             }
         }
 
-        protected string _placeholderText;
+        protected string _placeholderText = string.Empty;
 
         /// <summary>
         /// Gets or sets the placeholder text to show when there is no text entered.
@@ -360,7 +360,7 @@ namespace Blish_HUD.Controls {
         }
 
         private void UndoRedo(UndoRedoStack undoStack, UndoRedoStack redoStack) {
-            UndoRedoRecord record;
+            UndoRedoRecord? record;
 
             if ((record = undoStack.Pop()) == null) return;
 
@@ -452,13 +452,13 @@ namespace Blish_HUD.Controls {
             return index;
         }
 
-        private string ProcessText(string value) {
-            if (value == null) return string.Empty;
+        private string ProcessText(string? value) {
+            value = value ?? string.Empty;
 
             value = value.Replace("\r", string.Empty);
 
             if (!_multiline) {
-                value = value?.Replace("\n", string.Empty);
+                value = value.Replace("\n", string.Empty);
             }
 
             if (value.Length > _maxLength) {
@@ -468,7 +468,7 @@ namespace Blish_HUD.Controls {
             return value;
         }
 
-        protected bool SetText(string value, bool byUser) {
+        protected bool SetText(string? value, bool byUser) {
             string prevText = _text;
 
             value = ProcessText(value);
@@ -492,7 +492,7 @@ namespace Blish_HUD.Controls {
 
         public override void UnsetFocus() {
             this.Focused = false;
-            GameService.Input.Keyboard.FocusedControl = null;
+            GameService.Input.Keyboard.FocusedControl = null!;
         }
 
         public override bool GetFocusState() {
@@ -612,7 +612,7 @@ namespace Blish_HUD.Controls {
                          .ContinueWith((clipboardTask) => {
                              if (!clipboardTask.IsFaulted) {
                                  if (!string.IsNullOrEmpty(clipboardTask.Result)) {
-                                     Paste(clipboardTask.Result);
+                                     Paste(clipboardTask.Result!);
                                  }
                              } else {
                                  Logger.Warn(clipboardTask.Exception, "Failed to read clipboard text from system clipboard!");

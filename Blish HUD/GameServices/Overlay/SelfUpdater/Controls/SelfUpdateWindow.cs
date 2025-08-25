@@ -10,7 +10,7 @@ namespace Blish_HUD.Overlay.SelfUpdater.Controls {
 
         private static readonly Logger Logger = Logger.GetLogger<SelfUpdateWindow>();
 
-        private readonly BouncyNotification  _bouncyChest;
+        private readonly BouncyNotification? _bouncyChest;
         private readonly CoreVersionManifest _releaseManifest;
 
         private readonly Texture2D _windowTexture         = GameService.Content.GetTexture(@"views/selfupdater/updateview");
@@ -33,11 +33,16 @@ namespace Blish_HUD.Overlay.SelfUpdater.Controls {
             this.Visible       = false;
 
             if (withBouncyChest) {
-                _bouncyChest = new BouncyNotification(GameService.Content.GetTexture(@"views/selfupdater/744427-blue"), GameService.Content.GetTexture(@"views/selfupdater/744428-blue")) {
-                    Parent = GameService.Graphics.SpriteScreen
-                };
+                var chestTexture = GameService.Content.GetTexture(@"views/selfupdater/744427-blue");
+                
+                if (chestTexture != null) {
+                    var openChestTexture = GameService.Content.GetTexture(@"views/selfupdater/744428-blue");
+                    _bouncyChest = new BouncyNotification(chestTexture!, openChestTexture) {
+                        Parent = GameService.Graphics.SpriteScreen
+                    };
 
-                _bouncyChest.Click += BouncyChest_Click;
+                    _bouncyChest.Click += BouncyChest_Click;
+                }
             }
             
             var blishHudHero = new Label() {

@@ -87,8 +87,8 @@ namespace Blish_HUD.Contexts {
         }
 
         private void LoadFromCdn() {
-            GetCdnInfoFromCdnUrl(GW2_ASSETCDN_URL).ContinueWith(cdnInfo => SetCdnInfo(ref _standardCdnInfo,   cdnInfo.Result));
-            GetCdnInfoFromCdnUrl(GW2_CN_ASSETCDN_URL).ContinueWith(cdnInfo => SetCdnInfo(ref _chineseCdnInfo, cdnInfo.Result));
+            GetCdnInfoFromCdnUrl(GW2_ASSETCDN_URL).ContinueWith(cdnInfo => SetCdnInfo(ref _standardCdnInfo,   cdnInfo.Result ?? string.Empty));
+            GetCdnInfoFromCdnUrl(GW2_CN_ASSETCDN_URL).ContinueWith(cdnInfo => SetCdnInfo(ref _chineseCdnInfo, cdnInfo.Result ?? string.Empty));
         }
 
         protected override void Unload() {
@@ -143,7 +143,7 @@ namespace Blish_HUD.Contexts {
             SetCdnInfo(ref cdnInfo, ParseCdnInfo(result));
         }
 
-        private async Task<string> GetCdnInfoFromCdnUrl(string cdnUrl) {
+        private async Task<string?> GetCdnInfoFromCdnUrl(string cdnUrl) {
             try {
                 return await cdnUrl.GetStringAsync();
             } catch (FlurlHttpException ex) {

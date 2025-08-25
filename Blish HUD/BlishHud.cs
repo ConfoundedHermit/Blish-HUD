@@ -24,19 +24,19 @@ namespace Blish_HUD {
         /// </summary>
         internal Microsoft.Xna.Framework.Content.ContentManager ActiveContentManager { get; }
 
-        internal static BlishHud Instance;
+        internal static BlishHud? Instance;
 
         #endregion
 
         public IntPtr FormHandle { get; private set; }
 
-        public Form Form { get; private set; }
+        public Form? Form { get; private set; }
 
         // TODO: Move this into GraphicsService
-        public RasterizerState UiRasterizer { get; private set; }
+        public RasterizerState? UiRasterizer { get; private set; }
 
         // Primarily used to draw debug text
-        private SpriteBatch _basicSpriteBatch;
+        private SpriteBatch? _basicSpriteBatch;
 
         public BlishHud() {
             BlishHud.Instance = this;
@@ -60,10 +60,11 @@ namespace Blish_HUD {
             FormHandle = this.Window.Handle;
             Form       = Control.FromHandle(FormHandle).FindForm();
 
-
-            Form.BackColor = System.Drawing.Color.Black;
-            // Avoid the flash the window shows when the application launches (-32000x-32000 is where windows places minimized windows)
-            Form.Location = new System.Drawing.Point(-32000, -32000);
+            if (Form != null) {
+                Form.BackColor = System.Drawing.Color.Black;
+                // Avoid the flash the window shows when the application launches (-32000x-32000 is where windows places minimized windows)
+                Form.Location = new System.Drawing.Point(-32000, -32000);
+            }
 
             if (!File.Exists("OpacityFix")) {
                 // Causes an issue with it showing a black box if we don't set this to true
@@ -114,7 +115,7 @@ namespace Blish_HUD {
 
         protected override void Update(GameTime gameTime) {
             if (!GameService.GameIntegration.Gw2Instance.Gw2IsRunning) {
-                Form.Location = new System.Drawing.Point(-32000, -32000);
+                if (Form != null) Form.Location = new System.Drawing.Point(-32000, -32000);
 
                 // If gw2 isn't open so only run the essentials
                 GameService.Debug.DoUpdate(gameTime);
@@ -162,11 +163,13 @@ namespace Blish_HUD {
 
             if (!GameService.GameIntegration.Gw2Instance.Gw2IsRunning) return;
 
-            GameService.Graphics.Render(gameTime, _basicSpriteBatch);
+            if (_basicSpriteBatch != null) {
+                GameService.Graphics.Render(gameTime, _basicSpriteBatch);
 
-            _basicSpriteBatch.Begin();
-            GameService.Debug.DrawDebugOverlay(_basicSpriteBatch, gameTime);
-            _basicSpriteBatch.End();
+                _basicSpriteBatch.Begin();
+                GameService.Debug.DrawDebugOverlay(_basicSpriteBatch, gameTime);
+                _basicSpriteBatch.End();
+            }
             
             base.Draw(gameTime);
         }

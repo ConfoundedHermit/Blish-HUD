@@ -14,9 +14,9 @@ namespace Blish_HUD.Gw2WebApi.UI.Presenters {
 
         private readonly CancellationTokenSource _loadCancel;
 
-        private TokenInfo                _tokenInfo;
-        private Account                  _accountInfo;
-        private IApiV2ObjectList<string> _characters;
+        private TokenInfo?                _tokenInfo;
+        private Account?                  _accountInfo;
+        private IApiV2ObjectList<string>? _characters;
 
         public ApiTokenPresenter(ApiTokenView view, string apiKey) : base(view, apiKey) {
             _loadCancel = new CancellationTokenSource();
@@ -62,7 +62,7 @@ namespace Blish_HUD.Gw2WebApi.UI.Presenters {
             this.View.RemoveTokenView();
         }
 
-        private bool UpdateFromRequestTaskResult<T>(Task<T> infoTask, ref T field) {
+        private bool UpdateFromRequestTaskResult<T>(Task<T> infoTask, ref T? field) where T : class {
             if (infoTask.IsCanceled) return false;
 
             if (infoTask.Exception != null) {
@@ -85,8 +85,8 @@ namespace Blish_HUD.Gw2WebApi.UI.Presenters {
             if (_tokenInfo == null) return;
 
             this.View.TokenInfo     = _tokenInfo;
-            this.View.AccountInfo   = _accountInfo;
-            this.View.CharacterList = _characters;
+            this.View.AccountInfo   = _accountInfo!; // Safe: _accountInfo is set when _tokenInfo is set
+            this.View.CharacterList = _characters!; // Safe: _characters is set when _tokenInfo is set
 
             this.View.Active = GameService.Gw2WebApi.PrivilegedConnection.Connection.AccessToken == this.Model;
 

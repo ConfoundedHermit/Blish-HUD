@@ -16,8 +16,8 @@ namespace Blish_HUD.Modules.UI.Presenters {
 
         public ManageModulePresenter(ManageModuleView view, ModuleManager model) : base(view, model) { /* NOOP */ }
 
-        private ModulePermissionView _permissionView;
-        private ModuleDependencyView _dependencyView;
+        private ModulePermissionView _permissionView = null!;
+        private ModuleDependencyView _dependencyView = null!;
 
         protected override void UpdateView() {
             DisplayBaseViews();
@@ -110,7 +110,10 @@ namespace Blish_HUD.Modules.UI.Presenters {
                                                  ? Strings.GameServices.ModulesService.ModuleOption_ClearSettings_DescriptionEnabled
                                                  : Strings.GameServices.ModulesService.ModuleOption_ClearSettings_DescriptionDisabled;
 
-            clearSettings.Click += delegate { this.Model.State.Settings = null; };
+            clearSettings.Click += delegate { 
+                // Clear settings by setting to null - this is the intended behavior
+                this.Model.State.Settings = null!; 
+            };
 
             return clearSettings;
         }
@@ -120,7 +123,7 @@ namespace Blish_HUD.Modules.UI.Presenters {
 
             foreach (string dir in dirs) {
                 var dirItem = new ContextMenuStripItem() { Text = string.Format(Strings.GameServices.ModulesService.ModuleOption_OpenDir, dir.Titleize()) };
-                string dirPath = DirectoryUtil.RegisterDirectory(dir);
+                string? dirPath = DirectoryUtil.RegisterDirectory(dir);
 
                 dirItem.BasicTooltipText = dirPath;
                 dirItem.Enabled = Directory.Exists(dirPath);
@@ -136,7 +139,7 @@ namespace Blish_HUD.Modules.UI.Presenters {
         private void DisplayStateDetails() {
             if (!GameService.Module.ModuleIsExplicitlyIncompatible(this.Model)) {
                 var runState = Model.ModuleInstance?.RunState ?? ModuleRunState.Unloaded;
-                this.View.ModuleErrorReason = runState == ModuleRunState.FatalError ? this.Model.ModuleInstance?.ErrorReason : null;
+                this.View.ModuleErrorReason = runState == ModuleRunState.FatalError ? (this.Model.ModuleInstance?.ErrorReason ?? string.Empty) : string.Empty;
 
                 this.View.ModuleState = runState;
 
@@ -149,11 +152,11 @@ namespace Blish_HUD.Modules.UI.Presenters {
         }
 
         private void DisplaySettingsView(bool enable) {
-            IView toDisplay = null;
+            IView? toDisplay = null;
 
             if (enable) {
                 try {
-                    toDisplay = this.Model.ModuleInstance.GetSettingsView();
+                    toDisplay = this.Model.ModuleInstance?.GetSettingsView();
                 } catch (Exception ex) {
                     Logger.Warn(ex, $"Failed to load settings view from module '{this.Model.Manifest.GetDetailedName()}'.");
                 }

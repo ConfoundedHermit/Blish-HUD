@@ -25,9 +25,9 @@ namespace Blish_HUD {
 
         #region Cache Handling
 
-        private TokenComplianceMiddleware _sharedTokenBucketMiddleware;
-        private ICacheMethod              _sharedWebCache;
-        private ICacheMethod              _sharedRenderCache;
+        private TokenComplianceMiddleware _sharedTokenBucketMiddleware = null!;
+        private ICacheMethod              _sharedWebCache = null!;
+        private ICacheMethod              _sharedRenderCache = null!;
 
         private void InitCache() {
             var bucket = new TokenBucket(300, 5);
@@ -41,8 +41,8 @@ namespace Blish_HUD {
 
         #region Init Cache, Connection, & Client
 
-        private ManagedConnection _anonymousConnection;
-        private ManagedConnection _privilegedConnection;
+        private ManagedConnection _anonymousConnection = null!;
+        private ManagedConnection _privilegedConnection = null!;
 
         private void CreateInternalConnection() {
             InitCache();
@@ -59,8 +59,8 @@ namespace Blish_HUD {
         private readonly ConcurrentDictionary<string, string>            _characterRepository = new ConcurrentDictionary<string, string>();
         private readonly ConcurrentDictionary<string, ManagedConnection> _cachedConnections   = new ConcurrentDictionary<string, ManagedConnection>();
 
-        private SettingCollection _apiSettings;
-        private SettingCollection _apiKeyRepository;
+        private SettingCollection _apiSettings = null!;
+        private SettingCollection _apiKeyRepository = null!;
 
         protected override void Initialize() {
             _apiSettings = Settings.RegisterRootSettingCollection(GW2WEBAPI_SETTINGS);
@@ -69,7 +69,7 @@ namespace Blish_HUD {
         }
 
         private void DefineSettings(SettingCollection settings) {
-            _apiKeyRepository = ((SettingEntry<SettingCollection>)settings[SETTINGS_ENTRY_APIKEYS])?.Value
+            _apiKeyRepository = ((SettingEntry<SettingCollection>?)settings[SETTINGS_ENTRY_APIKEYS])?.Value
                              ?? settings.AddSubCollection(SETTINGS_ENTRY_APIKEYS);
         }
 

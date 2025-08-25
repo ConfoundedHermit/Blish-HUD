@@ -99,7 +99,7 @@ namespace Blish_HUD.GameServices.ArcDps.V2.Extensions {
             if (reader.ReadByte() == 1) {
                 return parse();
             }
-            return default;
+            return default!;
         }
     }
 

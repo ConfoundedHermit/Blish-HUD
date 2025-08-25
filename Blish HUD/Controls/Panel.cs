@@ -51,24 +51,24 @@ namespace Blish_HUD.Controls {
             }
         }
         
-        protected string _title;
+        protected string _title = string.Empty;
         public string Title {
             get => _title;
             set => SetProperty(ref _title, value, true);
         }
 
-        protected AsyncTexture2D _icon;
-        public AsyncTexture2D Icon {
+        protected AsyncTexture2D? _icon;
+        public AsyncTexture2D? Icon {
             get => _icon;
             set => SetProperty(ref _icon, value);
         }
 
-        protected AsyncTexture2D _backgroundTexture;
+        protected AsyncTexture2D? _backgroundTexture;
 
         /// <summary>
         /// A texture to be drawn on the <see cref="Panel"/> before children are drawn.
         /// </summary>
-        public AsyncTexture2D BackgroundTexture {
+        public AsyncTexture2D? BackgroundTexture {
             get => _backgroundTexture;
             set => SetProperty(ref _backgroundTexture, value);
         }
@@ -120,8 +120,8 @@ namespace Blish_HUD.Controls {
         [JsonIgnore] public float ArrowRotation { get; set; } = 0f;
         [JsonIgnore] public float AccentOpacity { get; set; } = 1f;
 
-        private Glide.Tween _collapseAnim;
-        private Scrollbar   _panelScrollbar;
+        private Glide.Tween? _collapseAnim;
+        private Scrollbar?   _panelScrollbar;
 
         /// <inheritdoc />
         public bool ToggleAccordionState() {
@@ -301,6 +301,8 @@ namespace Blish_HUD.Controls {
         // TODO Temporary solution to avoid memory leak due to Adhesive bindings before
         // This will be replaced when the Scrollbar is converted to a stateless overlay
         private void UpdatePanelScrollbarOnOwnPropertyChanged(object? sender, PropertyChangedEventArgs e) {
+            if (_panelScrollbar == null) return;
+            
             switch (e.PropertyName) {
                 case "Parent":
                     _panelScrollbar.Parent = this.Parent;

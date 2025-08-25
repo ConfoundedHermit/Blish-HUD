@@ -8,7 +8,7 @@ namespace Blish_HUD.Modules {
         public bool Optional { get; private set; }
 
         [JsonProperty("details")]
-        public string Details { get; private set; }
+        public string Details { get; private set; } = null!;
 
     }
 

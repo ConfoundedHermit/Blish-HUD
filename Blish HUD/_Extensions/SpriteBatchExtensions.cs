@@ -10,27 +10,27 @@ namespace Blish_HUD {
     public class SpriteBatchParameters {
 
         public SpriteSortMode    SortMode          { get; set; }
-        public BlendState        BlendState        { get; set; }
-        public SamplerState      SamplerState      { get; set; }
-        public DepthStencilState DepthStencilState { get; set; }
-        public RasterizerState   RasterizerState   { get; set; }
-        public Effect            Effect            { get; set; }
+        public BlendState?       BlendState        { get; set; }
+        public SamplerState?     SamplerState      { get; set; }
+        public DepthStencilState? DepthStencilState { get; set; }
+        public RasterizerState?  RasterizerState   { get; set; }
+        public Effect?           Effect            { get; set; }
         public Matrix?           TransformMatrix   { get; set; }
 
         public SpriteBatchParameters(
             SpriteSortMode    sortMode          = SpriteSortMode.Deferred,
-            BlendState        blendState        = null,
-            SamplerState      samplerState      = null,
-            DepthStencilState depthStencilState = null,
-            RasterizerState   rasterizerState   = null,
-            Effect            effect            = null,
+            BlendState?       blendState        = null,
+            SamplerState?     samplerState      = null,
+            DepthStencilState? depthStencilState = null,
+            RasterizerState?  rasterizerState   = null,
+            Effect?           effect            = null,
             Matrix?           transformMatrix   = null
         ) {
             this.SortMode          = sortMode;
             this.BlendState        = blendState;
             this.SamplerState      = samplerState;
             this.DepthStencilState = depthStencilState;
-            this.RasterizerState   = rasterizerState ?? BlishHud.Instance.UiRasterizer;
+            this.RasterizerState   = rasterizerState ?? BlishHud.Instance?.UiRasterizer;
             this.Effect            = effect;
             this.TransformMatrix   = transformMatrix;
         }
@@ -54,9 +54,9 @@ namespace Blish_HUD {
                               parameters.BlendState,
                               parameters.SamplerState,
                               parameters.DepthStencilState,
-                              parameters.RasterizerState ?? BlishHud.Instance.UiRasterizer,
+                              parameters.RasterizerState ?? BlishHud.Instance?.UiRasterizer,
                               parameters.Effect,
-                              parameters.TransformMatrix ?? GameService.Graphics.UIScaleTransform);
+                              parameters.TransformMatrix ?? GameService.Graphics?.UIScaleTransform);
         }
 
         public static void DrawOnCtrl(this SpriteBatch spriteBatch, Control ctrl, Texture2D texture, Rectangle destinationRectangle) {

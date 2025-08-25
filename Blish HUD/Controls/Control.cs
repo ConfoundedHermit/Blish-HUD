@@ -128,17 +128,17 @@ namespace Blish_HUD.Controls {
 
         #region Static Control Events
 
-        public static event EventHandler<ControlActivatedEventArgs> ActiveControlChanged;
+        public static event EventHandler<ControlActivatedEventArgs>? ActiveControlChanged;
 
-        private static Control _activeControl;
-        public static Control ActiveControl {
+        private static Control? _activeControl;
+        public static Control? ActiveControl {
             get => _activeControl;
             set {
                 if (_activeControl == value) return;
 
                 _activeControl = value;
 
-                OnActiveControlChanged(new ControlActivatedEventArgs(_activeControl));
+                OnActiveControlChanged(new ControlActivatedEventArgs(_activeControl!));
             }
         }
 
@@ -146,17 +146,17 @@ namespace Blish_HUD.Controls {
             ActiveControlChanged?.Invoke(null, e);
         }
 
-        public static event EventHandler<ControlActivatedEventArgs> FocusedControlChanged;
+        public static event EventHandler<ControlActivatedEventArgs>? FocusedControlChanged;
 
-        private static Control _focusedControl;
-        public static Control FocusedControl {
+        private static Control? _focusedControl;
+        public static Control? FocusedControl {
             get => _focusedControl;
             set {
                 if (_focusedControl == value) return;
 
                 _focusedControl = value;
 
-                OnFocusedControlChanged(new ControlActivatedEventArgs(_focusedControl));
+                OnFocusedControlChanged(new ControlActivatedEventArgs(_focusedControl!));
             }
         }
 
@@ -170,20 +170,20 @@ namespace Blish_HUD.Controls {
 
         #region Mouse Events
 
-        public event EventHandler<MouseEventArgs> LeftMouseButtonPressed;
-        public event EventHandler<MouseEventArgs> LeftMouseButtonReleased;
-        public event EventHandler<MouseEventArgs> MouseMoved;
-        public event EventHandler<MouseEventArgs> RightMouseButtonPressed;
-        public event EventHandler<MouseEventArgs> RightMouseButtonReleased;
-        public event EventHandler<MouseEventArgs> MouseWheelScrolled;
-        public event EventHandler<MouseEventArgs> MouseEntered;
-        public event EventHandler<MouseEventArgs> MouseLeft;
+        public event EventHandler<MouseEventArgs>? LeftMouseButtonPressed;
+        public event EventHandler<MouseEventArgs>? LeftMouseButtonReleased;
+        public event EventHandler<MouseEventArgs>? MouseMoved;
+        public event EventHandler<MouseEventArgs>? RightMouseButtonPressed;
+        public event EventHandler<MouseEventArgs>? RightMouseButtonReleased;
+        public event EventHandler<MouseEventArgs>? MouseWheelScrolled;
+        public event EventHandler<MouseEventArgs>? MouseEntered;
+        public event EventHandler<MouseEventArgs>? MouseLeft;
 
         /// <summary>
         /// Alias for <see cref="LeftMouseButtonReleased"/> with the difference that it only fires if <see cref="Enabled"/> is true.
         /// </summary>
         /// <remarks>Fires after <see cref="LeftMouseButtonReleased"/> fires.</remarks>
-        public event EventHandler<MouseEventArgs> Click;
+        public event EventHandler<MouseEventArgs>? Click;
 
         /// <summary>
         /// Called when a left mouse button press occurs on the <see cref="Control"/>.
@@ -276,11 +276,11 @@ namespace Blish_HUD.Controls {
 
         #endregion
 
-        public event EventHandler<EventArgs> Shown;
-        public event EventHandler<EventArgs> Hidden;
-        public event EventHandler<ResizedEventArgs> Resized;
-        public event EventHandler<MovedEventArgs> Moved;
-        public event EventHandler<EventArgs> Disposed;
+        public event EventHandler<EventArgs>? Shown;
+        public event EventHandler<EventArgs>? Hidden;
+        public event EventHandler<ResizedEventArgs>? Resized;
+        public event EventHandler<MovedEventArgs>? Moved;
+        public event EventHandler<EventArgs>? Disposed;
 
         /// <summary>
         /// Called when the value of <see cref="Visible"/> is changed to <c>true</c>.
@@ -481,20 +481,20 @@ namespace Blish_HUD.Controls {
             set => SetProperty(ref _clipsBounds, value);
         }
 
-        private ControlEffect _effectBehind;
+        private ControlEffect? _effectBehind;
         /// <summary>
         /// The <see cref="ControlEffect"/> to apply behind the control.
         /// </summary>
-        protected ControlEffect EffectBehind {
+        protected ControlEffect? EffectBehind {
             get => _effectBehind;
             set => SetProperty(ref _effectBehind, value);
         }
 
-        private ControlEffect _effectInFront;
+        private ControlEffect? _effectInFront;
         /// <summary>
         /// [NOT IMPLEMENTED] The <see cref="ControlEffect"/> to apply on top of the control.
         /// </summary>
-        protected ControlEffect EffectInFront {
+        protected ControlEffect? EffectInFront {
             get => _effectInFront;
             set => SetProperty(ref _effectInFront, value);
         }
@@ -541,37 +541,37 @@ namespace Blish_HUD.Controls {
         [JsonIgnore]
         public Point RelativeMousePosition => Input.Mouse.Position - this.AbsoluteBounds.Location;
 
-        private ContextMenuStrip _menu;
+        private ContextMenuStrip? _menu;
         /// <summary>
         /// If provided, the menu will display when the control is right-clicked on.
         /// </summary>
-        public ContextMenuStrip Menu {
+        public ContextMenuStrip? Menu {
             get => _menu;
             set => SetProperty(ref _menu, value);
         }
 
-        private Tooltip _tooltip;
+        private Tooltip? _tooltip;
         /// <summary>
         /// If provided, the Tooltip will display when the mouse is over the control.
         /// Do not use this if you are already using <see cref="BasicTooltipText"/>.
         /// </summary>
-        public Tooltip Tooltip {
+        public Tooltip? Tooltip {
             get {
                 if (_tooltip != null && !_tooltip._disposedValue) return _tooltip;
 
                 return !string.IsNullOrWhiteSpace(_basicTooltipText)
-                    ? _tooltip = new Tooltip(new BasicTooltipView(_basicTooltipText))
+                    ? _tooltip = new Tooltip(new BasicTooltipView(_basicTooltipText!))
                     : null;
             }
             set => SetProperty(ref _tooltip, value);
         }
 
-        private string _basicTooltipText;
+        private string? _basicTooltipText;
         /// <summary>
         /// If provided, a tooltip will be shown with the provided text when the mouse is over the control.
         /// Do not use this if you are already using <see cref="Tooltip"/>.
         /// </summary>
-        public string BasicTooltipText {
+        public string? BasicTooltipText {
             get => _basicTooltipText;
             set {
                 if (!SetProperty(ref _basicTooltipText, value)) return;
@@ -582,7 +582,7 @@ namespace Blish_HUD.Controls {
                     // portion will update it and display it (if it isn't already).
 
                     if (_tooltip.CurrentView is BasicTooltipView tooltipView && !string.IsNullOrWhiteSpace(value)) {
-                        tooltipView.Text = value;
+                        tooltipView.Text = value!;
                         return;
                     }
                 }
@@ -624,11 +624,11 @@ namespace Blish_HUD.Controls {
             set => SetProperty(ref _padding, value, true);
         }
 
-        private Container _parent;
+        private Container? _parent;
         /// <summary>
         /// The <see cref="Container"/> that this <see cref="Control"/> resides within.
         /// </summary>
-        public Container Parent {
+        public Container? Parent {
             get => _parent;
             set {
                 var currentParent = _parent;
@@ -686,7 +686,7 @@ namespace Blish_HUD.Controls {
         [JsonIgnore]
         internal LayoutState LayoutState { get; private set; } = LayoutState.SkipDraw;
 
-        protected SpriteBatchParameters _spriteBatchParameters;
+        protected SpriteBatchParameters? _spriteBatchParameters;
 
         [JsonIgnore]
         public SpriteBatchParameters SpriteBatchParameters {
@@ -834,7 +834,7 @@ namespace Blish_HUD.Controls {
             }
         }
 
-        public virtual Control TriggerMouseInput(MouseEventType mouseEventType, MouseState ms) {
+        public virtual Control? TriggerMouseInput(MouseEventType mouseEventType, MouseState ms) {
             var inputCapture = CapturesInput();
 
             switch (mouseEventType) {
@@ -986,7 +986,7 @@ namespace Blish_HUD.Controls {
 
         #region Property Management and Binding
 
-        protected bool SetProperty<T>(ref T property, T newValue, bool invalidateLayout = false, [CallerMemberName] string propertyName = null) {
+        protected bool SetProperty<T>(ref T property, T newValue, bool invalidateLayout = false, [CallerMemberName] string? propertyName = null) {
             if (Equals(property, newValue) || propertyName == null) return false;
 
             property = newValue;
@@ -996,9 +996,9 @@ namespace Blish_HUD.Controls {
             return true;
         }
 
-        public event PropertyChangedEventHandler PropertyChanged;
+        public event PropertyChangedEventHandler? PropertyChanged;
 
-        protected void OnPropertyChanged(string propertyName, bool invalidateLayout) {
+        protected void OnPropertyChanged(string? propertyName, bool invalidateLayout) {
             if (string.IsNullOrEmpty(propertyName)) return;
 
             this.PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
@@ -1008,7 +1008,7 @@ namespace Blish_HUD.Controls {
             }
         }
 
-        protected void OnPropertyChanged([CallerMemberName] string propertyName = null) {
+        protected void OnPropertyChanged([CallerMemberName] string? propertyName = null) {
             OnPropertyChanged(propertyName, false);
         }
 

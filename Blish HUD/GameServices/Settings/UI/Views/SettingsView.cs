@@ -6,7 +6,7 @@ using Microsoft.Xna.Framework;
 namespace Blish_HUD.Settings.UI.Views {
     public class SettingsView : SettingView<SettingCollection> {
 
-        private FlowPanel _settingFlowPanel;
+        private FlowPanel _settingFlowPanel = null!;
 
         private readonly SettingCollection _settings;
 
@@ -23,7 +23,7 @@ namespace Blish_HUD.Settings.UI.Views {
             }
         }
 
-        private ViewContainer _lastSettingContainer;
+        private ViewContainer _lastSettingContainer = null!;
 
         public SettingsView(SettingEntry<SettingCollection> setting, int definedWidth = -1) : base(setting, definedWidth) {
             _settings = setting.Value;

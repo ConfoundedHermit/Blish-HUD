@@ -24,12 +24,12 @@ namespace Blish_HUD.Controls {
         /// <summary>
         /// Fires when a <see cref="TabbedWindow2"/> Tab changes.
         /// </summary>
-        public event EventHandler<ValueChangedEventArgs<Tab>> TabChanged;
+        public event EventHandler<ValueChangedEventArgs<Tab>>? TabChanged;
 
         public TabCollection Tabs { get; }
 
-        private Tab _selectedTab = null;
-        public Tab SelectedTab {
+        private Tab? _selectedTab = null;
+        public Tab? SelectedTab {
             get => _selectedTab;
             set {
                 var currentTab = _selectedTab;
@@ -37,15 +37,15 @@ namespace Blish_HUD.Controls {
                 if (value != null && !this.Tabs.Contains(value)) return;
 
                 if (SetProperty(ref _selectedTab, value, true)) {
-                    OnTabChanged(new ValueChangedEventArgs<Tab>(currentTab, value));
+                    OnTabChanged(new ValueChangedEventArgs<Tab>(currentTab!, value!));
                 }
             }
         }
 
-        private Tab HoveredTab { get; set; }
+        private Tab? HoveredTab { get; set; }
 
         protected  virtual void OnTabChanged(ValueChangedEventArgs<Tab> e) {
-            ShowView(e.NewValue?.View());
+            ShowView(e.NewValue?.View()!);
 
             if (this.Visible && e.PreviousValue != null) {
                 Content.PlaySoundEffectByName($"tab-swap-{RandomUtil.GetRandom(1, 5)}");
@@ -54,23 +54,23 @@ namespace Blish_HUD.Controls {
             TabChanged?.Invoke(this, e);
         }
 
-        public TabbedWindow2(AsyncTexture2D background, Rectangle windowRegion, Rectangle contentRegion) {
+        public TabbedWindow2(AsyncTexture2D? background, Rectangle windowRegion, Rectangle contentRegion) {
             this.Tabs        = new TabCollection(this);
             this.ShowSideBar = true;
 
             this.ConstructWindow(background, windowRegion, contentRegion);
         }
 
-        public TabbedWindow2(Texture2D background, Rectangle windowRegion, Rectangle contentRegion) : this((AsyncTexture2D) background, windowRegion, contentRegion) { /* NOOP */ }
+        public TabbedWindow2(Texture2D? background, Rectangle windowRegion, Rectangle contentRegion) : this(background != null ? (AsyncTexture2D?)background : null, windowRegion, contentRegion) { /* NOOP */ }
 
-        public TabbedWindow2(AsyncTexture2D background, Rectangle windowRegion, Rectangle contentRegion, Point windowSize) {
+        public TabbedWindow2(AsyncTexture2D? background, Rectangle windowRegion, Rectangle contentRegion, Point windowSize) {
             this.Tabs        = new TabCollection(this);
             this.ShowSideBar = true;
 
             this.ConstructWindow(background, windowRegion, contentRegion, windowSize);
         }
 
-        public TabbedWindow2(Texture2D background, Rectangle windowRegion, Rectangle contentRegion, Point windowSize) : this((AsyncTexture2D) background, windowRegion, contentRegion, windowSize) { /* NOOP */ }
+        public TabbedWindow2(Texture2D? background, Rectangle windowRegion, Rectangle contentRegion, Point windowSize) : this(background != null ? (AsyncTexture2D?)background : null, windowRegion, contentRegion, windowSize) { /* NOOP */ }
 
         protected override void OnClick(MouseEventArgs e) {
             if (this.HoveredTab is { Enabled: true }) {
@@ -113,7 +113,7 @@ namespace Blish_HUD.Controls {
                                                   TAB_HEIGHT);
 
                     spriteBatch.DrawOnCtrl(this,
-                                           this.WindowBackground,
+                                           this.WindowBackground!,
                                            tabBounds,
                                            new Rectangle(this.WindowRegion.Left + tabBounds.X,
                                                          tabBounds.Y - (int)this.Padding.Top,

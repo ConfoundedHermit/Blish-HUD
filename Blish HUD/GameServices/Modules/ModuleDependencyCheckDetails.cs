@@ -7,9 +7,9 @@ namespace Blish_HUD.Modules {
 
         public ModuleDependencyCheckResult CheckResult { get; }
 
-        public ModuleManager Module { get; }
+        public ModuleManager? Module { get; }
 
-        public ModuleDependencyCheckDetails(ModuleDependency dependency, ModuleDependencyCheckResult checkResult, ModuleManager module = null) {
+        public ModuleDependencyCheckDetails(ModuleDependency dependency, ModuleDependencyCheckResult checkResult, ModuleManager? module = null) {
             this.Dependency  = dependency;
             this.CheckResult = checkResult;
             this.Module      = module;

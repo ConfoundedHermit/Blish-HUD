@@ -20,7 +20,7 @@ namespace Blish_HUD.GameIntegration {
 
         private const int FILELOCKED_ATTEMPTS = 3;
 
-        public event EventHandler<EventArgs> GfxSettingsReloaded;
+        public event EventHandler<EventArgs>? GfxSettingsReloaded;
 
         /// <summary>
         /// Indicates that we've successfully read and parsed the contents of the GFXSettings.Gw2-64.exe.xml file.
@@ -95,7 +95,7 @@ namespace Blish_HUD.GameIntegration {
 
         private readonly Dictionary<string, string> _settings = new Dictionary<string, string>(StringComparer.InvariantCultureIgnoreCase);
 
-        private FileSystemWatcher _fileSystemWatcher;
+        private FileSystemWatcher? _fileSystemWatcher;
 
         private bool _loadLock;
 
@@ -109,7 +109,7 @@ namespace Blish_HUD.GameIntegration {
             Task.Run(LoadGfxSettings);
         }
 
-        private bool? GetBoolSetting([CallerMemberName] string settingName = null) {
+        private bool? GetBoolSetting([CallerMemberName] string? settingName = null) {
             if (settingName == null) throw new ArgumentNullException(nameof(settingName));
 
             return _settings.TryGetValue(settingName, out string result)
@@ -117,7 +117,7 @@ namespace Blish_HUD.GameIntegration {
                        : default(bool?);
         }
 
-        private float? GetFloatSetting([CallerMemberName] string settingName = null) {
+        private float? GetFloatSetting([CallerMemberName] string? settingName = null) {
             if (settingName == null) throw new ArgumentNullException(nameof(settingName));
 
             return _settings.TryGetValue(settingName, out string result)
@@ -127,7 +127,7 @@ namespace Blish_HUD.GameIntegration {
                        : default;
         }    
 
-        private T? GetStringEnumSetting<T>(Func<string, T?> getSettingFunc, [CallerMemberName] string settingName = null) where T : struct {
+        private T? GetStringEnumSetting<T>(Func<string, T?> getSettingFunc, [CallerMemberName] string? settingName = null) where T : struct {
             if (settingName == null) throw new ArgumentNullException(nameof(settingName));
 
             return _settings.TryGetValue(settingName, out string result)
@@ -171,7 +171,7 @@ namespace Blish_HUD.GameIntegration {
             _changedDebounce = false;
         }
 
-        private bool TryGetGfxSettingsFileStream(out FileStream gfxSettingsFileStream) {
+        private bool TryGetGfxSettingsFileStream(out FileStream? gfxSettingsFileStream) {
             string path = Path.Combine(_service.Gw2Instance.AppDataPath, GFXSETTINGS_PATH, GFXSETTINGS_NAME);
 
             gfxSettingsFileStream = null;
@@ -200,7 +200,7 @@ namespace Blish_HUD.GameIntegration {
 
         private async Task LoadGfxSettings(int remainingAttempts) {
             try {
-                if (TryGetGfxSettingsFileStream(out var gfxSettingsFileStream)) {
+                if (TryGetGfxSettingsFileStream(out var gfxSettingsFileStream) && gfxSettingsFileStream != null) {
                     using (var gfxSettingsXmlReader = XmlReader.Create(gfxSettingsFileStream, new XmlReaderSettings { Async = true })) {
                         await gfxSettingsXmlReader.MoveToContentAsync();
 

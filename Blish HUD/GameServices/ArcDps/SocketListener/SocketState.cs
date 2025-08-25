@@ -10,9 +10,9 @@
         // Size of receive buffer.
         public const int BUFFER_SIZE = 4096;
         // Client socket.
-        public Socket Socket = null;
+        public Socket Socket = null!;
         // Receive buffer.
         public byte[] Buffer = new byte[BUFFER_SIZE];
-        public AsyncUserToken Token;
+        public AsyncUserToken Token = null!;
     }
 }

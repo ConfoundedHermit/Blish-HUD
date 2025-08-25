@@ -14,35 +14,39 @@ namespace Blish_HUD.Gw2Mumble {
         /// <summary>
         /// Fires when the current character's name changes such as when the player switches to a different character.
         /// </summary>
-        public event EventHandler<ValueEventArgs<string>> NameChanged;
+        public event EventHandler<ValueEventArgs<string>>? NameChanged;
 
         /// <summary>
         /// Fires when the current character's specialization changes.
         /// </summary>
-        public event EventHandler<ValueEventArgs<int>> SpecializationChanged;
+        public event EventHandler<ValueEventArgs<int>>? SpecializationChanged;
 
         /// <summary>
         /// Fires when the current character starts or stops being a Commander.
         /// </summary>
-        public event EventHandler<ValueEventArgs<bool>> IsCommanderChanged;
+        public event EventHandler<ValueEventArgs<bool>>? IsCommanderChanged;
 
         /// <summary>
         /// Fires when the current character enters or leaves combat.
         /// </summary>
-        public event EventHandler<ValueEventArgs<bool>> IsInCombatChanged;
+        public event EventHandler<ValueEventArgs<bool>>? IsInCombatChanged;
 
         /// <summary>
         /// Fires when the current characters mounts or dismounts.
         /// </summary>
-        public event EventHandler<ValueEventArgs<MountType>> CurrentMountChanged;
+        public event EventHandler<ValueEventArgs<MountType>>? CurrentMountChanged;
 
-        private void OnNameChanged(ValueEventArgs<string>            e) => this.NameChanged?.Invoke(this, e);
+        private void OnNameChanged(ValueEventArgs<string?> e) {
+            if (e.Value != null) {
+                this.NameChanged?.Invoke(this, new ValueEventArgs<string>(e.Value));
+            }
+        }
         private void OnSpecializationChanged(ValueEventArgs<int>     e) => this.SpecializationChanged?.Invoke(this, e);
         private void OnIsCommanderChanged(ValueEventArgs<bool>       e) => this.IsCommanderChanged?.Invoke(this, e);
         private void OnIsInCombatChanged(ValueEventArgs<bool>        e) => this.IsInCombatChanged?.Invoke(this, e);
         private void OnCurrentMountChanged(ValueEventArgs<MountType> e) => this.CurrentMountChanged?.Invoke(this, e);
 
-        private string    _prevName;
+        private string?   _prevName;
         private int       _prevSpecialization;
         private bool      _prevIsCommander;
         private bool      _prevIsInCombat;
@@ -68,7 +72,7 @@ namespace Blish_HUD.Gw2Mumble {
         public Vector3 Forward => _forward;
 
         /// <inheritdoc cref="IGw2MumbleClient.CharacterName"/>
-        public string Name => _service.RawClient.CharacterName;
+        public string Name => _service.RawClient.CharacterName ?? string.Empty;
 
         /// <inheritdoc cref="IGw2MumbleClient.Profession"/>
         public ProfessionType Profession => _service.RawClient.Profession;

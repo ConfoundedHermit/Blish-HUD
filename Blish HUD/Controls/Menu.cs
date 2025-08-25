@@ -18,7 +18,7 @@ namespace Blish_HUD.Controls {
 
         #region Events
 
-        public event EventHandler<ControlActivatedEventArgs> ItemSelected;
+        public event EventHandler<ControlActivatedEventArgs>? ItemSelected;
         protected virtual void OnItemSelected(ControlActivatedEventArgs e) {
             this.ItemSelected?.Invoke(this, e);
         }
@@ -51,26 +51,32 @@ namespace Blish_HUD.Controls {
 
         bool IMenuItem.Selected => false;
 
-        private MenuItem _selectedMenuItem;
-        public MenuItem SelectedMenuItem => _selectedMenuItem;
+        private MenuItem? _selectedMenuItem;
+        public MenuItem? SelectedMenuItem => _selectedMenuItem;
+        
+        MenuItem IMenuItem.SelectedMenuItem => _selectedMenuItem!;
 
         void IMenuItem.Select() {
             throw new InvalidOperationException($"The root {nameof(Menu)} instance can not be selected.");
         }
 
-        public void Select(MenuItem menuItem, List<IMenuItem> itemPath) {
+        public void Select(MenuItem? menuItem, List<IMenuItem>? itemPath) {
             if (!_canSelect) {
-                itemPath.ForEach(i => i.Deselect());
+                itemPath?.ForEach(i => i.Deselect());
                 return;
             }
 
-            foreach (var item in this.GetDescendants().Cast<IMenuItem>().Except(itemPath)) {
-                item.Deselect();
+            if (itemPath != null) {
+                foreach (var item in this.GetDescendants().Cast<IMenuItem>().Except(itemPath)) {
+                    item.Deselect();
+                }
             }
 
             _selectedMenuItem = menuItem;
 
-            OnItemSelected(new ControlActivatedEventArgs(menuItem));
+            if (menuItem != null) {
+                OnItemSelected(new ControlActivatedEventArgs(menuItem));
+            }
         }
 
         public void Select(MenuItem menuItem) {
@@ -121,9 +127,9 @@ namespace Blish_HUD.Controls {
             base.OnChildAdded(e);
         }
 
-        public MenuItem AddMenuItem(string text, Texture2D icon = null) {
+        public MenuItem AddMenuItem(string text, Texture2D? icon = null) {
             return new MenuItem(text) {
-                Icon   = icon,
+                Icon   = icon != null ? (AsyncTexture2D?)icon : null,
                 Parent = this
             };
         }
@@ -140,14 +146,16 @@ namespace Blish_HUD.Controls {
 
         public override void PaintBeforeChildren(SpriteBatch spriteBatch, Rectangle bounds) {
             // Draw items dark every other one
-            for (int sec = 0; sec < _size.Y / MenuItemHeight; sec += 2) {
-                spriteBatch.DrawOnCtrl(this,
-                                       _textureMenuItemFade.Texture,
-                                       new Rectangle(0,
-                                                     MenuItemHeight * sec - VerticalScrollOffset,
-                                                     _size.X,
-                                                     MenuItemHeight),
-                                       Color.Black * 0.7f);
+            if (_textureMenuItemFade.Texture != null) {
+                for (int sec = 0; sec < _size.Y / MenuItemHeight; sec += 2) {
+                    spriteBatch.DrawOnCtrl(this,
+                                           _textureMenuItemFade.Texture,
+                                           new Rectangle(0,
+                                                         MenuItemHeight * sec - VerticalScrollOffset,
+                                                         _size.X,
+                                                         MenuItemHeight),
+                                           Color.Black * 0.7f);
+                }
             }
         }
 

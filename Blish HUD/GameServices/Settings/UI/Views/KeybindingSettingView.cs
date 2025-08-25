@@ -5,7 +5,7 @@ using Blish_HUD.Input;
 namespace Blish_HUD.Settings.UI.Views {
     public class KeybindingSettingView : SettingView<KeyBinding> {
 
-        private KeybindingAssigner _keybindingAssigner;
+        private KeybindingAssigner _keybindingAssigner = null!;
 
         public KeybindingSettingView(SettingEntry<KeyBinding> setting, int definedWidth = -1) : base(setting, definedWidth) { /* NOOP */ }
 

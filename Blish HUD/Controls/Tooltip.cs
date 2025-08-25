@@ -19,9 +19,9 @@ namespace Blish_HUD.Controls {
 
         private static Thickness _contentEdgeBuffer;
 
-        private static ControlCollection<Tooltip> _allTooltips;
+        private static ControlCollection<Tooltip> _allTooltips = null!;
 
-        private static Texture2D _textureTooltip;
+        private static Texture2D _textureTooltip = null!;
 
         internal static void EnableTooltips() {
             _contentEdgeBuffer = new Thickness(4, 4, 3, 6);
@@ -45,7 +45,7 @@ namespace Blish_HUD.Controls {
             }
         }
 
-        private static Control _prevControl;
+        private static Control? _prevControl;
 
         private static void ControlOnActiveControlChanged(object sender, ControlActivatedEventArgs e) {
             foreach (var tooltip in _allTooltips) {
@@ -87,11 +87,11 @@ namespace Blish_HUD.Controls {
 
         public ViewState ViewState   { get; private set; } = ViewState.None;
 
-        public IView CurrentView { get; private set; }
+        public IView CurrentView { get; private set; } = null!;
 
-        public Control CurrentControl { get; set; }
+        public Control? CurrentControl { get; set; }
 
-        private Glide.Tween _animFadeLifecycle;
+        private Glide.Tween? _animFadeLifecycle;
 
         public Tooltip() : base() {
             this.ZIndex = Screen.TOOLTIP_BASEZINDEX;
@@ -111,7 +111,7 @@ namespace Blish_HUD.Controls {
 
             this.ViewState = ViewState.Loading;
 
-            this.CurrentView = newView;
+            this.CurrentView = newView!;
 
             var progressIndicator = new Progress<string>((progressReport) => { /* NOOP */ });
 
@@ -127,7 +127,7 @@ namespace Blish_HUD.Controls {
 
         private void BuildView(Task<bool> loadResult) {
             if (loadResult.Result) {
-                this.CurrentView.DoBuild(this);
+                this.CurrentView?.DoBuild(this);
             }
         }
 
