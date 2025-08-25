@@ -36,7 +36,11 @@ namespace Blish_HUD.Input {
         public Control? ActiveControl {
             get => _activeControl;
             private set {
-                _hudFocused    = value != null && !value.Captures.HasFlag(CaptureType.DoNotBlock);
+                // Only set _hudFocused if the control actually captures input (not None or Filter only)
+                _hudFocused = value != null 
+                           && value.Captures != CaptureType.None 
+                           && (value.Captures.HasFlag(CaptureType.Mouse) || value.Captures.HasFlag(CaptureType.MouseWheel))
+                           && !value.Captures.HasFlag(CaptureType.DoNotBlock);
                 _activeControl = value;
 
                 Control.ActiveControl = value;
@@ -103,9 +107,14 @@ namespace Blish_HUD.Input {
             
             _mouseEvent = mouseEventArgs;
 
-            // TEMPORARY FIX: Never block input to fix the nullable reference issue
-            // This allows the overlay to work while we debug the root cause
-            return false;
+            // Proper input blocking logic with null safety
+            bool shouldBlock = mouseEventArgs.EventType != MouseEventType.LeftMouseButtonReleased 
+                            && mouseEventArgs.EventType != MouseEventType.RightMouseButtonReleased 
+                            && _hudFocused 
+                            && this.ActiveControl != null 
+                            && !this.ActiveControl.Captures.HasFlag(CaptureType.DoNotBlock);
+
+            return shouldBlock;
         }
 
         private bool HandleHookedMouseEvent(MouseEventArgs e) {
