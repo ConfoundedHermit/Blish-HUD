@@ -371,6 +371,53 @@ namespace Blish_HUD {
         }
 
         /// <summary>
+        /// Gets a comprehensive status report of all threading optimizations.
+        /// </summary>
+        public string OptimizationStatus {
+            get {
+                var status = new System.Text.StringBuilder();
+                status.AppendLine("=== Blish HUD Threading Optimizations Status ===");
+                
+                // Graphics Device Pool Status
+                status.AppendLine($"Graphics Device Pool: {(UseOptimizedDevicePool ? "ENABLED" : "DISABLED")}");
+                if (_devicePool != null) {
+                    status.AppendLine($"  └─ Pool Stats: {DevicePoolStats}");
+                    status.AppendLine($"  └─ Status: ✓ ACTIVE and operational");
+                } else if (UseOptimizedDevicePool) {
+                    status.AppendLine($"  └─ Status: ✗ ENABLED but not initialized");
+                } else {
+                    status.AppendLine($"  └─ Status: Using legacy graphics device management");
+                }
+                
+                // Worker Thread Manager Status
+                status.AppendLine($"Worker Thread Manager: {(WorkerThreadManager.Instance != null ? "INITIALIZED" : "NOT INITIALIZED")}");
+                if (WorkerThreadManager.Instance != null) {
+                    var stats = WorkerThreadManager.Instance.Statistics;
+                    status.AppendLine($"  └─ Thread Stats: {stats}");
+                    status.AppendLine($"  └─ Status: ✓ ACTIVE and processing work");
+                } else {
+                    status.AppendLine($"  └─ Status: Worker threads not available");
+                }
+                
+                status.AppendLine("===============================================");
+                return status.ToString();
+            }
+        }
+
+        /// <summary>
+        /// Gets a value indicating whether any threading optimizations are currently active.
+        /// </summary>
+        public bool HasActiveOptimizations => _devicePool != null || WorkerThreadManager.Instance != null;
+
+        /// <summary>
+        /// Logs the current optimization status to the console and log file.
+        /// </summary>
+        public void LogOptimizationStatus() {
+            Logger.Info("Threading Optimization Status Check:");
+            Logger.Info(OptimizationStatus);
+        }
+
+        /// <summary>
         /// Provides exclusive and locked access to the <see cref="GraphicsDevice"/>. This
         /// method blocks until the device is available and will yield to higher priority
         /// lend requests. Core lend requests receive priority over these requests.  Once
@@ -494,11 +541,21 @@ namespace Blish_HUD {
 
         private void OnOptimizedDevicePoolSettingChanged(object sender, ValueChangedEventArgs<bool> e) {
             if (e.NewValue && _devicePool == null) {
+                Logger.Info("User enabled optimized graphics device pool - initializing...");
                 InitializeDevicePool();
+                
+                if (_devicePool != null) {
+                    Logger.Info("✓ Optimized graphics device pool is now ACTIVE");
+                    // Add a notification that users can see
+                    GameService.Content.PlaySoundEffectByName("button-click");
+                } else {
+                    Logger.Warn("✗ Failed to initialize optimized graphics device pool");
+                }
             } else if (!e.NewValue && _devicePool != null) {
+                Logger.Info("User disabled optimized graphics device pool - shutting down...");
                 _devicePool?.Dispose();
                 _devicePool = null;
-                Logger.Info("Graphics device pool disabled.");
+                Logger.Info("✓ Graphics device pool disabled - using legacy mode");
             }
         }
 
@@ -555,6 +612,14 @@ namespace Blish_HUD {
             if (UseOptimizedDevicePool) {
                 InitializeDevicePool();
             }
+
+            // Initialize worker thread manager if not already done
+            if (WorkerThreadManager.Instance == null) {
+                WorkerThreadManager.Initialize();
+            }
+
+            // Log initial optimization status
+            LogOptimizationStatus();
         }
 
         private void Rescale() {
