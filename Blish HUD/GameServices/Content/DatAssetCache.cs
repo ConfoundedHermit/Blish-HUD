@@ -163,13 +163,24 @@ namespace Blish_HUD.Content {
         }
 
         private static async Task<Texture2D> LoadTextureFromServ(string path, int assetId) {
-            byte[] rawAsset = await $"{ASSETSERV_HOST}/{assetId}.png".GetBytesAsync();
+            try {
+                byte[] rawAsset = await $"{ASSETSERV_HOST}/{assetId}.png".GetBytesAsync();
 
-            // Save to local cache for future requests
-            using var fileStream = new FileStream(path, FileMode.Create, FileAccess.Write, FileShare.Write, 4096, FileOptions.Asynchronous);
-            await fileStream.WriteAsync(rawAsset, 0, rawAsset.Length);
+                // Save to local cache for future requests asynchronously
+                _ = Task.Run(async () => {
+                    try {
+                        using var fileStream = new FileStream(path, FileMode.Create, FileAccess.Write, FileShare.Write, 4096, FileOptions.Asynchronous);
+                        await fileStream.WriteAsync(rawAsset, 0, rawAsset.Length);
+                    } catch (Exception ex) {
+                        Logger.Warn(ex, "Failed to cache texture {assetId} to disk.", assetId);
+                    }
+                });
 
-            return TextureUtil.FromStreamPremultiplied(new MemoryStream(rawAsset));
+                return TextureUtil.FromStreamPremultiplied(new MemoryStream(rawAsset));
+            } catch (Exception ex) {
+                Logger.Warn(ex, "Failed to load texture {assetId} from server.", assetId);
+                throw;
+            }
         }
 
         /// <summary>

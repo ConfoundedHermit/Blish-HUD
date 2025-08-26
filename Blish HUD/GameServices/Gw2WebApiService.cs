@@ -221,10 +221,10 @@ namespace Blish_HUD {
                 _checkFrequency = 0;
 
                 if (string.IsNullOrEmpty(PrivilegedConnection.Connection.AccessToken)) {
-                    RefreshRegisteredKeys();
+                    // Run refresh asynchronously to avoid blocking the update thread
+                    Task.Run(async () => await RefreshRegisteredKeys());
                 }
             }
-            
         }
 
     }

@@ -120,15 +120,13 @@ namespace Blish_HUD.Content {
         }
 
         /// <inheritdoc />
-        /// <remarks>For <see cref="ZipArchiveReader"/>, use <see cref="GetFileStream(string)"/> instead.</remarks>
         public async Task<Stream?> GetFileStreamAsync(string filePath) {
-            return await Task.FromResult(GetFileStream(filePath));
+            return await Task.Run(() => GetFileStream(filePath));
         }
 
         /// <inheritdoc />
-        /// <remarks>For <see cref="ZipArchiveReader"/>, use <see cref="GetFileBytes(string)"/> instead.</remarks>
         public async Task<byte[]?> GetFileBytesAsync(string filePath) {
-            return await Task.FromResult(GetFileBytes(filePath));
+            return await Task.Run(() => GetFileBytes(filePath));
         }
 
         public void DeleteRoot() {

@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Runtime.CompilerServices;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Xml;
 using Blish_HUD.Debug;
@@ -96,10 +97,14 @@ namespace Blish_HUD.GameIntegration {
         private readonly Dictionary<string, string> _settings = new Dictionary<string, string>(StringComparer.InvariantCultureIgnoreCase);
 
         private FileSystemWatcher? _fileSystemWatcher;
+        private readonly Timer _fileChangeDebounceTimer;
+        private volatile bool _fileChangesPending = false;
 
         private bool _loadLock;
 
-        internal GfxSettingsIntegration(GameIntegrationService service) : base(service) { /* NOOP */ }
+        internal GfxSettingsIntegration(GameIntegrationService service) : base(service) {
+            _fileChangeDebounceTimer = new Timer(OnFileChangeDebounceElapsed, null, Timeout.Infinite, Timeout.Infinite);
+        }
 
         public override void Load() {
             _service.Gw2Instance.Gw2Started += Gw2Proc_Gw2Started;
@@ -154,21 +159,16 @@ namespace Blish_HUD.GameIntegration {
             _fileSystemWatcher.Changed += GfxSettingsFileChanged;
         }
 
-        private bool _changedDebounce = false;
-
         private async void GfxSettingsFileChanged(object sender, FileSystemEventArgs e) {
-            // This typically fires twice
-            if (_changedDebounce) {
-                return;
-            }
+            _fileChangesPending = true;
+            _fileChangeDebounceTimer?.Change(100, Timeout.Infinite); // Debounce file changes
+        }
 
-            _changedDebounce = true;
-
-            // GW2 is usually still locked when we detect the file change, so we give it a chance to let go
-            await Task.Delay(100);
+        private async void OnFileChangeDebounceElapsed(object state) {
+            if (!_fileChangesPending) return;
+            _fileChangesPending = false;
+            
             await LoadGfxSettings();
-
-            _changedDebounce = false;
         }
 
         private bool TryGetGfxSettingsFileStream(out FileStream? gfxSettingsFileStream) {

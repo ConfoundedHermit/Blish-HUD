@@ -60,20 +60,21 @@ namespace Blish_HUD.Content {
         }
         
         public async Task<Stream?> GetFileStreamAsync(string filePath) {
-            return await Task.FromResult(this.GetFileStream(filePath));
+            if (!FileExists(filePath)) return null;
+
+            return await Task.Run(() => File.Open(Path.Combine(_directoryPath, filePath), FileMode.Open, FileAccess.Read, FileShare.Read));
         }
         
         public async Task<byte[]?> GetFileBytesAsync(string filePath) {
             if (!FileExists(filePath)) return null;
 
-            byte[] fileData;
-
-            using (var fileStream = File.OpenRead(Path.Combine(_directoryPath, filePath))) {
-                fileData = new byte[fileStream.Length];
-                await fileStream.ReadAsync(fileData, 0, (int) fileStream.Length);
+            var fullPath = Path.Combine(_directoryPath, filePath);
+            
+            using (var fileStream = new FileStream(fullPath, FileMode.Open, FileAccess.Read, FileShare.Read, 4096, FileOptions.Asynchronous)) {
+                var buffer = new byte[fileStream.Length];
+                await fileStream.ReadAsync(buffer, 0, buffer.Length);
+                return buffer;
             }
-
-            return fileData;
         }
 
         public void DeleteRoot() {

@@ -75,6 +75,9 @@ namespace Blish_HUD.Gw2WebApi {
                 this.Tokens = Math.Min(this.Tokens - this.RefillAmount, remainingAttempts - FAILED_CONSUME_RETRIES - 1);
 
                 if (remainingAttempts > 0) {
+                    // Exponential backoff for rate limiting
+                    int backoffDelay = CalculateExponentialBackoff(FAILED_CONSUME_RETRIES - remainingAttempts);
+                    await Task.Delay(backoffDelay);
                     return await ConsumeCompliant<T>(updateFunc, remainingAttempts - 1);
                 }
 
@@ -84,9 +87,10 @@ namespace Blish_HUD.Gw2WebApi {
                 if (ex.Response != null) {
                     // <head><title>504 Gateway Time-out</title></head>
                     if (ex.Response.StatusCode == System.Net.HttpStatusCode.GatewayTimeout || ex.Response.Content.Contains("504")) {
-                        await Task.Delay(1000);
-
                         if (remainingAttempts > 0) {
+                            // Exponential backoff for gateway timeouts
+                            int backoffDelay = CalculateExponentialBackoff(FAILED_CONSUME_RETRIES - remainingAttempts);
+                            await Task.Delay(backoffDelay);
                             return await ConsumeCompliant<T>(updateFunc, remainingAttempts - 1);
                         }
                     }
@@ -107,6 +111,18 @@ namespace Blish_HUD.Gw2WebApi {
 
                 throw;
             }
+        }
+
+        private int CalculateExponentialBackoff(int attemptNumber) {
+            // Exponential backoff: base delay * 2^attemptNumber + jitter
+            int baseDelay = 1000; // 1 second base delay
+            int exponentialDelay = (int)(baseDelay * Math.Pow(2, attemptNumber));
+            
+            // Add jitter to prevent thundering herd
+            var random = new Random();
+            int jitter = random.Next(0, Math.Min(1000, exponentialDelay / 4));
+            
+            return Math.Min(exponentialDelay + jitter, 30000); // Cap at 30 seconds
         }
 
     }
