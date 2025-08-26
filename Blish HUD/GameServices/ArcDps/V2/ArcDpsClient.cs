@@ -78,10 +78,10 @@ namespace Blish_HUD.GameServices.ArcDps {
             processor.RegisterListener(listener);
         }
 
-        private async void ProcessMessage(MessageProcessor processor, BlockingCollection<byte[]> messageQueue) {
+        private void ProcessMessage(MessageProcessor processor, BlockingCollection<byte[]> messageQueue) {
             while (!_linkedToken.IsCancellationRequested) {
                 _linkedToken.ThrowIfCancellationRequested();
-                await Task.Delay(1, _linkedToken).ConfigureAwait(false);
+                Task.Delay(1).Wait();
                 foreach (var item in messageQueue.GetConsumingEnumerable()) {
                     _linkedToken.ThrowIfCancellationRequested();
                     processor.Process(item, _linkedToken);

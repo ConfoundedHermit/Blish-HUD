@@ -4,7 +4,6 @@ using System;
 using System.Drawing;
 using System.IO;
 using System.Threading;
-using System.Threading.Tasks;
 using System.Windows.Forms;
 
 namespace Blish_HUD {
@@ -123,10 +122,9 @@ namespace Blish_HUD {
                 GameService.GameIntegration.DoUpdate(gameTime);
                 GameService.Module.DoUpdate(gameTime);
 
-                // Non-blocking check - only process Application.DoEvents() at intervals
-                var now = DateTime.UtcNow;
-                if ((now - _lastGw2Check).TotalMilliseconds >= GW2_CHECK_INTERVAL_MS) {
-                    _lastGw2Check = now;
+                for (int i = 0; i < 200; i++) { // Wait ~10 seconds between checks
+                    if (GameService.GameIntegration.Gw2Instance.Gw2IsRunning || GameService.Overlay.Exiting) break;
+                    Thread.Sleep(50);
                     Application.DoEvents();
                 }
 
@@ -148,9 +146,6 @@ namespace Blish_HUD {
         private float _drawLag;
 
         private bool _skipDraw = false;
-        private CancellationTokenSource _cancellationTokenSource = new CancellationTokenSource();
-        private DateTime _lastGw2Check = DateTime.MinValue;
-        private const int GW2_CHECK_INTERVAL_MS = 50;
 
         internal void SkipDraw() {
             _skipDraw = true;
@@ -158,6 +153,7 @@ namespace Blish_HUD {
 
         protected override void Draw(GameTime gameTime) {
             if (_skipDraw) {
+                Thread.Sleep(1);
                 _skipDraw = false;
                 return;
             }

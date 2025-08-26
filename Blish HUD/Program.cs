@@ -60,7 +60,7 @@ namespace Blish_HUD {
             Debug.ContingencyChecks.RunAll();
 
             // Check to see if we're currently mid-upgrade
-            var attemptUpdate = Overlay.SelfUpdater.SelfUpdateUtil.TryHandleUpdateAsync().GetAwaiter().GetResult();
+            var attemptUpdate = Overlay.SelfUpdater.SelfUpdateUtil.TryHandleUpdate();
             if (attemptUpdate.UpdateRelevant && !attemptUpdate.Succeeded) {
                 // Update was detected, but was not successful.  We exit out now.
                 return;

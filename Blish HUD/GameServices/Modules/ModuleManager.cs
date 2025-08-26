@@ -160,16 +160,7 @@ namespace Blish_HUD.Modules {
                 throw new FileNotFoundException($"Assembly data could not be loaded from {assemblyPath}");
             }
 
-            // Use worker thread for CPU-intensive Assembly.Load operation
-            // This prevents UI thread blocking during module loading
-            var loadTask = GameService.WorkerThreads.QueueWork(() => {
-                Logger.Debug("Loading assembly {assemblyPath} on worker thread.", assemblyPath);
-                return Assembly.Load(assemblyData, symbolData ?? new byte[0]);
-            });
-
-            // Wait for the worker thread to complete the assembly loading
-            // This is acceptable here since module loading is already a blocking operation
-            return loadTask.Result;
+            return Assembly.Load(assemblyData, symbolData ?? new byte[0]);
         }
 
         private Assembly? GetResourceAssembly(Assembly requestingAssembly, AssemblyName resourceDetails, string assemblyPath) {

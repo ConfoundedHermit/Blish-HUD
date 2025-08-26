@@ -26,7 +26,7 @@ namespace Blish_HUD.Overlay.SelfUpdater {
             "Blish HUD.pdb"              // Symbols are now embedded in the EXE.
         };
 
-        public static async Task<(bool UpdateRelevant, bool Succeeded)> TryHandleUpdateAsync() {
+        public static (bool UpdateRelevant, bool Succeeded) TryHandleUpdate() {
             string unpackPath = Path.Combine(Path.GetDirectoryName(Application.ExecutablePath), FILE_UNPACKZIP);
 
             if (!File.Exists(unpackPath)) {
@@ -34,7 +34,7 @@ namespace Blish_HUD.Overlay.SelfUpdater {
             }
 
             // Try to make sure we're the only Blish HUD instance running.
-            if (!await TryWaitForProcessLocksAsync().ConfigureAwait(false)) {
+            if (!TryWaitForProcessLocks()) {
                 Debug.Contingency.NotifyCoreUpdateFailed(Program.OverlayVersion, Strings.GameServices.Debug.ContingencyMessages.CoreUpdateFailed_Description_Timeout);
                 return (true, false);
             }
@@ -107,7 +107,7 @@ namespace Blish_HUD.Overlay.SelfUpdater {
             File.Delete(unpackPath);
         }
 
-        private static async Task<bool> TryWaitForProcessLocksAsync() {
+        private static bool TryWaitForProcessLocks() {
             bool timedout = true;
             for (int i = SINGLEPROCESS_DELAY; i > 0; i--) {
                 Process[] instances = Process.GetProcessesByName(Path.GetFileNameWithoutExtension(FILE_EXE));
@@ -117,7 +117,7 @@ namespace Blish_HUD.Overlay.SelfUpdater {
                     continue;
                 }
 
-                await Task.Delay(1000).ConfigureAwait(false);
+                System.Threading.Thread.Sleep(1000);
             }
 
             return !timedout;

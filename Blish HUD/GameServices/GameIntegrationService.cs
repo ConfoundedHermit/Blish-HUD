@@ -162,11 +162,11 @@ namespace Blish_HUD {
                                        if (clipboardResult.IsFaulted)
                                            Logger.Warn(clipboardResult.Exception, "Failed to set clipboard text to {message}!", message);
                                        else
-                                           Task.Run(async () => {
+                                           Task.Run(() => {
                                                Focus();
                                                Keyboard.Press(VirtualKeyShort.LCONTROL, true);
                                                Keyboard.Stroke(VirtualKeyShort.KEY_V, true);
-                                               await Task.Delay(50).ConfigureAwait(false);
+                                               Thread.Sleep(50);
                                                Keyboard.Release(VirtualKeyShort.LCONTROL, true);
                                                Keyboard.Stroke(VirtualKeyShort.RETURN);
                                            }).ContinueWith(result => {
@@ -189,11 +189,11 @@ namespace Blish_HUD {
                                        if (clipboardResult.IsFaulted)
                                            Logger.Warn(clipboardResult.Exception, "Failed to set clipboard text to {text}!", text);
                                        else
-                                           Task.Run(async () => {
+                                           Task.Run(() => {
                                                Focus();
                                                Keyboard.Press(VirtualKeyShort.LCONTROL, true);
                                                Keyboard.Stroke(VirtualKeyShort.KEY_V, true);
-                                               await Task.Delay(50).ConfigureAwait(false);
+                                               Thread.Sleep(50);
                                                Keyboard.Release(VirtualKeyShort.LCONTROL, true);
                                            }).ContinueWith(result => {
                                                if (result.IsFaulted) {
@@ -208,12 +208,12 @@ namespace Blish_HUD {
             public async Task<string> GetInputText() {
                 if (IsBusy()) return "";
                 byte[] prevClipboardContent = await ClipboardUtil.WindowsClipboardService.GetAsUnicodeBytesAsync();
-                await Task.Run(async () => {
+                await Task.Run(() => {
                     Focus();
                     Keyboard.Press(VirtualKeyShort.LCONTROL, true);
                     Keyboard.Stroke(VirtualKeyShort.KEY_A, true);
                     Keyboard.Stroke(VirtualKeyShort.KEY_C, true);
-                    await Task.Delay(50).ConfigureAwait(false);
+                    Thread.Sleep(50);
                     Keyboard.Release(VirtualKeyShort.LCONTROL, true);
                     Unfocus();
                 });
@@ -229,11 +229,11 @@ namespace Blish_HUD {
             [Obsolete("No longer supported here in Core.", true)]
             public void Clear() {
                 if (IsBusy()) return;
-                Task.Run(async () => {
+                Task.Run(() => {
                     Focus();
                     Keyboard.Press(VirtualKeyShort.LCONTROL, true);
                     Keyboard.Stroke(VirtualKeyShort.KEY_A, true);
-                    await Task.Delay(50).ConfigureAwait(false);
+                    Thread.Sleep(50);
                     Keyboard.Release(VirtualKeyShort.LCONTROL, true);
                     Keyboard.Stroke(VirtualKeyShort.BACK);
                     Unfocus();
