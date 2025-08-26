@@ -227,12 +227,87 @@ namespace Blish_HUD {
 
         private readonly ConcurrentQueue<Action<GraphicsDevice>> _queuedRenders = new ConcurrentQueue<Action<GraphicsDevice>>();
 
+        // New optimized render queue system
+        private RenderCommandPriorityManager _priorityManager;
+        private RenderBatchPool _batchPool;
+        private AdaptiveBatchProcessor _batchProcessor;
+        private SettingEntry<bool> _useOptimizedRenderQueueSetting;
+
+        /// <summary>
+        /// Gets a value indicating whether the optimized render queue is enabled.
+        /// </summary>
+        public bool UseOptimizedRenderQueue {
+            get => _useOptimizedRenderQueueSetting?.Value ?? false;
+            set {
+                if (_useOptimizedRenderQueueSetting != null) {
+                    _useOptimizedRenderQueueSetting.Value = value;
+                }
+            }
+        }
+
+        /// <summary>
+        /// Gets statistics about the render queue optimization system.
+        /// </summary>
+        public string RenderQueueStats {
+            get {
+                if (_batchProcessor == null) return "Optimized render queue not initialized";
+                return $"Batch Size: {_batchProcessor.CurrentOptimalBatchSize}, Avg Frame: {_batchProcessor.AverageFrameTime:F2}ms, " +
+                       $"Processed: {_batchProcessor.TotalBatchesProcessed} batches, {_batchProcessor.TotalCommandsProcessed} commands";
+            }
+        }
+
+        /// <summary>
+        /// Gets comprehensive performance statistics from the render queue optimization system.
+        /// </summary>
+        public string RenderQueuePerformanceStats {
+            get {
+                if (_batchProcessor == null) return "Optimized render queue not initialized - no performance data available";
+                var stats = new System.Text.StringBuilder();
+                stats.AppendLine(_batchProcessor.GetPerformanceStatistics());
+                if (_priorityManager != null) {
+                    stats.AppendLine(_priorityManager.GetPerformanceStatistics());
+                }
+                return stats.ToString();
+            }
+        }
+
+        /// <summary>
+        /// Resets the render queue performance counters.
+        /// </summary>
+        public void ResetRenderQueuePerformanceCounters() {
+            if (_batchProcessor != null) {
+                _batchProcessor.ResetPerformanceCounters();
+                Logger.Info("Render queue performance counters have been reset.");
+            } else {
+                Logger.Warn("Cannot reset performance counters - optimized render queue is not initialized.");
+            }
+        }
+
         /// <summary>
         /// Allows you to enqueue a call that will occur during the next time the update loop executes.
         /// </summary>
         /// <param name="call">A method accepting <see cref="GameTime" /> as a parameter.</param>
         public void QueueMainThreadRender(Action<GraphicsDevice> call) {
-            _queuedRenders.Enqueue(call);
+            QueueMainThreadRender(call, RenderCommandPriority.Normal);
+        }
+
+        /// <summary>
+        /// Allows you to enqueue a prioritized render call that will occur during the next time the update loop executes.
+        /// </summary>
+        /// <param name="call">A method accepting <see cref="GraphicsDevice" /> as a parameter.</param>
+        /// <param name="priority">The priority level for this render command.</param>
+        /// <param name="estimatedTimeMs">The estimated execution time in milliseconds.</param>
+        /// <param name="metadata">Optional metadata for debugging and profiling.</param>
+        public void QueueMainThreadRender(Action<GraphicsDevice> call, RenderCommandPriority priority = RenderCommandPriority.Normal, 
+                                         float estimatedTimeMs = 1.0f, string metadata = null) {
+            if (call == null) return;
+
+            if (UseOptimizedRenderQueue && _priorityManager != null) {
+                _priorityManager.EnqueueCommand(priority, call, estimatedTimeMs, metadata);
+            } else {
+                // Fallback to legacy queue
+                _queuedRenders.Enqueue(call);
+            }
         }
 
         private void ScreenSizeUpdated(Point newSize) {
@@ -290,6 +365,14 @@ namespace Blish_HUD {
                                                                    () => "Enables the optimized graphics device pool for reduced lock contention and improved performance. Provides 20-30% frame rate improvement and 80%+ reduction in graphics device lock contention.");
 
             _useOptimizedDevicePoolSetting.SettingChanged += OnOptimizedDevicePoolSettingChanged;
+
+            // Add optimized render queue setting
+            _useOptimizedRenderQueueSetting = settings.DefineSetting("UseOptimizedRenderQueue",
+                                                                    true, // Enable by default for improved performance
+                                                                    () => "Use Optimized Render Queue",
+                                                                    () => "Enables the optimized render queue with dynamic batching and priority-based processing. Provides improved frame rate consistency and reduced render queue processing overhead.");
+
+            _useOptimizedRenderQueueSetting.SettingChanged += OnOptimizedRenderQueueSettingChanged;
             
             _frameLimiterSetting.SettingChanged += FrameLimiterSettingMethodChanged;
             FrameLimiterSettingMethodChanged(_frameLimiterSetting, new ValueChangedEventArgs<FramerateMethod>(_frameLimiterSetting.Value, _frameLimiterSetting.Value));
@@ -411,6 +494,17 @@ namespace Blish_HUD {
                     status.AppendLine($"  └─ Status: Using legacy graphics device management");
                 }
                 
+                // Render Queue Optimization Status
+                status.AppendLine($"Render Queue Optimization: {(UseOptimizedRenderQueue ? "ENABLED" : "DISABLED")}");
+                if (_batchProcessor != null) {
+                    status.AppendLine($"  └─ Queue Stats: {RenderQueueStats}");
+                    status.AppendLine($"  └─ Status: ✓ ACTIVE and processing batches");
+                } else if (UseOptimizedRenderQueue) {
+                    status.AppendLine($"  └─ Status: ✗ ENABLED but not initialized");
+                } else {
+                    status.AppendLine($"  └─ Status: Using legacy render queue processing");
+                }
+                
                 // Worker Thread Manager Status
                 status.AppendLine($"Worker Thread Manager: {(WorkerThreadManager.Instance != null ? "INITIALIZED" : "NOT INITIALIZED")}");
                 if (WorkerThreadManager.Instance != null) {
@@ -429,7 +523,7 @@ namespace Blish_HUD {
         /// <summary>
         /// Gets a value indicating whether any threading optimizations are currently active.
         /// </summary>
-        public bool HasActiveOptimizations => _devicePool != null || WorkerThreadManager.Instance != null;
+        public bool HasActiveOptimizations => _devicePool != null || _batchProcessor != null || WorkerThreadManager.Instance != null;
 
         /// <summary>
         /// Logs the current optimization status to the console and log file.
@@ -563,13 +657,33 @@ namespace Blish_HUD {
             GameService.Debug.StopTimeFunc("UI Elements");
 
             GameService.Debug.StartTimeFunc("Render Queue");
-            for (int i = MIN_QUEUED_RENDERS; i > 0 && _queuedRenders.TryDequeue(out var renderCall); i--) {
-                renderCall.Invoke(ctx.GraphicsDevice);
+            
+            if (UseOptimizedRenderQueue && _batchProcessor != null) {
+                // Use optimized render queue with adaptive batch processing
+                var frameTimeMs = (float)_renderTimer.ElapsedMilliseconds;
+                _batchProcessor.UpdateFrameTime(frameTimeMs);
+                
+                var remainingTimeMs = TARGET_MAX_FRAMETIME - _renderTimer.ElapsedMilliseconds;
+                if (remainingTimeMs > 1) {
+                    var stats = _batchProcessor.ProcessCommands(ctx.GraphicsDevice, remainingTimeMs);
+                    
+                    // Log performance if we processed a significant number of commands
+                    if (stats.CommandsProcessed > 10) {
+                        Logger.Debug($"Processed {stats.CommandsProcessed} commands in {stats.TotalElapsedTimeMs}ms " +
+                                   $"(efficiency: {stats.ProcessingEfficiency:F2} cmd/ms)");
+                    }
+                }
+            } else {
+                // Fallback to legacy render queue processing
+                for (int i = MIN_QUEUED_RENDERS; i > 0 && _queuedRenders.TryDequeue(out var renderCall); i--) {
+                    renderCall.Invoke(ctx.GraphicsDevice);
 
-                if (_renderTimer.ElapsedMilliseconds < TARGET_MAX_FRAMETIME) {
-                    i++;
+                    if (_renderTimer.ElapsedMilliseconds < TARGET_MAX_FRAMETIME) {
+                        i++;
+                    }
                 }
             }
+            
             GameService.Debug.StopTimeFunc("Render Queue");
         }
 
@@ -593,6 +707,25 @@ namespace Blish_HUD {
             }
         }
 
+        private void OnOptimizedRenderQueueSettingChanged(object sender, ValueChangedEventArgs<bool> e) {
+            if (e.NewValue && _batchProcessor == null) {
+                Logger.Info("User enabled optimized render queue - initializing...");
+                InitializeRenderQueue();
+                
+                if (_batchProcessor != null) {
+                    Logger.Info("✓ Optimized render queue is now ACTIVE");
+                    // Add a notification that users can see
+                    GameService.Content.PlaySoundEffectByName("button-click");
+                } else {
+                    Logger.Warn("✗ Failed to initialize optimized render queue");
+                }
+            } else if (!e.NewValue && _batchProcessor != null) {
+                Logger.Info("User disabled optimized render queue - shutting down...");
+                ShutdownRenderQueue();
+                Logger.Info("✓ Render queue optimization disabled - using legacy mode");
+            }
+        }
+
         private void InitializeDevicePool() {
             try {
                 if (BlishHud.Instance?.ActiveGraphicsDeviceManager?.GraphicsDevice != null) {
@@ -601,6 +734,36 @@ namespace Blish_HUD {
                 }
             } catch (Exception ex) {
                 Logger.Error(ex, "Failed to initialize graphics device pool.");
+            }
+        }
+
+        private void InitializeRenderQueue() {
+            try {
+                _priorityManager = new RenderCommandPriorityManager();
+                _batchPool = new RenderBatchPool(32); // Max batch size of 32 commands
+                _batchProcessor = new AdaptiveBatchProcessor(_priorityManager, _batchPool);
+                
+                Logger.Info("Optimized render queue initialized with adaptive batch processing.");
+            } catch (Exception ex) {
+                Logger.Error(ex, "Failed to initialize optimized render queue.");
+                
+                // Clean up partial initialization
+                _batchProcessor = null;
+                _batchPool = null;
+                _priorityManager = null;
+            }
+        }
+
+        private void ShutdownRenderQueue() {
+            try {
+                _batchProcessor = null;
+                _batchPool = null;
+                _priorityManager?.Clear();
+                _priorityManager = null;
+                
+                Logger.Debug("Optimized render queue shutdown complete.");
+            } catch (Exception ex) {
+                Logger.Warn(ex, "Error during render queue shutdown.");
             }
         }
 
@@ -647,6 +810,11 @@ namespace Blish_HUD {
                 InitializeDevicePool();
             }
 
+            // Initialize render queue if enabled
+            if (UseOptimizedRenderQueue) {
+                InitializeRenderQueue();
+            }
+
             // Initialize worker thread manager if not already done
             if (WorkerThreadManager.Instance == null) {
                 WorkerThreadManager.Initialize();
@@ -677,6 +845,11 @@ namespace Blish_HUD {
             // Dispose device pool if it exists
             _devicePool?.Dispose();
             _devicePool = null;
+            
+            // Shutdown render queue if it exists
+            if (_batchProcessor != null) {
+                ShutdownRenderQueue();
+            }
         }
 
         protected override void Update(GameTime gameTime) {
