@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
 using System.Threading;
+using System.Threading.Tasks;
 using Blish_HUD.Content;
 using Blish_HUD.Contexts;
 using Blish_HUD.Controls;
@@ -251,15 +252,16 @@ namespace Blish_HUD {
             GameService.Settings.Save(true);
 
             if (timeout > 0) {
-                (new Thread(() => {
-                                Thread.Sleep(timeout);
-                                Logger.Warn($"Unload took too long (longer than {timeout} ms). Forcing exit.");
-                                Environment.Exit(0);
-                            }) {IsBackground = true}).Start();
+                // Use async timeout instead of blocking Thread.Sleep
+                _ = Task.Run(async () => {
+                    await Task.Delay(timeout);
+                    Logger.Warn($"Unload took too long (longer than {timeout} ms). Forcing exit.");
+                    Environment.Exit(0);
+                });
             }
 
             return true;
-        } 
+        }
         
         /// <summary>
         /// Instructs Blish HUD to unload and then restart.

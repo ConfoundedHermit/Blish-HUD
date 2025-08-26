@@ -4,6 +4,7 @@ using System;
 using System.Drawing;
 using System.IO;
 using System.Threading;
+using System.Threading.Tasks;
 using System.Windows.Forms;
 
 namespace Blish_HUD {
@@ -37,6 +38,10 @@ namespace Blish_HUD {
 
         // Primarily used to draw debug text
         private SpriteBatch? _basicSpriteBatch;
+
+        // Threading optimization fields
+        private readonly CancellationTokenSource _gw2WaitCancellation = new CancellationTokenSource();
+        private volatile bool _gw2StateChanged = false;
 
         public BlishHud() {
             BlishHud.Instance = this;
@@ -122,14 +127,17 @@ namespace Blish_HUD {
                 GameService.GameIntegration.DoUpdate(gameTime);
                 GameService.Module.DoUpdate(gameTime);
 
-                for (int i = 0; i < 200; i++) { // Wait ~10 seconds between checks
-                    if (GameService.GameIntegration.Gw2Instance.Gw2IsRunning || GameService.Overlay.Exiting) break;
-                    Thread.Sleep(50);
-                    Application.DoEvents();
+                // Non-blocking wait for GW2 to start - schedule async wait
+                if (!_gw2StateChanged) {
+                    _gw2StateChanged = true;
+                    _ = WaitForGw2OrExitAsync(_gw2WaitCancellation.Token);
                 }
 
                 return;
             }
+
+            // Reset the GW2 state change flag when GW2 is running
+            _gw2StateChanged = false;
 
             // Update all game services
             foreach (var service in GameService.All) {
@@ -143,6 +151,30 @@ namespace Blish_HUD {
             _drawLag += (float)gameTime.ElapsedGameTime.TotalSeconds;
         }
 
+        /// <summary>
+        /// Non-blocking wait for GW2 to start or application to exit.
+        /// This replaces the blocking Thread.Sleep loop with proper async handling.
+        /// </summary>
+        private async Task WaitForGw2OrExitAsync(CancellationToken cancellationToken) {
+            try {
+                // Wait up to 10 seconds, checking every 50ms
+                for (int i = 0; i < 200; i++) {
+                    if (GameService.GameIntegration.Gw2Instance.Gw2IsRunning || GameService.Overlay.Exiting) {
+                        break;
+                    }
+                    
+                    await Task.Delay(50, cancellationToken);
+                    
+                    // Allow UI thread to process events without blocking
+                    if (!cancellationToken.IsCancellationRequested) {
+                        Application.DoEvents();
+                    }
+                }
+            } catch (OperationCanceledException) {
+                // Expected when GW2 starts or application exits
+            }
+        }
+
         private float _drawLag;
 
         private bool _skipDraw = false;
@@ -153,7 +185,9 @@ namespace Blish_HUD {
 
         protected override void Draw(GameTime gameTime) {
             if (_skipDraw) {
-                Thread.Sleep(1);
+                // Use Task.Yield() instead of Thread.Sleep(1) to allow other threads to run
+                // without blocking the current thread
+                Task.Yield().GetAwaiter().GetResult();
                 _skipDraw = false;
                 return;
             }

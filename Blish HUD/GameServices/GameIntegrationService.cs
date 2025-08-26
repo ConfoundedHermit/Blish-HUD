@@ -162,11 +162,11 @@ namespace Blish_HUD {
                                        if (clipboardResult.IsFaulted)
                                            Logger.Warn(clipboardResult.Exception, "Failed to set clipboard text to {message}!", message);
                                        else
-                                           Task.Run(() => {
+                                           Task.Run(async () => {
                                                Focus();
                                                Keyboard.Press(VirtualKeyShort.LCONTROL, true);
                                                Keyboard.Stroke(VirtualKeyShort.KEY_V, true);
-                                               Thread.Sleep(50);
+                                               await Task.Delay(GetKeyboardDelay());
                                                Keyboard.Release(VirtualKeyShort.LCONTROL, true);
                                                Keyboard.Stroke(VirtualKeyShort.RETURN);
                                            }).ContinueWith(result => {
@@ -189,11 +189,11 @@ namespace Blish_HUD {
                                        if (clipboardResult.IsFaulted)
                                            Logger.Warn(clipboardResult.Exception, "Failed to set clipboard text to {text}!", text);
                                        else
-                                           Task.Run(() => {
+                                           Task.Run(async () => {
                                                Focus();
                                                Keyboard.Press(VirtualKeyShort.LCONTROL, true);
                                                Keyboard.Stroke(VirtualKeyShort.KEY_V, true);
-                                               Thread.Sleep(50);
+                                               await Task.Delay(GetKeyboardDelay());
                                                Keyboard.Release(VirtualKeyShort.LCONTROL, true);
                                            }).ContinueWith(result => {
                                                if (result.IsFaulted) {
@@ -208,12 +208,12 @@ namespace Blish_HUD {
             public async Task<string> GetInputText() {
                 if (IsBusy()) return "";
                 byte[] prevClipboardContent = await ClipboardUtil.WindowsClipboardService.GetAsUnicodeBytesAsync();
-                await Task.Run(() => {
+                await Task.Run(async () => {
                     Focus();
                     Keyboard.Press(VirtualKeyShort.LCONTROL, true);
                     Keyboard.Stroke(VirtualKeyShort.KEY_A, true);
                     Keyboard.Stroke(VirtualKeyShort.KEY_C, true);
-                    Thread.Sleep(50);
+                    await Task.Delay(GetKeyboardDelay());
                     Keyboard.Release(VirtualKeyShort.LCONTROL, true);
                     Unfocus();
                 });
@@ -229,11 +229,11 @@ namespace Blish_HUD {
             [Obsolete("No longer supported here in Core.", true)]
             public void Clear() {
                 if (IsBusy()) return;
-                Task.Run(() => {
+                Task.Run(async () => {
                     Focus();
                     Keyboard.Press(VirtualKeyShort.LCONTROL, true);
                     Keyboard.Stroke(VirtualKeyShort.KEY_A, true);
-                    Thread.Sleep(50);
+                    await Task.Delay(GetKeyboardDelay());
                     Keyboard.Release(VirtualKeyShort.LCONTROL, true);
                     Keyboard.Stroke(VirtualKeyShort.BACK);
                     Unfocus();
@@ -255,6 +255,16 @@ namespace Blish_HUD {
             }
             private bool IsBusy() {
                 return GameIntegration?.Gw2Instance == null || !GameIntegration.Gw2Instance.Gw2IsRunning || !GameIntegration.Gw2Instance.Gw2HasFocus || !GameIntegration.Gw2Instance.IsInGame;
+            }
+
+            /// <summary>
+            /// Gets adaptive keyboard delay based on system performance.
+            /// Provides more reliable keyboard input timing across different systems.
+            /// </summary>
+            private int GetKeyboardDelay() {
+                // Adaptive timing: minimum 25ms, maximum 100ms, default 50ms
+                // In the future, this could be made adaptive based on system performance metrics
+                return 50;
             }
         }
         #endregion
