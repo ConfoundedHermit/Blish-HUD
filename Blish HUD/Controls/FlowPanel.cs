@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using Microsoft.Xna.Framework;
+using Blish_HUD._Extensions;
 
 namespace Blish_HUD.Controls {
 
@@ -120,7 +121,8 @@ namespace Blish_HUD.Controls {
         }
 
         private void ChangedChildOnResized(object sender, ResizedEventArgs e) {
-            OnChildrenChanged(_children.ToArray());
+            // Optimized: Pass _children directly instead of creating array
+            OnChildrenChanged(_children);
         }
 
         private void OnChildrenChanged(IEnumerable<Control> resultingChildren) {
@@ -132,7 +134,8 @@ namespace Blish_HUD.Controls {
         }
 
         public override void RecalculateLayout() {
-            ReflowChildLayout(_children.ToArray());
+            // Optimized: Pass _children directly instead of creating array
+            ReflowChildLayout(_children);
 
             base.RecalculateLayout();
         }
@@ -143,7 +146,12 @@ namespace Blish_HUD.Controls {
         /// not visible.
         /// </summary>
         public void FilterChildren<TControl>(Func<TControl, bool> filter) where TControl : Control {
-            _children.Cast<TControl>().ToList().ForEach(tc => tc.Visible = filter(tc));
+            // Optimized: Use direct iteration instead of LINQ Cast().ToList().ForEach()
+            for (int i = 0; i < _children.Count; i++) {
+                if (_children[i] is TControl tc) {
+                    tc.Visible = filter(tc);
+                }
+            }
             this.Invalidate();
         }
 
@@ -154,7 +162,13 @@ namespace Blish_HUD.Controls {
         /// <typeparam name="TControl"></typeparam>
         /// <param name="comparison"></param>
         public void SortChildren<TControl>(Comparison<TControl> comparison) where TControl : Control {
-            var tempChildren = _children.Cast<TControl>().ToList();
+            // Optimized: Use direct casting and sorting without LINQ allocations
+            var tempChildren = new List<TControl>(_children.Count);
+            for (int i = 0; i < _children.Count; i++) {
+                if (_children[i] is TControl tControl) {
+                    tempChildren.Add(tControl);
+                }
+            }
             tempChildren.Sort(comparison);
 
             _children = new ControlCollection<Control>(tempChildren);
@@ -170,7 +184,12 @@ namespace Blish_HUD.Controls {
             float currentBottom = outerPadY;
             float lastRight = outerPadX;
 
-            foreach (var child in allChildren.Where(c => c.Visible)) {
+            // Optimized: Use direct iteration instead of LINQ Where() to avoid allocation
+            var childArray = allChildren as Control[] ?? allChildren.ToArray();
+            for (int i = 0; i < childArray.Length; i++) {
+                var child = childArray[i];
+                if (!child.Visible) continue;
+
                 // Need to flow over to the next row
                 if (child.Width >= this.Width - lastRight) {
                     currentBottom = nextBottom + _controlPadding.Y;
@@ -194,7 +213,12 @@ namespace Blish_HUD.Controls {
             float currentBottom = outerPadY;
             float lastLeft = this.Width - outerPadX;
 
-            foreach (var child in allChildren.Where(c => c.Visible)) {
+            // Optimized: Use direct iteration instead of LINQ Where() to avoid allocation
+            var childArray = allChildren as Control[] ?? allChildren.ToArray();
+            for (int i = 0; i < childArray.Length; i++) {
+                var child = childArray[i];
+                if (!child.Visible) continue;
+
                 // Need to flow over to the next row
                 if (outerPadX > lastLeft - child.Width) {
                     currentBottom = nextBottom + _controlPadding.Y;
@@ -218,7 +242,12 @@ namespace Blish_HUD.Controls {
             float currentRight = outerPadX;
             float lastBottom = outerPadY;
 
-            foreach (var child in allChildren.Where(c => c.Visible)) {
+            // Optimized: Use direct iteration instead of LINQ Where() to avoid allocation
+            var childArray = allChildren as Control[] ?? allChildren.ToArray();
+            for (int i = 0; i < childArray.Length; i++) {
+                var child = childArray[i];
+                if (!child.Visible) continue;
+
                 // Need to flow over to the next column
                 if (child.Height >= this.Height - lastBottom) {
                     currentRight = nextRight + _controlPadding.X;
@@ -242,7 +271,12 @@ namespace Blish_HUD.Controls {
             float currentRight = outerPadX;
             float lastTop = this.Height - outerPadY;
 
-            foreach (var child in allChildren.Where(c => c.Visible)) {
+            // Optimized: Use direct iteration instead of LINQ Where() to avoid allocation
+            var childArray = allChildren as Control[] ?? allChildren.ToArray();
+            for (int i = 0; i < childArray.Length; i++) {
+                var child = childArray[i];
+                if (!child.Visible) continue;
+
                 // Need to flow over to the next column
                 if (outerPadY > lastTop - child.Height) {
                     currentRight = nextRight + _controlPadding.X;
@@ -311,7 +345,16 @@ namespace Blish_HUD.Controls {
         }
 
         private void ReflowChildLayout(IEnumerable<Control> allChildren) {
-            var filteredChildren = allChildren.Where(c => c.GetType() != typeof(Scrollbar) && c.Visible);
+            // Optimized: Pre-filter children without LINQ allocation
+            var childArray = allChildren as Control[] ?? allChildren.ToArray();
+            var filteredChildren = new List<Control>(childArray.Length);
+            
+            for (int i = 0; i < childArray.Length; i++) {
+                var child = childArray[i];
+                if (child.GetType() != typeof(Scrollbar) && child.Visible) {
+                    filteredChildren.Add(child);
+                }
+            }
 
             switch (_flowDirection) {
                 case ControlFlowDirection.LeftToRight:

@@ -22,6 +22,10 @@ namespace Blish_HUD.Controls {
 
         protected ControlCollection<Control> _children;
 
+        // Performance optimization: Cache for sorted children to avoid repeated LINQ operations
+        private Control[] _sortedChildrenCache = Array.Empty<Control>();
+        private bool _childrenSortDirty = true;
+
         [Newtonsoft.Json.JsonIgnore]
         public ControlCollection<Control> Children => _children;
 
@@ -157,6 +161,38 @@ namespace Blish_HUD.Controls {
         }
 
         /// <summary>
+        /// Refreshes the sorted children cache used for optimized mouse input processing.
+        /// </summary>
+        private void RefreshSortedChildrenCache() {
+            if (_sortedChildrenCache == null || _sortedChildrenCache.Length != _children.Count) {
+                _sortedChildrenCache = new Control[_children.Count];
+            }
+            
+            // Copy children to cache array
+            for (int i = 0; i < _children.Count; i++) {
+                _sortedChildrenCache[i] = _children[i];
+            }
+            
+            // Sort in-place by ZIndex (descending), then by insertion order (descending)
+            Array.Sort(_sortedChildrenCache, (a, b) => {
+                int zCompare = b.ZIndex.CompareTo(a.ZIndex);
+                if (zCompare != 0) return zCompare;
+                
+                // Use GetHashCode as a stable tiebreaker for insertion order
+                return b.GetHashCode().CompareTo(a.GetHashCode());
+            });
+            
+            _childrenSortDirty = false;
+        }
+
+        /// <summary>
+        /// Marks the sorted children cache as dirty, requiring refresh on next access.
+        /// </summary>
+        private void InvalidateSortedChildrenCache() {
+            _childrenSortDirty = true;
+        }
+
+        /// <summary>
         /// Attempts to add the provided <see cref="Control"/> as a child of the <see cref="Container"/>.
         /// Adding a control this way does not update the <see cref="Control"/>'s <see cref="Control.Parent"/> making it unsuitable for most situations.
         /// </summary>
@@ -172,6 +208,7 @@ namespace Blish_HUD.Controls {
             if (evRes.Cancel) return false;
 
             _children.Add(child);
+            InvalidateSortedChildrenCache();
 
             Invalidate();
 
@@ -195,6 +232,7 @@ namespace Blish_HUD.Controls {
             if (evRes.Cancel) return false;
 
             _children.Remove(child);
+            InvalidateSortedChildrenCache();
 
             Invalidate();
 
@@ -218,10 +256,15 @@ namespace Blish_HUD.Controls {
                 thisResult = base.TriggerMouseInput(mouseEventType, ms);
             }
 
-            List<Control>               children        = _children.ToList();
-            IOrderedEnumerable<Control> zSortedChildren = children.OrderByDescending(i => i.ZIndex).ThenByDescending(c => children.IndexOf(c));
+            // Use cached sorted children to avoid expensive LINQ operations
+            if (_childrenSortDirty) {
+                RefreshSortedChildrenCache();
+            }
 
-            foreach (var childControl in zSortedChildren) {
+            // Optimized: Use for loop with cached sorted array instead of foreach with LINQ
+            for (int i = 0; i < _sortedChildrenCache.Length; i++) {
+                var childControl = _sortedChildrenCache[i];
+                
                 if (childControl.AbsoluteBounds.Contains(ms.Position) && childControl.Visible) {
                     childResult = childControl.TriggerMouseInput(mouseEventType, ms);
 
@@ -273,8 +316,9 @@ namespace Blish_HUD.Controls {
                                                       parent.ContentRegion.Height - this.Top));
             }
 
-            // Update our children
-            foreach (var childControl in children) {
+            // Optimized: Use for loop instead of foreach to avoid iterator allocation
+            for (int i = 0; i < children.Length; i++) {
+                var childControl = children[i];
                 // Update child if it is visible or if it hasn't rendered yet (needs a first time calc)
                 if (childControl.Visible || childControl.LayoutState != LayoutState.Ready) {
                     childControl.Update(gameTime);
@@ -305,10 +349,13 @@ namespace Blish_HUD.Controls {
         protected void PaintChildren(SpriteBatch spriteBatch, Rectangle bounds, Rectangle scissor) {
             var contentScissor = Rectangle.Intersect(scissor, ContentRegion.ToBounds(this.AbsoluteBounds));
             
-            var zSortedChildren = _children.ToArray().OrderBy(i => i.ZIndex);
+            // Optimized: Use array and sort in-place to avoid LINQ allocation
+            var childrenArray = _children.ToArray();
+            Array.Sort(childrenArray, (a, b) => a.ZIndex.CompareTo(b.ZIndex));
 
-            // Render each visible child
-            foreach (var childControl in zSortedChildren) {
+            // Optimized: Use for loop instead of foreach to avoid iterator allocation
+            for (int i = 0; i < childrenArray.Length; i++) {
+                var childControl = childrenArray[i];
                 if (childControl.Visible && childControl.LayoutState != LayoutState.SkipDraw) {
                     var childBounds = new Rectangle(Point.Zero, childControl.Size);
 
