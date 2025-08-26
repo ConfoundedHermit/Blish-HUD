@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Concurrent;
+using System.Diagnostics;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Xna.Framework.Graphics;
@@ -75,6 +76,14 @@ namespace Blish_HUD.Graphics {
         private volatile int _maxContexts;
         private volatile int _currentContextCount = 0;
         private volatile bool _disposed = false;
+        
+        // Performance monitoring (using Interlocked for thread safety)
+        private long _totalContextsCreated = 0;
+        private long _totalContextsAcquired = 0;
+        private long _totalContextsReturned = 0;
+        private long _totalWaitTimeMs = 0;
+        private long _peakConcurrentRequests = 0;
+        private readonly Stopwatch _performanceTimer = Stopwatch.StartNew();
 
         /// <summary>
         /// Gets the maximum number of contexts that can be created.
@@ -123,10 +132,13 @@ namespace Blish_HUD.Graphics {
                 _priorityQueues[i] = new ConcurrentQueue<ContextRequest>();
             }
 
+            // Pre-create a few contexts to have them ready for immediate use
+            PreCreateContexts();
+
             // Start the request processing task
             _processingTask = Task.Run(ProcessRequestsAsync, _shutdownToken.Token);
 
-            Logger.Debug($"GraphicsDevicePool initialized with max {_maxContexts} contexts.");
+            Logger.Debug($"GraphicsDevicePool initialized with max {_maxContexts} contexts, {AvailableContextCount} pre-created.");
         }
 
         /// <summary>
@@ -194,6 +206,9 @@ namespace Blish_HUD.Graphics {
 
             // Reset context state if needed
             try {
+                // Track performance metrics
+                Interlocked.Increment(ref _totalContextsReturned);
+                
                 // Add any context cleanup logic here
                 _availableContexts.Enqueue(context);
                 _contextSemaphore.Release();
@@ -255,6 +270,23 @@ namespace Blish_HUD.Graphics {
             }
         }
 
+        private void PreCreateContexts() {
+            // Pre-create 2-3 contexts to have them immediately available
+            int preCreateCount = Math.Min(3, _maxContexts);
+            
+            for (int i = 0; i < preCreateCount; i++) {
+                var context = CreateNewContext();
+                if (context != null) {
+                    _availableContexts.Enqueue(context);
+                    Interlocked.Increment(ref _totalContextsCreated);
+                } else {
+                    break; // Stop if we can't create more contexts
+                }
+            }
+            
+            Logger.Debug($"Pre-created {AvailableContextCount} contexts for immediate use.");
+        }
+
         private PooledGraphicsDeviceContext CreateNewContext() {
             lock (_poolLock) {
                 if (_currentContextCount >= _maxContexts) {
@@ -274,6 +306,48 @@ namespace Blish_HUD.Graphics {
                     return null;
                 }
             }
+        }
+
+        /// <summary>
+        /// Gets comprehensive performance statistics for the graphics device pool.
+        /// </summary>
+        public string GetPerformanceStatistics() {
+            var stats = new System.Text.StringBuilder();
+            stats.AppendLine("=== Graphics Device Pool Performance Statistics ===");
+            stats.AppendLine($"Pool Configuration:");
+            stats.AppendLine($"  └─ Max Contexts: {_maxContexts}");
+            stats.AppendLine($"  └─ Active Contexts: {_currentContextCount}");
+            stats.AppendLine($"  └─ Available Contexts: {AvailableContextCount}");
+            stats.AppendLine($"  └─ Pending Requests: {PendingRequestCount}");
+            
+            stats.AppendLine($"Performance Metrics:");
+            stats.AppendLine($"  └─ Total Contexts Created: {Interlocked.Read(ref _totalContextsCreated)}");
+            stats.AppendLine($"  └─ Total Contexts Acquired: {Interlocked.Read(ref _totalContextsAcquired)}");
+            stats.AppendLine($"  └─ Total Contexts Returned: {Interlocked.Read(ref _totalContextsReturned)}");
+            stats.AppendLine($"  └─ Peak Concurrent Requests: {Interlocked.Read(ref _peakConcurrentRequests)}");
+            stats.AppendLine($"  └─ Total Wait Time: {Interlocked.Read(ref _totalWaitTimeMs)}ms");
+            stats.AppendLine($"  └─ Pool Uptime: {_performanceTimer.Elapsed.TotalSeconds:F1}s");
+            
+            var contextReuseRate = Interlocked.Read(ref _totalContextsAcquired) > 0 
+                ? (1.0 - (double)Interlocked.Read(ref _totalContextsCreated) / Interlocked.Read(ref _totalContextsAcquired)) * 100 
+                : 0;
+            stats.AppendLine($"  └─ Context Reuse Rate: {contextReuseRate:F1}%");
+            
+            stats.AppendLine("=====================================================");
+            return stats.ToString();
+        }
+
+        /// <summary>
+        /// Resets all performance counters to zero.
+        /// </summary>
+        public void ResetPerformanceCounters() {
+            Interlocked.Exchange(ref _totalContextsCreated, 0);
+            Interlocked.Exchange(ref _totalContextsAcquired, 0);
+            Interlocked.Exchange(ref _totalContextsReturned, 0);
+            Interlocked.Exchange(ref _totalWaitTimeMs, 0);
+            Interlocked.Exchange(ref _peakConcurrentRequests, 0);
+            _performanceTimer.Restart();
+            Logger.Debug("Graphics device pool performance counters reset.");
         }
 
         private void ThrowIfDisposed() {

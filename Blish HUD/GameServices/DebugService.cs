@@ -261,6 +261,23 @@ namespace Blish_HUD {
             this.OverlayTexts.TryAdd("renderLate",  gameTime => "Render Late: "     + (gameTime.IsRunningSlowly ? "Yes" : "No"));
             this.OverlayTexts.TryAdd("arcDps",      _ => "ArcDPS Bridge: "          + (ArcDps.RenderPresent ? "Yes" : "No"));
             this.OverlayTexts.TryAdd("volume",      _ => "Average In-Game Volume: " + GameIntegration.Audio.Volume);
+            
+            // Graphics Device Pool Performance Statistics
+            this.OverlayTexts.TryAdd("gfxPoolStatus", _ => "Graphics Pool: " + (Graphics.UseOptimizedDevicePool ? "ENABLED ✓" : "DISABLED"));
+            this.OverlayTexts.TryAdd("gfxPoolStats", _ => {
+                if (!Graphics.UseOptimizedDevicePool) return "Pool disabled - using legacy mode";
+                
+                var stats = Graphics.DevicePoolStats;
+                // Parse the stats to provide better explanation
+                if (stats.Contains("Available: 0")) {
+                    return $"{stats} (⚠️ No contexts ready - check pool initialization)";
+                } else if (stats.Contains("Active: 0")) {
+                    return $"{stats} (✓ Efficient - contexts returned after use)";
+                } else {
+                    return $"{stats} (Pool working normally)";
+                }
+            });
+            this.OverlayTexts.TryAdd("gfxOptimizations", _ => "Threading Optimizations: " + (Graphics.HasActiveOptimizations ? "ACTIVE ✓" : "INACTIVE"));
         }
 
         protected override void Update(GameTime gameTime) {
