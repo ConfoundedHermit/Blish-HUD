@@ -5,9 +5,11 @@ using System.Diagnostics;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Threading;
+using System.Threading.Tasks;
 using Blish_HUD.Controls;
 using Blish_HUD.Entities;
 using Blish_HUD.Graphics;
+using Blish_HUD.GameServices.Threading;
 using Blish_HUD.Settings;
 using Gw2Sharp.Mumble.Models;
 using Microsoft.Xna.Framework;
@@ -280,6 +282,14 @@ namespace Blish_HUD {
                                                                      ManualUISize.SyncWithGame,
                                                                      () => Strings.GameServices.GraphicsService.Setting_UIScaling_DisplayName,
                                                                      () => Strings.GameServices.GraphicsService.Setting_UIScaling_Description);
+
+            // Add optimized device pool setting
+            _useOptimizedDevicePoolSetting = settings.DefineSetting("UseOptimizedDevicePool",
+                                                                   false, // Default to false for backward compatibility
+                                                                   () => "Use Optimized Graphics Device Pool",
+                                                                   () => "Enables the optimized graphics device pool for reduced lock contention and improved performance. Requires application restart to take effect.");
+
+            _useOptimizedDevicePoolSetting.SettingChanged += OnOptimizedDevicePoolSettingChanged;
             
             _frameLimiterSetting.SettingChanged += FrameLimiterSettingMethodChanged;
             FrameLimiterSettingMethodChanged(_frameLimiterSetting, new ValueChangedEventArgs<FramerateMethod>(_frameLimiterSetting.Value, _frameLimiterSetting.Value));
@@ -333,6 +343,32 @@ namespace Blish_HUD {
         private readonly object _lendLockLow    = new object();
         private readonly object _lendLockNext   = new object();
         private readonly object _lendLockDevice = new object();
+
+        // New optimized graphics device pool
+        private GraphicsDevicePool _devicePool;
+        private SettingEntry<bool> _useOptimizedDevicePoolSetting;
+
+        /// <summary>
+        /// Gets a value indicating whether the optimized graphics device pool is enabled.
+        /// </summary>
+        public bool UseOptimizedDevicePool {
+            get => _useOptimizedDevicePoolSetting?.Value ?? false;
+            set {
+                if (_useOptimizedDevicePoolSetting != null) {
+                    _useOptimizedDevicePoolSetting.Value = value;
+                }
+            }
+        }
+
+        /// <summary>
+        /// Gets statistics about the graphics device pool, if enabled.
+        /// </summary>
+        public string DevicePoolStats {
+            get {
+                if (_devicePool == null) return "Device pool not initialized";
+                return $"Active: {_devicePool.ActiveContextCount}/{_devicePool.MaxContexts}, Available: {_devicePool.AvailableContextCount}, Pending: {_devicePool.PendingRequestCount}";
+            }
+        }
 
         /// <summary>
         /// Provides exclusive and locked access to the <see cref="GraphicsDevice"/>. This
@@ -456,7 +492,70 @@ namespace Blish_HUD {
             GameService.Debug.StopTimeFunc("Render Queue");
         }
 
-        protected override void Load() { /* NOOP */ }
+        private void OnOptimizedDevicePoolSettingChanged(object sender, ValueChangedEventArgs<bool> e) {
+            if (e.NewValue && _devicePool == null) {
+                InitializeDevicePool();
+            } else if (!e.NewValue && _devicePool != null) {
+                _devicePool?.Dispose();
+                _devicePool = null;
+                Logger.Info("Graphics device pool disabled.");
+            }
+        }
+
+        private void InitializeDevicePool() {
+            try {
+                if (BlishHud.Instance?.ActiveGraphicsDeviceManager?.GraphicsDevice != null) {
+                    _devicePool = new GraphicsDevicePool(BlishHud.Instance.ActiveGraphicsDeviceManager.GraphicsDevice, 8);
+                    Logger.Info("Graphics device pool initialized.");
+                }
+            } catch (Exception ex) {
+                Logger.Error(ex, "Failed to initialize graphics device pool.");
+            }
+        }
+
+        /// <summary>
+        /// Acquires a pooled graphics device context asynchronously with the specified priority and timeout.
+        /// Only available when the optimized device pool is enabled.
+        /// </summary>
+        /// <param name="priority">The priority of the context request.</param>
+        /// <param name="timeout">The maximum time to wait for a context.</param>
+        /// <param name="cancellationToken">Cancellation token for the request.</param>
+        /// <returns>A pooled graphics device context.</returns>
+        public async Task<PooledGraphicsDeviceContext> AcquirePooledContextAsync(
+            ContextPriority priority = ContextPriority.Normal,
+            TimeSpan timeout = default,
+            CancellationToken cancellationToken = default) {
+            
+            if (_devicePool == null) {
+                throw new InvalidOperationException("Optimized graphics device pool is not enabled. Enable it in graphics settings.");
+            }
+
+            return await _devicePool.AcquireContextAsync(priority, timeout, cancellationToken);
+        }
+
+        /// <summary>
+        /// Tries to acquire a pooled graphics device context synchronously.
+        /// Only available when the optimized device pool is enabled.
+        /// </summary>
+        /// <param name="context">The acquired context, if successful.</param>
+        /// <param name="priority">The priority of the context request.</param>
+        /// <returns>True if a context was acquired; otherwise, false.</returns>
+        public bool TryAcquirePooledContext(out PooledGraphicsDeviceContext context, ContextPriority priority = ContextPriority.Normal) {
+            context = null;
+            
+            if (_devicePool == null) {
+                return false;
+            }
+
+            return _devicePool.TryAcquireContext(out context, priority);
+        }
+
+        protected override void Load() {
+            // Initialize device pool if enabled
+            if (UseOptimizedDevicePool) {
+                InitializeDevicePool();
+            }
+        }
 
         private void Rescale() {
             Point backbufferSize = new Point(
@@ -475,7 +574,11 @@ namespace Blish_HUD {
             this.UIScaleTransform = Matrix.CreateScale(this.UIScaleMultiplier);
         }
 
-        protected override void Unload() { /* NOOP */ }
+        protected override void Unload() {
+            // Dispose device pool if it exists
+            _devicePool?.Dispose();
+            _devicePool = null;
+        }
 
         protected override void Update(GameTime gameTime) {
             Rescale();
