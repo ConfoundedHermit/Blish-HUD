@@ -45,6 +45,12 @@ namespace Blish_HUD {
         }
 
         public static Rectangle ScaleBy(this Rectangle rectangle, float scale) {
+            // Use optimized scaling if available
+            if (GameService.Graphics.UseOptimizedUIScaling && GameService.Graphics.ScalingCalculator != null) {
+                return GameService.Graphics.ScalingCalculator.ScaleRectangle(rectangle, scale);
+            }
+            
+            // Fallback to legacy scaling
             return new Rectangle((int)Math.Floor(rectangle.X * scale), (int)Math.Floor(rectangle.Y * scale), (int)Math.Ceiling(rectangle.Width * scale), (int)Math.Ceiling(rectangle.Height * scale));
         }
 

@@ -29,6 +29,12 @@ namespace Blish_HUD {
         /// <param name="point">The <see cref="Point"/> to scale.</param>
         /// <returns>A new <see cref="Point"/> scaled to the game UI.</returns>
         public static Microsoft.Xna.Framework.Point ScaleToUi(this Microsoft.Xna.Framework.Point point) {
+            // Use optimized scaling if available
+            if (GameService.Graphics.UseOptimizedUIScaling && GameService.Graphics.ScalingCalculator != null) {
+                return GameService.Graphics.ScalingCalculator.ScaleToUi(point, GameService.Graphics.UIScaleMultiplier);
+            }
+            
+            // Fallback to legacy scaling
             return new Microsoft.Xna.Framework.Point((int)(point.X * GameService.Graphics.UIScaleMultiplier),
                                                      (int)(point.Y * GameService.Graphics.UIScaleMultiplier));
         }
@@ -39,6 +45,12 @@ namespace Blish_HUD {
         /// <param name="point">The <see cref="Point"/> to de-scale.</param>
         /// <returns>A new <see cref="Point"/> without game UI scaling.</returns>
         public static Microsoft.Xna.Framework.Point UiToScale(this Microsoft.Xna.Framework.Point point) {
+            // Use optimized scaling if available
+            if (GameService.Graphics.UseOptimizedUIScaling && GameService.Graphics.ScalingCalculator != null) {
+                return GameService.Graphics.ScalingCalculator.UiToScale(point, GameService.Graphics.UIScaleMultiplier);
+            }
+            
+            // Fallback to legacy scaling
             return new Microsoft.Xna.Framework.Point((int)(point.X / GameService.Graphics.UIScaleMultiplier),
                                                      (int)(point.Y / GameService.Graphics.UIScaleMultiplier));
         }
@@ -175,6 +187,12 @@ namespace Blish_HUD {
         /// <param name="enlarge">A value indicating whether to allow scale ratios above 1.</param>
         /// <returns>A scale value for scaling <paramref name="src"/> with a locked aspect ratio to <paramref name="maxHeight"/>, <paramref name="maxWidth"/></returns>
         public static float GetAspectRatioScale(this Point src, int maxWidth, int maxHeight, ScaleMode scaleMode, bool enlarge) {
+            // Use optimized scaling if available
+            if (GameService.Graphics.UseOptimizedUIScaling && GameService.Graphics.ScalingCalculator != null) {
+                return GameService.Graphics.ScalingCalculator.GetAspectRatioScale(src, maxWidth, maxHeight, scaleMode, enlarge);
+            }
+            
+            // Fallback to legacy scaling
             maxWidth = enlarge ? maxWidth : Math.Min(maxWidth, src.X);
             maxHeight = enlarge ? maxHeight : Math.Min(maxHeight, src.Y);
 

@@ -9,6 +9,7 @@ using System.Threading.Tasks;
 using Blish_HUD.Controls;
 using Blish_HUD.Entities;
 using Blish_HUD.Graphics;
+using Blish_HUD.GameServices.Graphics;
 using Blish_HUD.GameServices.Threading;
 using Blish_HUD.Settings;
 using Gw2Sharp.Mumble.Models;
@@ -373,6 +374,14 @@ namespace Blish_HUD {
                                                                     () => "Enables the optimized render queue with dynamic batching and priority-based processing. Provides improved frame rate consistency and reduced render queue processing overhead.");
 
             _useOptimizedRenderQueueSetting.SettingChanged += OnOptimizedRenderQueueSettingChanged;
+
+            // Add optimized UI scaling setting
+            _useOptimizedScalingSetting = settings.DefineSetting("UseOptimizedUIScaling",
+                                                               true, // Enable by default for improved performance
+                                                               () => "Use Optimized UI Scaling",
+                                                               () => "Enables optimized UI scaling with caching to eliminate redundant per-frame calculations. Provides significant performance improvements for UI scaling operations.");
+
+            _useOptimizedScalingSetting.SettingChanged += OnOptimizedScalingSettingChanged;
             
             _frameLimiterSetting.SettingChanged += FrameLimiterSettingMethodChanged;
             FrameLimiterSettingMethodChanged(_frameLimiterSetting, new ValueChangedEventArgs<FramerateMethod>(_frameLimiterSetting.Value, _frameLimiterSetting.Value));
@@ -431,6 +440,10 @@ namespace Blish_HUD {
         private GraphicsDevicePool _devicePool;
         private SettingEntry<bool> _useOptimizedDevicePoolSetting;
 
+        // New optimized UI scaling system
+        private ScalingCalculator _scalingCalculator;
+        private SettingEntry<bool> _useOptimizedScalingSetting;
+
         /// <summary>
         /// Gets a value indicating whether the optimized graphics device pool is enabled.
         /// </summary>
@@ -442,6 +455,24 @@ namespace Blish_HUD {
                 }
             }
         }
+
+        /// <summary>
+        /// Gets a value indicating whether the optimized UI scaling is enabled.
+        /// </summary>
+        public bool UseOptimizedUIScaling {
+            get => _useOptimizedScalingSetting?.Value ?? false;
+            set {
+                if (_useOptimizedScalingSetting != null) {
+                    _useOptimizedScalingSetting.Value = value;
+                }
+            }
+        }
+
+        /// <summary>
+        /// Gets the scaling calculator instance for direct access to scaling operations.
+        /// Only available when optimized UI scaling is enabled.
+        /// </summary>
+        public ScalingCalculator ScalingCalculator => _scalingCalculator;
 
         /// <summary>
         /// Gets statistics about the graphics device pool, if enabled.
@@ -726,6 +757,25 @@ namespace Blish_HUD {
             }
         }
 
+        private void OnOptimizedScalingSettingChanged(object sender, ValueChangedEventArgs<bool> e) {
+            if (e.NewValue && _scalingCalculator == null) {
+                Logger.Info("User enabled optimized UI scaling - initializing...");
+                InitializeScalingCalculator();
+                
+                if (_scalingCalculator != null) {
+                    Logger.Info("✓ Optimized UI scaling is now ACTIVE");
+                    // Add a notification that users can see
+                    GameService.Content.PlaySoundEffectByName("button-click");
+                } else {
+                    Logger.Warn("✗ Failed to initialize optimized UI scaling");
+                }
+            } else if (!e.NewValue && _scalingCalculator != null) {
+                Logger.Info("User disabled optimized UI scaling - shutting down...");
+                _scalingCalculator = null;
+                Logger.Info("✓ UI scaling optimization disabled - using legacy mode");
+            }
+        }
+
         private void InitializeDevicePool() {
             try {
                 if (BlishHud.Instance?.ActiveGraphicsDeviceManager?.GraphicsDevice != null) {
@@ -764,6 +814,20 @@ namespace Blish_HUD {
                 Logger.Debug("Optimized render queue shutdown complete.");
             } catch (Exception ex) {
                 Logger.Warn(ex, "Error during render queue shutdown.");
+            }
+        }
+
+        private void InitializeScalingCalculator() {
+            try {
+                _scalingCalculator = new ScalingCalculator();
+                
+                // Warm up the cache with current UI scale multiplier
+                _scalingCalculator.WarmupCache(this.UIScaleMultiplier);
+                
+                Logger.Info("Optimized UI scaling calculator initialized with cache warmup.");
+            } catch (Exception ex) {
+                Logger.Error(ex, "Failed to initialize scaling calculator.");
+                _scalingCalculator = null;
             }
         }
 
@@ -815,6 +879,11 @@ namespace Blish_HUD {
                 InitializeRenderQueue();
             }
 
+            // Initialize scaling calculator if enabled
+            if (UseOptimizedUIScaling) {
+                InitializeScalingCalculator();
+            }
+
             // Initialize worker thread manager if not already done
             if (WorkerThreadManager.Instance == null) {
                 WorkerThreadManager.Initialize();
@@ -832,11 +901,24 @@ namespace Blish_HUD {
             int integerDpi = (int)GetDpiScaleRatio();
             Point scaledMinimumGameResolution = MinimumUnscaledGameResolution * new Point(integerDpi, integerDpi);
 
+            float previousUIScaleMultiplier = this.UIScaleMultiplier;
+
             this.UIScaleMultiplier = GetDpiScaleRatio()
               * GetScaleRatio(GameService.Gw2Mumble.UI.UISize)
               * scaledMinimumGameResolution.GetAspectRatioScale(backbufferSize);
 
-            this.SpriteScreen.Size = backbufferSize.UiToScale();
+            // Use optimized scaling if available
+            if (UseOptimizedUIScaling && _scalingCalculator != null) {
+                // Invalidate cache if UI scale multiplier changed
+                if (Math.Abs(this.UIScaleMultiplier - previousUIScaleMultiplier) > 0.001f) {
+                    _scalingCalculator.InvalidateCache(this.UIScaleMultiplier);
+                }
+                
+                this.SpriteScreen.Size = _scalingCalculator.UiToScale(backbufferSize, this.UIScaleMultiplier);
+            } else {
+                // Fallback to legacy scaling
+                this.SpriteScreen.Size = backbufferSize.UiToScale();
+            }
 
             this.UIScaleTransform = Matrix.CreateScale(this.UIScaleMultiplier);
         }
