@@ -406,11 +406,9 @@ namespace Blish_HUD {
             }
         }
 
-        private void FrameLimiterSettingMethodChanged(object sender, ValueChangedEventArgs<FramerateMethod> e) {
-            bool currentVsync = GraphicsDeviceManager.SynchronizeWithVerticalRetrace;
-
-            var frameRateLookup = new Dictionary<FramerateMethod, (bool IsFixedTimeStep, TimeSpan TargetElapsedTime, bool VSync)> {
-                { FramerateMethod.Custom,        (true, TimeSpan.FromSeconds(1d / ApplicationSettings.Instance.TargetFramerate), false) }, // Only enabled with launch args
+        // Cached frame rate lookup to avoid repeated dictionary creation
+        private static readonly Dictionary<FramerateMethod, (bool IsFixedTimeStep, TimeSpan TargetElapsedTime, bool VSync)> _frameRateLookup = 
+            new Dictionary<FramerateMethod, (bool IsFixedTimeStep, TimeSpan TargetElapsedTime, bool VSync)> {
                 { FramerateMethod.SyncWithGame,  (false, TimeSpan.FromMilliseconds(1), false) }, // Deprecated
                 { FramerateMethod.LockedTo30Fps, (true, TimeSpan.FromSeconds(1d / 30d), false) },
                 { FramerateMethod.LockedTo60Fps, (true, TimeSpan.FromSeconds(1d / 60d), false) },
@@ -419,7 +417,21 @@ namespace Blish_HUD {
                 { FramerateMethod.TrueUnlimited, (false, TimeSpan.FromMilliseconds(1), false) } // Unlimited without vsync (unsafe)
             };
 
-            if (frameRateLookup.TryGetValue(e.NewValue, out var settings)) {
+        private void FrameLimiterSettingMethodChanged(object sender, ValueChangedEventArgs<FramerateMethod> e) {
+            bool currentVsync = GraphicsDeviceManager.SynchronizeWithVerticalRetrace;
+
+            // Handle custom framerate separately since it depends on runtime settings
+            if (e.NewValue == FramerateMethod.Custom) {
+                BlishHud.Instance!.IsFixedTimeStep = true;
+                BlishHud.Instance.TargetElapsedTime = TimeSpan.FromSeconds(1d / ApplicationSettings.Instance.TargetFramerate);
+                if (false != currentVsync) { // Custom always uses VSync = false
+                    GraphicsDeviceManager.SynchronizeWithVerticalRetrace = false;
+                    GraphicsDeviceManager.ApplyChanges();
+                }
+                return;
+            }
+
+            if (_frameRateLookup.TryGetValue(e.NewValue, out var settings)) {
                 BlishHud.Instance!.IsFixedTimeStep = settings.IsFixedTimeStep;
                 BlishHud.Instance.TargetElapsedTime = settings.TargetElapsedTime;
                 if (settings.VSync != currentVsync) {
