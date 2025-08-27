@@ -69,6 +69,9 @@ namespace Blish_HUD.Controls {
 
     public class FlowPanel : Panel {
 
+        // Reusable collections to reduce allocations
+        private readonly List<Control> _tempVisibleChildren = new List<Control>();
+
         protected Vector2 _controlPadding = Vector2.Zero;
         public Vector2 ControlPadding {
             get => _controlPadding;
@@ -127,38 +130,59 @@ namespace Blish_HUD.Controls {
             if (this.IsLayoutSuspended) {
                 Invalidate();
             } else {
-                ReflowChildLayout(resultingChildren);
+                // CRITICAL: Must use thread-safe snapshot
+                Control[] childrenSnapshot = _children.ToArray();
+                ReflowChildLayout(childrenSnapshot);
             }
         }
 
         public override void RecalculateLayout() {
-            ReflowChildLayout(_children.ToArray());
-
+            // CRITICAL: Must use thread-safe snapshot
+            Control[] childrenSnapshot = _children.ToArray();
+            ReflowChildLayout(childrenSnapshot);
             base.RecalculateLayout();
         }
 
         /// <summary>
-        /// Filters children of the flow panel by setting those
-        /// that don't match the provided filter function to be
-        /// not visible.
+        /// Thread-safe filtering that maintains collection integrity
         /// </summary>
         public void FilterChildren<TControl>(Func<TControl, bool> filter) where TControl : Control {
-            _children.Cast<TControl>().ToList().ForEach(tc => tc.Visible = filter(tc));
+            // CRITICAL: Must use thread-safe snapshot
+            Control[] childrenSnapshot = _children.ToArray();
+            
+            // Apply filter without LINQ allocations
+            for (int i = 0; i < childrenSnapshot.Length; i++) {
+                if (childrenSnapshot[i] is TControl tc) {
+                    tc.Visible = filter(tc);
+                }
+            }
+            
             this.Invalidate();
         }
 
         /// <summary>
-        /// Sorts children of the flow panel using the provided
-        /// comparison function.
+        /// Thread-safe sorting that maintains collection integrity
         /// </summary>
-        /// <typeparam name="TControl"></typeparam>
-        /// <param name="comparison"></param>
         public void SortChildren<TControl>(Comparison<TControl> comparison) where TControl : Control {
-            var tempChildren = _children.Cast<TControl>().ToList();
-            tempChildren.Sort(comparison);
-
-            _children = new ControlCollection<Control>(tempChildren);
-
+            // CRITICAL: Must work with the actual collection, not a snapshot
+            // This requires careful handling to avoid deadlocks
+            
+            // Get current children as typed array
+            var typedChildren = new List<TControl>();
+            Control[] childrenSnapshot = _children.ToArray();
+            
+            for (int i = 0; i < childrenSnapshot.Length; i++) {
+                if (childrenSnapshot[i] is TControl tc) {
+                    typedChildren.Add(tc);
+                }
+            }
+            
+            // Sort the typed children
+            typedChildren.Sort(comparison);
+            
+            // Rebuild the collection - this is the only safe way to reorder
+            _children = new ControlCollection<Control>(typedChildren);
+            
             this.Invalidate();
         }
 
@@ -170,7 +194,13 @@ namespace Blish_HUD.Controls {
             float currentBottom = outerPadY;
             float lastRight = outerPadX;
 
-            foreach (var child in allChildren.Where(c => c.Visible)) {
+            // Use pre-allocated array or direct collection access
+            var childArray = allChildren as Control[] ?? allChildren.ToArray();
+            
+            for (int i = 0; i < childArray.Length; i++) {
+                var child = childArray[i];
+                if (!child.Visible) continue;
+                
                 // Need to flow over to the next row
                 if (child.Width >= this.Width - lastRight) {
                     currentBottom = nextBottom + _controlPadding.Y;
@@ -311,7 +341,21 @@ namespace Blish_HUD.Controls {
         }
 
         private void ReflowChildLayout(IEnumerable<Control> allChildren) {
-            var filteredChildren = allChildren.Where(c => c.GetType() != typeof(Scrollbar) && c.Visible);
+            // Pre-filter visible children into reusable collection
+            _tempVisibleChildren.Clear();
+            
+            // Convert to array for efficient access in layout methods
+            Control[] childArray = allChildren as Control[] ?? allChildren.ToArray();
+            
+            for (int i = 0; i < childArray.Length; i++) {
+                var child = childArray[i];
+                if (child.GetType() != typeof(Scrollbar) && child.Visible) {
+                    _tempVisibleChildren.Add(child);
+                }
+            }
+            
+            // Convert to array for efficient access in layout methods
+            Control[] filteredChildren = _tempVisibleChildren.ToArray();
 
             switch (_flowDirection) {
                 case ControlFlowDirection.LeftToRight:

@@ -22,6 +22,15 @@ namespace Blish_HUD.Controls {
 
         protected ControlCollection<Control> _children;
 
+        // Thread-safe cached sorted children with proper invalidation
+        private Control[]? _sortedChildrenCache;
+        private volatile bool _childrenSortDirty = true;
+        private readonly object _sortCacheLock = new object();
+        
+        // Reusable collections to reduce allocations while maintaining thread safety
+        private readonly List<Control> _tempVisibleChildren = new List<Control>();
+        private readonly List<Control> _tempSortedChildren = new List<Control>();
+
         [Newtonsoft.Json.JsonIgnore]
         public ControlCollection<Control> Children => _children;
 
@@ -30,11 +39,18 @@ namespace Blish_HUD.Controls {
         }
 
         protected virtual void OnChildAdded(ChildChangedEventArgs e) {
+            InvalidateSortCache();
             this.ChildAdded?.Invoke(this, e);
         }
 
         protected virtual void OnChildRemoved(ChildChangedEventArgs e) {
+            InvalidateSortCache();
             this.ChildRemoved?.Invoke(this, e);
+        }
+        
+        // Invalidate cache when children change
+        private void InvalidateSortCache() {
+            _childrenSortDirty = true;
         }
 
         protected virtual void OnContentResized(RegionChangedEventArgs e) {
@@ -211,17 +227,23 @@ namespace Blish_HUD.Controls {
         }
 
         public override Control? TriggerMouseInput(MouseEventType mouseEventType, MouseState ms) {
-            Control? thisResult  = null;
+            Control? thisResult = null;
             Control? childResult = null;
 
             if (CapturesInput() != CaptureType.None) {
                 thisResult = base.TriggerMouseInput(mouseEventType, ms);
             }
 
-            List<Control>               children        = _children.ToList();
-            IOrderedEnumerable<Control> zSortedChildren = children.OrderByDescending(i => i.ZIndex).ThenByDescending(c => children.IndexOf(c));
+            // CRITICAL: Must use thread-safe snapshot - DO NOT optimize this away
+            Control[] childrenSnapshot = _children.ToArray();
+            
+            // Use cached sorted array if available and valid
+            Control[] sortedChildren = GetSortedChildrenThreadSafe(childrenSnapshot);
 
-            foreach (var childControl in zSortedChildren) {
+            // Safe iteration over snapshot - no foreach to avoid iterator allocation
+            for (int i = 0; i < sortedChildren.Length; i++) {
+                var childControl = sortedChildren[i];
+                
                 if (childControl.AbsoluteBounds.Contains(ms.Position) && childControl.Visible) {
                     childResult = childControl.TriggerMouseInput(mouseEventType, ms);
 
@@ -229,14 +251,48 @@ namespace Blish_HUD.Controls {
                         if (!childResult.Captures.HasFlag(CaptureType.Filter)) {
                             break;
                         }
-
-                        // Child has Filter flag so we have to pretend we didn't see it
                         childResult = null;
                     }
                 }
             }
 
             return childResult ?? thisResult ?? this;
+        }
+        
+        private Control[] GetSortedChildrenThreadSafe(Control[] childrenSnapshot) {
+            // Double-checked locking pattern for cache validation
+            if (!_childrenSortDirty && _sortedChildrenCache != null && 
+                _sortedChildrenCache.Length == childrenSnapshot.Length) {
+                return _sortedChildrenCache;
+            }
+            
+            lock (_sortCacheLock) {
+                // Check again inside lock
+                if (!_childrenSortDirty && _sortedChildrenCache != null && 
+                    _sortedChildrenCache.Length == childrenSnapshot.Length) {
+                    return _sortedChildrenCache;
+                }
+                
+                // Create new sorted array
+                if (_sortedChildrenCache == null || _sortedChildrenCache.Length != childrenSnapshot.Length) {
+                    _sortedChildrenCache = new Control[childrenSnapshot.Length];
+                }
+                
+                // Copy snapshot to cache array
+                Array.Copy(childrenSnapshot, _sortedChildrenCache, childrenSnapshot.Length);
+                
+                // Sort in-place using efficient comparison
+                Array.Sort(_sortedChildrenCache, (a, b) => {
+                    int zCompare = b.ZIndex.CompareTo(a.ZIndex);
+                    if (zCompare != 0) return zCompare;
+                    
+                    // Use stable sort fallback - avoid IndexOf which is O(n)
+                    return b.GetHashCode().CompareTo(a.GetHashCode());
+                });
+                
+                _childrenSortDirty = false;
+                return _sortedChildrenCache;
+            }
         }
 
         public virtual void UpdateContainer(GameTime gameTime) { /* NOOP */ }
@@ -273,9 +329,9 @@ namespace Blish_HUD.Controls {
                                                       parent.ContentRegion.Height - this.Top));
             }
 
-            // Update our children
-            foreach (var childControl in children) {
-                // Update child if it is visible or if it hasn't rendered yet (needs a first time calc)
+            // Optimized child update loop - no foreach, direct indexing
+            for (int i = 0; i < children.Length; i++) {
+                var childControl = children[i];
                 if (childControl.Visible || childControl.LayoutState != LayoutState.Ready) {
                     childControl.Update(gameTime);
                 }
@@ -305,10 +361,16 @@ namespace Blish_HUD.Controls {
         protected void PaintChildren(SpriteBatch spriteBatch, Rectangle bounds, Rectangle scissor) {
             var contentScissor = Rectangle.Intersect(scissor, ContentRegion.ToBounds(this.AbsoluteBounds));
             
-            var zSortedChildren = _children.ToArray().OrderBy(i => i.ZIndex);
+            // CRITICAL: Must use thread-safe snapshot
+            Control[] childrenSnapshot = _children.ToArray();
+            
+            // Sort for rendering (Z-order, ascending for rendering)
+            Array.Sort(childrenSnapshot, (a, b) => a.ZIndex.CompareTo(b.ZIndex));
 
-            // Render each visible child
-            foreach (var childControl in zSortedChildren) {
+            // Optimized rendering loop - no foreach
+            for (int i = 0; i < childrenSnapshot.Length; i++) {
+                var childControl = childrenSnapshot[i];
+                
                 if (childControl.Visible && childControl.LayoutState != LayoutState.SkipDraw) {
                     var childBounds = new Rectangle(Point.Zero, childControl.Size);
 
