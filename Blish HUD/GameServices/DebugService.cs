@@ -10,6 +10,8 @@ using System.Threading;
 using System.Windows.Forms;
 using Blish_HUD.Debug;
 using Blish_HUD.Settings;
+using Blish_HUD._Utils;
+using Blish_HUD._Extensions;
 using Humanizer;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
@@ -103,19 +105,25 @@ namespace Blish_HUD {
             const int INTERNAL_DEBUG_WRITESIZE = 4091;
 
             lock (_debugLock) {
-                string outEntry = $"{time} | {level} | {logger} | {message}\r\n";
+                var sb = StringBuilderPool.Get();
+                try {
+                    sb.Append(time).Append(" | ").Append(level).Append(" | ").Append(logger).Append(" | ").Append(message).Append("\r\n");
+                    string outEntry = sb.ToString();
 
-                // Messages that are too large can cause issues for various debuggers
-                if (outEntry.Length >= INTERNAL_DEBUG_WRITESIZE) {
-                    int offset;
+                    // Messages that are too large can cause issues for various debuggers
+                    if (outEntry.Length >= INTERNAL_DEBUG_WRITESIZE) {
+                        int offset;
 
-                    for (offset = 0; offset < outEntry.Length - INTERNAL_DEBUG_WRITESIZE; offset += INTERNAL_DEBUG_WRITESIZE) {
-                        Debugger.Log(0, null, outEntry.Substring(offset, INTERNAL_DEBUG_WRITESIZE));
+                        for (offset = 0; offset < outEntry.Length - INTERNAL_DEBUG_WRITESIZE; offset += INTERNAL_DEBUG_WRITESIZE) {
+                            Debugger.Log(0, null, outEntry.Substring(offset, INTERNAL_DEBUG_WRITESIZE));
+                        }
+
+                        Debugger.Log(0, null, outEntry.Substring(offset));
+                    } else {
+                        Debugger.Log(0, null, outEntry);
                     }
-
-                    Debugger.Log(0, null, outEntry.Substring(offset));
-                } else {
-                    Debugger.Log(0, null, outEntry);
+                } finally {
+                    StringBuilderPool.Return(sb);
                 }
             }
         }

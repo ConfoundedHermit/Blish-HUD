@@ -12,6 +12,8 @@ using Blish_HUD.Graphics;
 using Blish_HUD.GameServices.Graphics;
 using Blish_HUD.GameServices.Threading;
 using Blish_HUD.Settings;
+using Blish_HUD._Utils;
+using Blish_HUD._Extensions;
 using Gw2Sharp.Mumble.Models;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
@@ -252,8 +254,17 @@ namespace Blish_HUD {
         public string RenderQueueStats {
             get {
                 if (_batchProcessor == null) return "Optimized render queue not initialized";
-                return $"Batch Size: {_batchProcessor.CurrentOptimalBatchSize}, Avg Frame: {_batchProcessor.AverageFrameTime:F2}ms, " +
-                       $"Processed: {_batchProcessor.TotalBatchesProcessed} batches, {_batchProcessor.TotalCommandsProcessed} commands";
+                
+                var sb = StringBuilderPool.Get();
+                try {
+                    sb.Append("Batch Size: ").Append(_batchProcessor.CurrentOptimalBatchSize)
+                      .Append(", Avg Frame: ").Append(_batchProcessor.AverageFrameTime.ToString("F2")).Append("ms, ")
+                      .Append("Processed: ").Append(_batchProcessor.TotalBatchesProcessed).Append(" batches, ")
+                      .Append(_batchProcessor.TotalCommandsProcessed).Append(" commands");
+                    return sb.ToString();
+                } finally {
+                    StringBuilderPool.Return(sb);
+                }
             }
         }
 
@@ -263,12 +274,17 @@ namespace Blish_HUD {
         public string RenderQueuePerformanceStats {
             get {
                 if (_batchProcessor == null) return "Optimized render queue not initialized - no performance data available";
-                var stats = new System.Text.StringBuilder();
-                stats.AppendLine(_batchProcessor.GetPerformanceStatistics());
-                if (_priorityManager != null) {
-                    stats.AppendLine(_priorityManager.GetPerformanceStatistics());
+                
+                var sb = StringBuilderPool.Get();
+                try {
+                    sb.AppendLine(_batchProcessor.GetPerformanceStatistics());
+                    if (_priorityManager != null) {
+                        sb.AppendLine(_priorityManager.GetPerformanceStatistics());
+                    }
+                    return sb.ToString();
+                } finally {
+                    StringBuilderPool.Return(sb);
                 }
-                return stats.ToString();
             }
         }
 
@@ -523,43 +539,47 @@ namespace Blish_HUD {
         /// </summary>
         public string OptimizationStatus {
             get {
-                var status = new System.Text.StringBuilder();
-                status.AppendLine("=== Blish HUD Threading Optimizations Status ===");
-                
-                // Graphics Device Pool Status
-                status.AppendLine($"Graphics Device Pool: {(UseOptimizedDevicePool ? "ENABLED" : "DISABLED")}");
-                if (_devicePool != null) {
-                    status.AppendLine($"  └─ Pool Stats: {DevicePoolStats}");
-                    status.AppendLine($"  └─ Status: ✓ ACTIVE and operational");
-                } else if (UseOptimizedDevicePool) {
-                    status.AppendLine($"  └─ Status: ✗ ENABLED but not initialized");
-                } else {
-                    status.AppendLine($"  └─ Status: Using legacy graphics device management");
+                var sb = StringBuilderPool.Get();
+                try {
+                    sb.AppendLine("=== Blish HUD Threading Optimizations Status ===");
+                    
+                    // Graphics Device Pool Status
+                    sb.Append("Graphics Device Pool: ").AppendLine(UseOptimizedDevicePool ? "ENABLED" : "DISABLED");
+                    if (_devicePool != null) {
+                        sb.Append("  └─ Pool Stats: ").AppendLine(DevicePoolStats);
+                        sb.AppendLine("  └─ Status: ✓ ACTIVE and operational");
+                    } else if (UseOptimizedDevicePool) {
+                        sb.AppendLine("  └─ Status: ✗ ENABLED but not initialized");
+                    } else {
+                        sb.AppendLine("  └─ Status: Using legacy graphics device management");
+                    }
+                    
+                    // Render Queue Optimization Status
+                    sb.Append("Render Queue Optimization: ").AppendLine(UseOptimizedRenderQueue ? "ENABLED" : "DISABLED");
+                    if (_batchProcessor != null) {
+                        sb.Append("  └─ Queue Stats: ").AppendLine(RenderQueueStats);
+                        sb.AppendLine("  └─ Status: ✓ ACTIVE and processing batches");
+                    } else if (UseOptimizedRenderQueue) {
+                        sb.AppendLine("  └─ Status: ✗ ENABLED but not initialized");
+                    } else {
+                        sb.AppendLine("  └─ Status: Using legacy render queue processing");
+                    }
+                    
+                    // Worker Thread Manager Status
+                    sb.Append("Worker Thread Manager: ").AppendLine(WorkerThreadManager.Instance != null ? "INITIALIZED" : "NOT INITIALIZED");
+                    if (WorkerThreadManager.Instance != null) {
+                        var stats = WorkerThreadManager.Instance.Statistics;
+                        sb.Append("  └─ Thread Stats: ").AppendLine(stats.ToString());
+                        sb.AppendLine("  └─ Status: ✓ ACTIVE and processing work");
+                    } else {
+                        sb.AppendLine("  └─ Status: Worker threads not available");
+                    }
+                    
+                    sb.AppendLine("===============================================");
+                    return sb.ToString();
+                } finally {
+                    StringBuilderPool.Return(sb);
                 }
-                
-                // Render Queue Optimization Status
-                status.AppendLine($"Render Queue Optimization: {(UseOptimizedRenderQueue ? "ENABLED" : "DISABLED")}");
-                if (_batchProcessor != null) {
-                    status.AppendLine($"  └─ Queue Stats: {RenderQueueStats}");
-                    status.AppendLine($"  └─ Status: ✓ ACTIVE and processing batches");
-                } else if (UseOptimizedRenderQueue) {
-                    status.AppendLine($"  └─ Status: ✗ ENABLED but not initialized");
-                } else {
-                    status.AppendLine($"  └─ Status: Using legacy render queue processing");
-                }
-                
-                // Worker Thread Manager Status
-                status.AppendLine($"Worker Thread Manager: {(WorkerThreadManager.Instance != null ? "INITIALIZED" : "NOT INITIALIZED")}");
-                if (WorkerThreadManager.Instance != null) {
-                    var stats = WorkerThreadManager.Instance.Statistics;
-                    status.AppendLine($"  └─ Thread Stats: {stats}");
-                    status.AppendLine($"  └─ Status: ✓ ACTIVE and processing work");
-                } else {
-                    status.AppendLine($"  └─ Status: Worker threads not available");
-                }
-                
-                status.AppendLine("===============================================");
-                return status.ToString();
             }
         }
 
