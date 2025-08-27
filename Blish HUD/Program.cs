@@ -17,7 +17,21 @@ namespace Blish_HUD {
 
         private const string APP_GUID = "{5802208e-71ca-4745-ab1b-d851bc17a460}";
 
-        public static SemVer.Version OverlayVersion { get; } = new SemVer.Version(typeof(BlishHud).Assembly.GetCustomAttribute<AssemblyInformationalVersionAttribute>().InformationalVersion, true);
+        public static SemVer.Version OverlayVersion { get; } = GetOverlayVersion();
+
+        private static SemVer.Version GetOverlayVersion() {
+            try {
+                var informationalVersion = typeof(BlishHud).Assembly.GetCustomAttribute<AssemblyInformationalVersionAttribute>()?.InformationalVersion;
+                if (!string.IsNullOrEmpty(informationalVersion)) {
+                    return new SemVer.Version(informationalVersion, true);
+                }
+            } catch (Exception) {
+                // Fall back to default version if parsing fails
+            }
+            
+            // Fallback to default version
+            return new SemVer.Version("0.0.0-local-dev+0", true);
+        }
 
         internal static bool RestartOnExit { get; set; } = false;
 
