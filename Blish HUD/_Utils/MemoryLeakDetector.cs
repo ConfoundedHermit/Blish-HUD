@@ -292,6 +292,18 @@ namespace Blish_HUD._Utils {
                     }
                 }
                 
+                // Log periodic monitoring status (every 5 minutes = 10 cycles of 30 seconds)
+                if (_memoryHistory.Count % 10 == 0) {
+                    var workingSetMB = snapshot.WorkingSet / 1024 / 1024;
+                    var managedMB = snapshot.ManagedMemory / 1024 / 1024;
+                    var growthMB = memoryGrowth / 1024 / 1024;
+                    
+                    Logger.Info($"Memory monitoring: Working Set: {workingSetMB}MB, Managed: {managedMB}MB, " +
+                               $"Growth: {growthMB:+0;-0;0}MB, Snapshots: {_memoryHistory.Count}");
+                    
+                    CleanupDeadReferences();
+                }
+                
                 // Check for concerning memory growth
                 if (memoryGrowth > _thresholds.MaxMemoryGrowthMB * 1024 * 1024) {
                     Logger.Warn($"High memory growth detected: {memoryGrowth / 1024 / 1024}MB growth");
@@ -306,11 +318,6 @@ namespace Blish_HUD._Utils {
                 }
                 
                 _lastGCMemory = currentMemory;
-                
-                // Periodic cleanup
-                if (_memoryHistory.Count % 10 == 0) {
-                    CleanupDeadReferences();
-                }
                 
             } catch (Exception ex) {
                 Logger.Error(ex, "Error during memory monitoring");
