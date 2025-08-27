@@ -78,6 +78,16 @@ namespace Blish_HUD._Utils {
                 stats.AppendLine(CollectionPool.GetPerformanceStatistics());
                 stats.AppendLine();
                 
+                // Geometry Pool
+                stats.AppendLine("--- Geometry Pool ---");
+                stats.AppendLine(GeometryPool.GetPerformanceStatistics());
+                stats.AppendLine();
+                
+                // Stream Pool
+                stats.AppendLine("--- Stream Pool ---");
+                stats.AppendLine(StreamPool.GetPerformanceStatistics());
+                stats.AppendLine();
+                
             } catch (Exception ex) {
                 stats.AppendLine($"Error collecting individual pool statistics: {ex.Message}");
             }
@@ -156,6 +166,8 @@ namespace Blish_HUD._Utils {
                 StringPool.ResetPerformanceCounters();
                 EventArgsPool.ResetPerformanceCounters();
                 CollectionPool.ResetPerformanceCounters();
+                GeometryPool.ResetPerformanceCounters();
+                StreamPool.ResetPerformanceCounters();
             } catch (Exception ex) {
                 // Log error but don't throw - monitoring should be resilient
                 System.Diagnostics.Debug.WriteLine($"Error resetting pool statistics: {ex.Message}");
@@ -263,6 +275,14 @@ namespace Blish_HUD._Utils {
                 // Collection Pool
                 var collectionHitRate = CollectionPool.AverageHitRate;
                 diagnostics.AppendLine($"  Collection Pool: {collectionHitRate:F1}% hit rate - {(collectionHitRate > 50 ? "✅ OK" : "⚠️  LOW")}");
+                
+                // Geometry Pool
+                var geometryHitRate = GeometryPool.AverageHitRate;
+                diagnostics.AppendLine($"  Geometry Pool: {geometryHitRate:F1}% hit rate - {(geometryHitRate > 60 ? "✅ OK" : "⚠️  LOW")}");
+                
+                // Stream Pool
+                var streamHitRate = StreamPool.AverageHitRate;
+                diagnostics.AppendLine($"  Stream Pool: {streamHitRate:F1}% hit rate - {(streamHitRate > 50 ? "✅ OK" : "⚠️  LOW")}");
                 
                 diagnostics.AppendLine();
                 diagnostics.AppendLine("=== END DIAGNOSTICS ===");
