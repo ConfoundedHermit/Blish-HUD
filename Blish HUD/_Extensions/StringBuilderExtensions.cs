@@ -2,6 +2,10 @@ using System;
 using System.Text;
 using Blish_HUD._Utils;
 
+// Import the new string optimization utilities
+using static Blish_HUD._Utils.CachedStringFormatter;
+using static Blish_HUD._Utils.StringPool;
+
 namespace Blish_HUD._Extensions {
     /// <summary>
     /// Extension methods for StringBuilder to provide convenient pooling operations.
@@ -78,28 +82,60 @@ namespace Blish_HUD._Extensions {
 
     /// <summary>
     /// Utility class for common string building patterns using pooled StringBuilders.
+    /// Enhanced with string pooling and format caching for improved performance.
     /// </summary>
     public static class PooledStringBuilder {
         /// <summary>
-        /// Creates a formatted string using a pooled StringBuilder.
+        /// Creates a formatted string using a pooled StringBuilder with cached format strings.
         /// This is more efficient than string.Format for complex formatting operations.
         /// </summary>
         /// <param name="format">The format string.</param>
         /// <param name="args">The arguments for the format string.</param>
         /// <returns>The formatted string.</returns>
         public static string Format(string format, params object[] args) {
-            var sb = StringBuilderPool.Get();
-            try {
-                sb.AppendFormat(format, args);
-                return sb.ToString();
-            } finally {
-                StringBuilderPool.Return(sb);
-            }
+            return CachedStringFormatter.Format(format, args);
+        }
+
+        /// <summary>
+        /// Creates a formatted string using a pooled StringBuilder with cached format strings.
+        /// Optimized version for single-argument formatting.
+        /// </summary>
+        /// <param name="format">The format string.</param>
+        /// <param name="arg0">The argument for the format string.</param>
+        /// <returns>The formatted string.</returns>
+        public static string Format(string format, object arg0) {
+            return CachedStringFormatter.Format(format, arg0);
+        }
+
+        /// <summary>
+        /// Creates a formatted string using a pooled StringBuilder with cached format strings.
+        /// Optimized version for two-argument formatting.
+        /// </summary>
+        /// <param name="format">The format string.</param>
+        /// <param name="arg0">The first argument for the format string.</param>
+        /// <param name="arg1">The second argument for the format string.</param>
+        /// <returns>The formatted string.</returns>
+        public static string Format(string format, object arg0, object arg1) {
+            return CachedStringFormatter.Format(format, arg0, arg1);
+        }
+
+        /// <summary>
+        /// Creates a formatted string using a pooled StringBuilder with cached format strings.
+        /// Optimized version for three-argument formatting.
+        /// </summary>
+        /// <param name="format">The format string.</param>
+        /// <param name="arg0">The first argument for the format string.</param>
+        /// <param name="arg1">The second argument for the format string.</param>
+        /// <param name="arg2">The third argument for the format string.</param>
+        /// <returns>The formatted string.</returns>
+        public static string Format(string format, object arg0, object arg1, object arg2) {
+            return CachedStringFormatter.Format(format, arg0, arg1, arg2);
         }
 
         /// <summary>
         /// Joins a collection of strings with a separator using a pooled StringBuilder.
         /// This is more efficient than string.Join for large collections.
+        /// Uses string pooling for common separators.
         /// </summary>
         /// <param name="separator">The separator string.</param>
         /// <param name="values">The strings to join.</param>
@@ -108,11 +144,14 @@ namespace Blish_HUD._Extensions {
             if (values == null || values.Length == 0) return string.Empty;
             if (values.Length == 1) return values[0] ?? string.Empty;
 
+            // Use string pooling for common separators
+            var pooledSeparator = StringPool.GetPooled(separator);
+
             var sb = StringBuilderPool.Get();
             try {
                 sb.Append(values[0]);
                 for (int i = 1; i < values.Length; i++) {
-                    sb.Append(separator);
+                    sb.Append(pooledSeparator);
                     sb.Append(values[i]);
                 }
                 return sb.ToString();
