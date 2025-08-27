@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using Microsoft.Xna.Framework;
 using Blish_HUD._Extensions;
+using Blish_HUD._Utils;
 
 namespace Blish_HUD.Controls {
 
@@ -69,9 +70,6 @@ namespace Blish_HUD.Controls {
     }
 
     public class FlowPanel : Panel {
-
-        // Reusable collections to reduce allocations
-        private readonly List<Control> _tempVisibleChildren = new List<Control>();
 
         protected Vector2 _controlPadding = Vector2.Zero;
         public Vector2 ControlPadding {
@@ -360,47 +358,51 @@ namespace Blish_HUD.Controls {
         }
 
         private void ReflowChildLayout(IEnumerable<Control> allChildren) {
-            // Pre-filter visible children into reusable collection
-            _tempVisibleChildren.Clear();
-            
-            // Convert to array for efficient access in layout methods
-            Control[] childArray = allChildren as Control[] ?? allChildren.ToArray();
-            
-            for (int i = 0; i < childArray.Length; i++) {
-                var child = childArray[i];
-                if (child.GetType() != typeof(Scrollbar) && child.Visible) {
-                    _tempVisibleChildren.Add(child);
+            // Use thread-safe pooled collection to reduce allocations
+            var tempVisibleChildren = CollectionPool.GetList<Control>();
+            try {
+                // Convert to array for efficient access in layout methods
+                Control[] childArray = allChildren as Control[] ?? allChildren.ToArray();
+                
+                for (int i = 0; i < childArray.Length; i++) {
+                    var child = childArray[i];
+                    if (child.GetType() != typeof(Scrollbar) && child.Visible) {
+                        tempVisibleChildren.Add(child);
+                    }
                 }
-            }
-            
-            // Convert to array for efficient access in layout methods
-            Control[] filteredChildren = _tempVisibleChildren.ToArray();
+                
+                // Convert to array for efficient access in layout methods
+                Control[] filteredChildren = tempVisibleChildren.ToArray();
 
-            switch (_flowDirection) {
-                case ControlFlowDirection.LeftToRight:
-                    ReflowChildLayoutLeftToRight(filteredChildren);
-                    break;
-                case ControlFlowDirection.RightToLeft:
-                    ReflowChildLayoutRightToLeft(filteredChildren);
-                    break;
-                case ControlFlowDirection.TopToBottom:
-                    ReflowChildLayoutTopToBottom(filteredChildren);
-                    break;
-                case ControlFlowDirection.BottomToTop:
-                    ReflowChildLayoutBottomToTop(filteredChildren);
-                    break;
-                case ControlFlowDirection.SingleLeftToRight:
-                    ReflowChildLayoutSingleLeftToRight(filteredChildren);
-                    break;
-                case ControlFlowDirection.SingleRightToLeft:
-                    ReflowChildLayoutSingleRightToLeft(filteredChildren);
-                    break;
-                case ControlFlowDirection.SingleTopToBottom:
-                    ReflowChildLayoutSingleTopToBottom(filteredChildren);
-                    break;
-                case ControlFlowDirection.SingleBottomToTop:
-                    ReflowChildLayoutSingleBottomToTop(filteredChildren);
-                    break;
+                switch (_flowDirection) {
+                    case ControlFlowDirection.LeftToRight:
+                        ReflowChildLayoutLeftToRight(filteredChildren);
+                        break;
+                    case ControlFlowDirection.RightToLeft:
+                        ReflowChildLayoutRightToLeft(filteredChildren);
+                        break;
+                    case ControlFlowDirection.TopToBottom:
+                        ReflowChildLayoutTopToBottom(filteredChildren);
+                        break;
+                    case ControlFlowDirection.BottomToTop:
+                        ReflowChildLayoutBottomToTop(filteredChildren);
+                        break;
+                    case ControlFlowDirection.SingleLeftToRight:
+                        ReflowChildLayoutSingleLeftToRight(filteredChildren);
+                        break;
+                    case ControlFlowDirection.SingleRightToLeft:
+                        ReflowChildLayoutSingleRightToLeft(filteredChildren);
+                        break;
+                    case ControlFlowDirection.SingleTopToBottom:
+                        ReflowChildLayoutSingleTopToBottom(filteredChildren);
+                        break;
+                    case ControlFlowDirection.SingleBottomToTop:
+                        ReflowChildLayoutSingleBottomToTop(filteredChildren);
+                        break;
+                }
+            } finally {
+                // Always return the list to the pool
+                CollectionPool.ReturnList(tempVisibleChildren);
             }
         }
 
