@@ -6,6 +6,7 @@ using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using Blish_HUD._Utils;
 
 namespace Blish_HUD {
 
@@ -79,6 +80,12 @@ namespace Blish_HUD {
             this.Window.AllowAltF4 = false;
             this.InactiveSleepTime = TimeSpan.Zero;
 
+            // Initialize memory leak detection infrastructure
+            Logger.Info("Initializing memory leak detection infrastructure...");
+            // MemoryLeakDetector automatically starts monitoring via static constructor
+            var initialStats = MemoryLeakDetector.GetStatistics();
+            Logger.Info("Memory leak detection active - monitoring every 30 seconds");
+
             // Initialize all game services
             foreach (var service in GameService.All) {
                 service.DoInitialize(this);
@@ -115,6 +122,16 @@ namespace Blish_HUD {
             // Let all of the game services have a chance to unload
             foreach (var service in GameService.All) {
                 service.DoUnload();
+            }
+
+            // Generate final memory leak detection report
+            Logger.Info("Generating final memory leak detection report...");
+            var finalReport = MemoryLeakDetector.PerformHealthCheck();
+            var finalStats = MemoryLeakDetector.GetStatistics();
+            Logger.Info($"Final memory health status: {finalReport.OverallHealth}");
+            Logger.Info($"Total objects tracked: {finalStats.TotalObjectsTracked}, Health checks: {finalStats.TotalHealthChecks}");
+            if (finalReport.Issues.Count > 0) {
+                Logger.Warn($"Memory issues detected at shutdown: {string.Join(", ", finalReport.Issues)}");
             }
         }
 
