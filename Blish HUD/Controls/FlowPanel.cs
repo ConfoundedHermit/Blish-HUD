@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using Microsoft.Xna.Framework;
+using Blish_HUD._Extensions;
 
 namespace Blish_HUD.Controls {
 
@@ -224,7 +225,13 @@ namespace Blish_HUD.Controls {
             float currentBottom = outerPadY;
             float lastLeft = this.Width - outerPadX;
 
-            foreach (var child in allChildren.Where(c => c.Visible)) {
+            // Use pre-allocated array or direct collection access
+            var childArray = allChildren as Control[] ?? allChildren.ToArray();
+            
+            for (int i = 0; i < childArray.Length; i++) {
+                var child = childArray[i];
+                if (!child.Visible) continue;
+                
                 // Need to flow over to the next row
                 if (outerPadX > lastLeft - child.Width) {
                     currentBottom = nextBottom + _controlPadding.Y;
@@ -248,7 +255,13 @@ namespace Blish_HUD.Controls {
             float currentRight = outerPadX;
             float lastBottom = outerPadY;
 
-            foreach (var child in allChildren.Where(c => c.Visible)) {
+            // Use pre-allocated array or direct collection access
+            var childArray = allChildren as Control[] ?? allChildren.ToArray();
+            
+            for (int i = 0; i < childArray.Length; i++) {
+                var child = childArray[i];
+                if (!child.Visible) continue;
+                
                 // Need to flow over to the next column
                 if (child.Height >= this.Height - lastBottom) {
                     currentRight = nextRight + _controlPadding.X;
@@ -272,7 +285,13 @@ namespace Blish_HUD.Controls {
             float currentRight = outerPadX;
             float lastTop = this.Height - outerPadY;
 
-            foreach (var child in allChildren.Where(c => c.Visible)) {
+            // Use pre-allocated array or direct collection access
+            var childArray = allChildren as Control[] ?? allChildren.ToArray();
+            
+            for (int i = 0; i < childArray.Length; i++) {
+                var child = childArray[i];
+                if (!child.Visible) continue;
+                
                 // Need to flow over to the next column
                 if (outerPadY > lastTop - child.Height) {
                     currentRight = nextRight + _controlPadding.X;
